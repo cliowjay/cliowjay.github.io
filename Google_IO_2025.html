@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google I/O 2025 全面解析 - Cyberpunk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Gemini Elo Score / Context Window. Goal: Compare performance. Viz: Bar Chart (Chart.js). Interaction: Static display. Justification: Clear visual comparison of metrics. (Implemented: Gemini Pro Elo Score, Context Window examples)
+        - Report Info: AI Overviews Usage Increase (10%). Goal: Highlight impact. Viz: Donut Chart (Chart.js). Interaction: Static display. Justification: Simple visual for a key percentage. (Implemented)
+        - Report Info: Developer Growth / Vertex AI Usage. Goal: Show adoption. Viz: Bar Chart (Chart.js). Interaction: Static display. Justification: Illustrates growth metrics effectively. (Implemented: Developer Growth, Vertex AI Usage)
+        - Report Info: Details of Gemini models, Generative Media models. Goal: Inform about features. Presentation: Clickable Cards (HTML/JS). Interaction: Click to expand/reveal. Justification: Organizes dense info, user-controlled detail. (Implemented for various features)
+        - Report Info: AI Overviews concerns, market impact subsections. Goal: Provide detailed analysis. Presentation: Toggles/Accordions/Tabs (HTML/JS). Interaction: Click to show/hide. Justification: Manages complexity, progressive disclosure. (Implemented via tabs and expandable sections - tab logic remains for sub-sections)
+        - Report Info: Pricing (AI Ultra vs. Pro). Goal: Compare offerings. Presentation: Table (HTML). Interaction: Static. Justification: Clear structured comparison. (Implemented as descriptive text comparison)
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body { 
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; 
+            background-color: #0d0f1a; /* Very dark blue/purple - Cyberpunk base */
+            color: #c0c0e0; /* Light lavender/cyan for general text */
+        }
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s, color 0.3s, text-shadow 0.3s;
+            cursor: pointer;
+            color: #8f9bff; /* Lighter purple/blue for nav links */
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            color: #f0f0ff; /* Brighter on hover */
+            background-color: #2a2d4e; /* Darker purple/blue accent */
+            text-shadow: 0 0 5px #66fcf1; /* Cyan glow */
+        }
+        .nav-link.active {
+            background-color: #66fcf1; /* Neon Cyan for active link */
+            color: #0d0f1a; /* Dark text on active cyan background */
+            font-weight: bold;
+            text-shadow: 0 0 8px #66fcf1, 0 0 12px #66fcf1;
+            border: 1px solid #66fcf1;
+        }
+        .section-container {
+            background-color: rgba(20, 22, 40, 0.8); /* Slightly transparent dark blue/purple */
+            padding: 1.5rem; 
+            border-radius: 0.5rem; 
+            border: 1px solid #4f518c; /* Purple border */
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.1), 0 0 25px rgba(244, 67, 178, 0.1); /* Subtle cyan and pink glow */
+            margin-bottom: 2rem; 
+            scroll-margin-top: 80px; /* Adjusted for potentially taller header */
+        }
+        .section-content { 
+            display: block; 
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 1px solid #f443b2; /* Neon Pink border */
+            background-color: transparent;
+            color: #f443b2; /* Neon Pink text */
+        }
+        .tab-button:hover {
+            background-color: rgba(244, 67, 178, 0.2); /* Pinkish transparent hover */
+            color: #f8a5d7;
+            box-shadow: 0 0 8px rgba(244, 67, 178, 0.5);
+        }
+        .tab-button.active {
+            background-color: #f443b2; /* Neon Pink */
+            color: #0d0f1a; /* Dark text for contrast */
+            border-color: #f443b2;
+            font-weight: bold;
+            box-shadow: 0 0 10px #f443b2, 0 0 15px #f443b2;
+        }
+        .sub-section-content { display: none; } 
+        .sub-section-content.active { display: block; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; 
+            max-height: 350px; 
+            border: 1px solid #33c6ab; /* Teal border for charts */
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            background-color: rgba(13, 15, 26, 0.5); /* Darker background for chart area */
+        }
+         @media (min-width: 768px) { 
+            .chart-container {
+                height: 350px; 
+            }
+        }
+        .card {
+            background-color: rgba(28, 30, 58, 0.7); /* Darker, slightly transparent card */
+            border-radius: 0.5rem; 
+            border: 1px solid #8f9bff; /* Purple/blue border */
+            box-shadow: 0 0 10px rgba(143, 155, 255, 0.2); /* Subtle glow */
+            padding: 1.5rem; 
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #66fcf1; /* Cyan border on hover */
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.4), 0 0 25px rgba(102, 252, 241, 0.2); 
+        }
+        .expandable-card .expand-icon {
+            transition: transform 0.3s ease-in-out;
+            color: #66fcf1; /* Cyan for expand icon */
+        }
+        .expandable-card.expanded .expand-icon {
+            transform: rotate(135deg); /* More distinct rotation */
+        }
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            color: #a0a0c0; /* Slightly lighter text for expandable content */
+        }
+        .expanded .expandable-content {
+            max-height: 1000px; 
+        }
+        h1, h2, h3, h4 {
+            font-weight: 600; 
+        }
+        h1 { color: #e0e0ff; /* Bright lavender for main title */ text-shadow: 0 0 5px #66fcf1; }
+        h2 { color: #66fcf1; /* Neon Cyan for section titles */ margin-bottom: 1rem; text-shadow: 0 0 3px #66fcf1;}
+        h3 { color: #f443b2; /* Neon Pink for sub-titles */ margin-bottom: 0.75rem; }
+        h4 { color: #a0a0ff; /* Lighter purple for card titles */ }
+
+        /* Specific text color overrides for better contrast */
+        .text-slate-600 { color: #b0b0d0 !important; }
+        .text-slate-700 { color: #c0c0e0 !important; }
+        .text-slate-800 { color: #d0d0f0 !important; } /* Should be body default */
+        
+        .text-sky-700 { color: #66fcf1 !important; }
+        .text-sky-600 { color: #8bebf2 !important; }
+        .text-teal-700 { color: #33c6ab !important; } /* Teal */
+        .text-teal-600 { color: #5dd9c1 !important; }
+        .text-teal-500 { color: #87ebd6 !important; }
+        .text-indigo-700 { color: #a367e1 !important; } /* Purple */
+        .text-indigo-600 { color: #b784e8 !important; }
+        .text-indigo-500 { color: #c9a0ed !important; }
+        .text-purple-700 { color: #d05ce3 !important; } /* Magenta/Purple */
+        .text-purple-600 { color: #de7fe8 !important; }
+        .text-red-700 { color: #ff5572 !important; } /* Bright Red/Pink */
+        .text-red-600 { color: #ff7790 !important; }
+        .text-green-700 { color: #50fa7b !important; } /* Neon Green */
+        .text-green-600 { color: #79fc9a !important; }
+
+        .bg-amber-50 { background-color: rgba(75, 70, 20, 0.3) !important; border-left-color: #f59e0b !important; } /* Dark Amber for notices */
+        .text-amber-700 { color: #fcd34d !important; } /* Yellowish for notice text */
+
+        .border-slate-300 { border-color: #4f518c !important; } /* Purple for dividers */
+
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.3), inset 0 0 10px rgba(102,252,241,0.1); }
+
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300">
+    <header class="bg-black/70 backdrop-blur-md text-white shadow-lg sticky top-0 z-50 border-b border-purple-500/30">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold tracking-wider">GOOGLE I/O 2025</h1>
+            <nav id="main-nav" class="mt-3 sm:mt-0 flex flex-wrap justify-center gap-x-3 gap-y-2">
+                <a class="nav-link" data-section="home" href="#home">🏠 首頁</a>
+                <a class="nav-link" data-section="gemini-models" href="#gemini-models">🌌 GEMINI CORE</a>
+                <a class="nav-link" data-section="ai-innovations" href="#ai-innovations">🚀 AI REVOLUTION</a>
+                <a class="nav-link" data-section="future-platforms" href="#future-platforms">📡 FUTURE_OS</a>
+                <a class="nav-link" data-section="market-impact" href="#market-impact">📈 MARKET SHIFT</a>
+                <a class="nav-link" data-section="broader-implications" href="#broader-implications">🌍 SYSTEM_SHOCK</a>
+                <a class="nav-link" data-section="conclusion" href="#conclusion">🔭 NEXT_HORIZON</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="home" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">歡迎來到 Google I/O 2025 <span class="text-pink-500">互動式報告</span></h2>
+            <p class="mb-4 text-base md:text-lg leading-relaxed">本應用程式旨在為您呈現 2025 年 Google I/O 大會的關鍵發布內容及其對科技市場的深遠影響。Google I/O 2025 清晰地傳達了一個核心信息：AI 正以前所未有的深度和廣度重塑其產品、服務乃至整個科技產業的未來。透過此互動報告，您可以深入了解 AI 如何引領科技新格局。</p>
+            <p class="mb-4 text-base md:text-lg leading-relaxed">請使用上方導覽列探索不同主題，從核心的 Gemini 模型進化，到 AI 在搜索、助理、創意工具的全面融入，再到開發者平台、未來硬件以及商業模式的革新。我們將一同剖析這些進展對市場競爭、產業轉型及社會倫理帶來的多方面衝擊與啟示。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                <div class="card cursor-pointer" onclick="smoothScrollToSection('gemini-models')">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 mb-2">🌌 Gemini 模型宇宙</h3>
+                    <p class="text-sm md:text-base">探索 Gemini 2.5 Pro 與 Flash 的強大能力、上下文窗口的擴展及 Deep Think 等尖端技術。</p>
+                </div>
+                <div class="card cursor-pointer" onclick="smoothScrollToSection('ai-innovations')">
+                    <h3 class="text-lg md:text-xl font-semibold text-pink-500 mb-2">🚀 AI 驅動的革新</h3>
+                    <p class="text-sm md:text-base">深入了解 AI 如何重塑搜索體驗、個人助理、生成式媒體創作及開發者工具。</p>
+                </div>
+                <div class="card cursor-pointer" onclick="smoothScrollToSection('market-impact')">
+                    <h3 class="text-lg md:text-xl font-semibold text-lime-400 mb-2">📈 市場衝擊與前瞻</h3>
+                    <p class="text-sm md:text-base">分析 AI 進展對搜索市場、創意產業、企業應用及科技巨頭競爭格局的影響。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="gemini-models" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">🌌 GEMINI 模型宇宙</h2>
+            <p class="mb-6 text-base md:text-lg leading-relaxed">Google 持續投入其核心 AI 模型 Gemini 的研發與升級，Gemini 2.5 系列模型帶來了顯著進展，突顯了其在複雜推理、編程能力、速度和效率方面的提升。這些進步得益於 Google 強大的 TPU 基礎設施，不僅提升性能，也顯著降低成本。</p>
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div class="card">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 mb-2">Gemini 2.5 Pro</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm md:text-base">
+                        <li>在 LMArena 等多項基準測試中表現出色，Elo 分數大幅提升。</li>
+                        <li>優化複雜推理和編程能力。</li>
+                        <li>引入「Deep Think」實驗性增強推理模式。</li>
+                        <li>支持 100 萬 token 上下文窗口，計劃擴展至 200 萬。</li>
+                        <li>整合先進安全保護措施。</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 mb-2">Gemini 2.5 Flash</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm md:text-base">
+                        <li>專注於速度和效率。</li>
+                        <li>新預覽版在編碼和複雜推理方面性能更強。</li>
+                        <li>將於 6 月初在 Google AI Studio 和 Vertex AI 上正式可用。</li>
+                        <li>同樣整合先進安全保護措施。</li>
+                        <li>上下文窗口能力與 Pro 版本看齊。</li>
+                    </ul>
+                </div>
+            </div>
+             <p class="mb-4 text-sm md:text-base">Google 還提及了名為 <strong class="text-lime-400">Gemini Diffusion</strong> 的新型研究模型，採用類似圖像和視頻生成的文本擴散技術，用於生成連貫的文本或代碼。</p>
+            <div class="mt-6">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">Gemini 模型亮點</h3>
+                <div class="chart-container">
+                    <canvas id="geminiChart"></canvas>
+                </div>
+                <p class="text-xs md:text-sm text-center mt-2">圖表展示 Gemini 2.5 Pro 在 Elo 分數上的提升以及其領先的上下文窗口能力。</p>
+            </div>
+        </section>
+
+        <section id="ai-innovations" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">🚀 AI 驅動的革新</h2>
+            <p class="mb-6 text-base md:text-lg leading-relaxed">Google I/O 2025 展示了 AI 如何深度融入並革新其核心產品與服務。從搜索體驗的重塑，到個人化 AI 助理的進化，再到生成式媒體工具的突破以及開發者平台的賦能，AI 正全面驅動創新。</p>
+            <div class="mb-6 border-b pb-3">
+                <nav id="innovations-tabs" class="flex flex-wrap gap-2">
+                    <button class="tab-button active" data-subsection="search-revolution">🔍 搜索革命</button>
+                    <button class="tab-button" data-subsection="personal-ai">🤖 個人化 AI</button>
+                    <button class="tab-button" data-subsection="generative-media">🎨 生成式媒體</button>
+                    <button class="tab-button" data-subsection="developer-empowerment">💻 開發者賦能</button>
+                </nav>
+            </div>
+
+            <div id="search-revolution" class="sub-section-content active">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">🔍 搜索革命：AI Overviews 與 AI Mode</h3>
+                <p class="mb-4 text-sm md:text-base leading-relaxed">AI Overviews (AI 生成摘要) 和 AI Mode (對話式搜索) 正重塑信息獲取方式。AI Overviews 已擴展至全球200+國家/地區，支持40+語言。AI Mode 在美國全面推出，採用「查詢扇出」技術處理複雜問題。</p>
+                <ul class="list-disc list-inside space-y-1 mb-4 text-sm md:text-base">
+                    <li>AI Overviews 提升相關查詢使用量 10%。</li>
+                    <li>AI Mode 集成 Deep Search、AI 購物 (含虛擬試穿)、個性化代理。</li>
+                    <li>AI Mode 可生成定制圖表和圖形。</li>
+                </ul>
+                <div class="chart-container mx-auto" style="height:250px; max-height:300px;">
+                    <canvas id="aiOverviewsChart"></canvas>
+                </div>
+                <p class="text-xs md:text-sm text-center mt-2">AI Overviews 帶動相關查詢使用量增長。</p>
+                <div class="mt-4 p-3 md:p-4 bg-amber-50 border-l-4 rounded">
+                    <p class="text-sm md:text-base"><strong class="font-semibold text-yellow-400">注意事項：</strong>儘管 Google 聲稱 AI Overviews 連結點擊率高，但其準確性及對自然流量的潛在影響仍受關注。</p>
+                </div>
+            </div>
+
+            <div id="personal-ai" class="sub-section-content">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">🤖 個人化 AI 體驗：Gemini App 與 Project Astra</h3>
+                <p class="mb-4 text-sm md:text-base leading-relaxed">Gemini App (月活躍用戶超4億) 和 Project Astra 旨在打造「真正通用的 AI 助理」，提供更個性化、主動和強大的功能。</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="card">
+                        <h4 class="text-base md:text-lg font-semibold text-lime-400 mb-1">Gemini App 更新</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm md:text-base">
+                            <li>集成 Veo 3, Imagen 4, Deep Research, Canvas。</li>
+                            <li>個性化：連接 Drive/Gmail 生成報告，智能回覆匹配風格。</li>
+                            <li>Meet 實時翻譯 (匹配語氣)。</li>
+                            <li>Gemini Live (基於 Project Astra 能力)：實時視覺問答，連接地圖、日曆等。</li>
+                            <li>實驗性 Agent Mode：代辦複雜任務。</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                         <h4 class="text-base md:text-lg font-semibold text-lime-400 mb-1">Project Astra 願景</h4>
+                        <p class="text-sm md:text-base leading-relaxed">一個能理解多模態信息、具備情境感知、可跨設備操作並控制第三方應用的通用 AI 助理。強調自然對話、視覺理解、持久記憶和跨應用協同。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="generative-media" class="sub-section-content">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">🎨 生成式媒體：Veo, Imagen, Flow, Lyria</h3>
+                <p class="mb-4 text-sm md:text-base leading-relaxed">Google 在生成式媒體領域取得顯著進展，發布新一代模型和工具，大幅降低高質量內容創作門檻。</p>
+                <div class="space-y-4">
+                    <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                        <h4 class="text-base md:text-lg font-semibold text-lime-400 flex justify-between items-center">Veo 3 (視頻生成) <span class="expand-icon text-xl transition-transform duration-300">＋</span></h4>
+                        <div class="expandable-content mt-2 text-sm md:text-base">
+                            <p>首次能生成帶有同步音頻（環境噪音、對話）的視頻。提升文本/圖像提示理解、物理世界模擬、口型同步。Veo 2 亦有更新 (參考驅動、運鏡控制等)。</p>
+                        </div>
+                    </div>
+                    <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                        <h4 class="text-base md:text-lg font-semibold text-lime-400 flex justify-between items-center">Imagen 4 (圖像生成) <span class="expand-icon text-xl transition-transform duration-300">＋</span></h4>
+                        <div class="expandable-content mt-2 text-sm md:text-base">
+                            <p>提升文本渲染、提示依從性、圖像質量 (照片級/抽象)、多語言支持、細節處理 (織物/毛髮)、2K 分辨率、拼寫/排版。</p>
+                        </div>
+                    </div>
+                     <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                        <h4 class="text-base md:text-lg font-semibold text-lime-400 flex justify-between items-center">Flow (AI 電影製作工具) <span class="expand-icon text-xl transition-transform duration-300">＋</span></h4>
+                        <div class="expandable-content mt-2 text-sm md:text-base">
+                            <p>整合 Veo, Imagen, Gemini 能力，允許創作者用自然語言描述鏡頭、管理故事元素，編織成電影場景。</p>
+                        </div>
+                    </div>
+                    <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                        <h4 class="text-base md:text-lg font-semibold text-lime-400 flex justify-between items-center">Lyria 2 & Music AI Sandbox (音樂生成) <span class="expand-icon text-xl transition-transform duration-300">＋</span></h4>
+                        <div class="expandable-content mt-2 text-sm md:text-base">
+                            <p>擴展訪問權限，通過 YouTube Shorts 和 Vertex AI 提供，生成高質量音頻，對樂器、BPM 等提供更強創作控制。</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm md:text-base">為應對 AI 生成內容問題，推出 <strong class="text-yellow-400">SynthID Detector</strong> 幫助識別 SynthID 水印內容。</p>
+            </div>
+
+            <div id="developer-empowerment" class="sub-section-content">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">💻 開發者賦能：平台與工具</h3>
+                <p class="mb-4 text-sm md:text-base leading-relaxed">Google 推出一系列工具和平台更新，旨在降低 AI 開發門檻，提升效率。已有超700萬開發者使用 Gemini 構建，Vertex AI 上 Gemini 使用量增長40倍。</p>
+                 <ul class="list-disc list-inside space-y-2 mb-4 text-sm md:text-base">
+                    <li><strong>Vertex AI:</strong> 整合最新 Gemini 模型，提供端到端解決方案。Vertex AI Agent Builder 助開發者設計部署企業級 GenAI 應用。</li>
+                    <li><strong>Gemini Code Assist:</strong> (個人/GitHub) 正式可用，由 Gemini 2.5 支持，強化編碼輔助。</li>
+                    <li><strong>Jules:</strong> 並行異步 GitHub 知識庫代理 (Beta)，理解代碼庫、測試、修復錯誤、構建功能。</li>
+                    <li><strong>開源模型:</strong> Gemma 3n (端側多模態)、SignGemma (手語翻譯)、MedGemma (醫學文本圖像理解)。</li>
+                    <li><strong>Google AI Studio & Colab:</strong> UI 更新，集成新功能，Colab 將提供代理體驗。</li>
+                    <li><strong>Google Home APIs:</strong> 與 Gemini 整合，為智能家居帶來更強智能。</li>
+                </ul>
+                <div class="chart-container">
+                    <canvas id="developerAdoptionChart"></canvas>
+                </div>
+                <p class="text-xs md:text-sm text-center mt-2">開發者對 Gemini 和 Vertex AI 的採用率顯著增長。</p>
+            </div>
+        </section>
+
+        <section id="future-platforms" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">💰 未來平台與商業化</h2>
+            <p class="mb-6 text-base md:text-lg leading-relaxed">Google 展示了其在擴展現實 (XR)、下一代通信以及 AI 服務商業化方面的佈局，積極塑造未來科技的形態與商業模式。</p>
+            <div class="mb-6 border-b pb-3">
+                <nav id="future-tabs" class="flex flex-wrap gap-2">
+                    <button class="tab-button active" data-subsection="immersive-future">🕶️ 沉浸式未來</button>
+                    <button class="tab-button" data-subsection="ai-business-models">💰 AI 商業模式</button>
+                </nav>
+            </div>
+
+            <div id="immersive-future" class="sub-section-content active">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">🕶️ 沉浸式未來：Android XR & Google Beam</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h4 class="text-lg md:text-xl font-semibold text-lime-400 mb-2">Android XR</h4>
+                        <p class="text-sm md:text-base leading-relaxed">旨在將 Android 成功複製到 XR 領域，提供統一操作系統。與三星 (Project Moohan)、高通、Xreal (Project Aura) 等合作打造開放生態。Gemini AI 將深度集成，提供情境感知、實時翻譯等智能輔助。與 Gentle Monster, Warby Parker 合作開發時尚 XR 眼鏡。</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="text-lg md:text-xl font-semibold text-lime-400 mb-2">Google Beam (原 Project Starline)</h4>
+                        <p class="text-sm md:text-base leading-relaxed">AI 優先的 3D 視頻通信平台，無需特殊眼鏡，將 2D 視頻轉換為沉浸式 3D 通話體驗。利用 AI 體積視頻模型和光場顯示技術。主要面向企業，與 HP, Zoom 合作。首批 HP 製造設備近期亮相。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ai-business-models" class="sub-section-content">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">💰 AI 商業模式：Google AI Ultra & Pro</h3>
+                <p class="mb-4 text-sm md:text-base leading-relaxed">為滿足高端用戶需求並探索新商業模式，Google 推出 AI 訂閱計劃。</p>
+                 <div class="card mb-4">
+                    <h4 class="text-lg md:text-xl font-semibold text-lime-400 mb-2">Google AI Ultra</h4>
+                    <p class="text-sm md:text-base">定價 $249.99/月 (美國，新用戶有優惠)。目標用戶為電影製作人、開發者、創意專業人士等。</p>
+                    <strong class="block mt-2 text-yellow-400 text-sm md:text-base">核心權益包括：</strong>
+                    <ul class="list-disc list-inside space-y-1 mt-1 text-sm md:text-base">
+                        <li>Gemini App 頂級體驗 (Deep Research, Veo 3, Deep Think 搶先體驗)。</li>
+                        <li>Flow 工具高級權限 (1080p 視頻生成, Veo 3 搶先體驗)。</li>
+                        <li>Whisk Animate, NotebookLM 最高限額。</li>
+                        <li>Gmail, Docs, Vids 等應用集成 Gemini。</li>
+                        <li>Chrome 瀏覽器 Gemini 集成搶先體驗。</li>
+                        <li>Project Mariner 使用權限 (代理研究原型)。</li>
+                        <li>YouTube Premium 個人版，30 TB Google One 存儲。</li>
+                    </ul>
+                </div>
+                 <div class="card">
+                    <h4 class="text-lg md:text-xl font-semibold text-lime-400 mb-2">Google AI Pro (原 AI Premium)</h4>
+                    <p class="text-sm md:text-base">定價 $19.99/月。將獲得 Flow 中的 AI 電影製作功能 (Veo 2) 及 Chrome 中 Gemini 搶先體驗等權益。Google 也向多國大學生提供免費 Gemini 升級。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="market-impact" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">📈 市場衝擊與前瞻</h2>
+            <p class="mb-6 text-base md:text-lg leading-relaxed">Google I/O 2025 展示的 AI 進展預示著科技市場將迎來深刻變革。從信息獲取、內容創作到企業應用和人機交互，都將受到顯著影響。</p>
+             <div class="space-y-4">
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">搜索市場變革 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>AI Overviews 和 AI Mode 旨在直接提供答案，可能減少第三方網站流量。內容創作者需關注 E-E-A-T，優化內容以被 AI 選中。品牌需建立網絡權威性。流量追蹤面臨新挑戰。</p>
+                    </div>
+                </div>
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">AI 助理的未來 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Project Astra/Gemini Live 挑戰 Siri/Alexa，強調自然交互、視覺理解、持久記憶和跨應用協同。Google 生態系統是其優勢。這可能引發新的「操作系統級」主導權之爭。</p>
+                    </div>
+                </div>
+                 <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">創意產業的顛覆與機遇 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Veo 3, Imagen 4, Flow 等工具降低創作門檻，提升效率，挑戰 Adobe Firefly 等。Adobe 也開始集成第三方模型 (含 Google)。未來創意平台可能演變成「模型不可知」的樞紐。</p>
+                    </div>
+                </div>
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">企業級 AI 的加速普及 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Vertex AI 及開發者工具 (Agent Builder, Code Assist, Jules) 降低企業 AI 應用門檻。Google Cloud 強調行業應用，旨在培育基於其基礎設施的第三方 AI 應用生態。</p>
+                    </div>
+                </div>
+                 <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">沉浸式體驗的競賽 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Android XR (開放生態) 與 Google Beam (3D 視頻通訊) 佈局元宇宙和遠程協作。Google 側重將 AI 能力深度融入未來硬件，目標是成為驅動體驗的「智能層」。</p>
+                    </div>
+                </div>
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">AI 模型與服務的商業模式 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Google AI Ultra ($249.99/月) 鎖定高價值專業用戶，捆綁生態服務。高定價可能加速「足夠好」AI 在大眾市場的普及，導致市場分化。</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-6 bg-black/50 p-4 md:p-6 rounded-lg shadow-inner border border-purple-500/50">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-3">Google AI 產品與主要競爭對手比較 (摘要)</h3>
+                <p class="text-sm md:text-base leading-relaxed">Google 通過 Gemini 模型、AI 搜索、生成式媒體工具 (Veo, Imagen) 及高級訂閱服務 (AI Ultra) 全方位參與市場競爭，對標 OpenAI GPT 系列、Perplexity AI、RunwayML、Midjourney 及相應的企業級和個人訂閱方案。Google 的優勢在於其強大的模型能力 (如 Gemini 2.5 Pro 的上下文窗口和推理能力)、深度的生態整合 (搜索, Workspace, Android) 以及針對特定應用場景的優化 (如 Veo 3 的音視頻同步生成)。</p>
+            </div>
+        </section>
+
+        <section id="broader-implications" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">🌍 宏觀影響與挑戰</h2>
+            <p class="mb-6 text-base md:text-lg leading-relaxed">Google I/O 2025 所揭示的 AI 進展不僅影響特定產品和市場，更對社會倫理、科技巨頭競爭格局及各行業未來發展產生宏觀而深遠的影響。</p>
+             <div class="space-y-4">
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">AI 倫理與社會責任 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>AI 發展伴隨挑戰：算法偏見、透明度與問責制缺失、隱私與數據保護、就業衝擊、人類判斷的角色。Google 推出 SynthID Detector 等措施應對，但仍需多方努力。AI 的普及可能迫使社會重新審視「人類工作」和「價值創造」的定義。</p>
+                    </div>
+                </div>
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">科技巨頭的 AI 競賽格局 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>Google 將 AI 置於核心，與 Microsoft/OpenAI, 蘋果, Meta, 亞馬遜等展開多維度競爭 (核心模型, AI 服務應用, 下一代硬件OS)。Google 試圖利用現有優勢構建深度整合的 AI 生態壁壘。激進的 AI 整合可能引發新一輪「平台戰爭」，用戶可能被鎖定在特定生態內。</p>
+                    </div>
+                </div>
+                <div class="card expandable-card cursor-pointer" onclick="toggleExpand(this)">
+                    <h3 class="text-lg md:text-xl font-semibold text-cyan-400 flex justify-between items-center">對不同行業的啟示 <span class="expand-icon text-xl transition-transform duration-300">＋</span></h3>
+                    <div class="expandable-content mt-2 text-sm md:text-base">
+                        <p>AI 將滲透各行業，帶來效率提升和模式創新。企業需評估影響，重視數據資產，轉型人才技能，擁抱變革。成功整合 AI 的企業將實現「AI 原生」轉型，圍繞 AI 核心能力重塑業務流程和價值主張，培養「AI 優先」思維。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="section-content section-container">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4">🔭 結論與展望</h2>
+            <div class="mb-6">
+                <h3 class="text-xl md:text-2xl font-semibold text-pink-500 mb-2">Google I/O 2025 的核心啟示：AI Everywhere</h3>
+                <p class="text-base md:text-lg leading-relaxed">Google I/O 2025 傳遞的核心信息是：AI 正在演變成如同電力或互聯網一樣的基礎性、賦能性力量，將無處不在地融入所有數字體驗的底層架構。這不僅是 Google 的發展宣告，也反映其在全球 AI 競賽中力求全面領先的雄心。</p>
+            </div>
+            <div>
+                <h3 class="text-xl md:text-2xl font-semibold text-lime-400 mb-3">未來科技市場的關鍵趨勢預測</h3>
+                <ul class="list-decimal list-inside space-y-2 text-base md:text-lg leading-relaxed">
+                    <li><strong>代理式 AI (Agentic AI) 的興起：</strong>AI 系統將更智能自主，代表用戶規劃執行多步驟任務。</li>
+                    <li><strong>多模態交互成為主流：</strong>融合視覺、語音、文本、圖像等多模態信息的 AI 交互體驗。</li>
+                    <li><strong>個性化與情境感知能力的深化：</strong>AI 提供高度定制化、與情境高度相關的服務。</li>
+                    <li><strong>AI 倫理與治理的持續博弈：</strong>倫理、法律、社會規範和治理問題將持續受關注。</li>
+                    <li><strong>行業深度融合與產業智能化升級：</strong>AI 加速與各行業融合，催生新產業形態和經濟增長點。</li>
+                </ul>
+                <p class="mt-6 text-base md:text-lg leading-relaxed">總體而言，Google I/O 2025 描繪了一個 AI 全面滲透、深度賦能的未來圖景。在這場由 AI 引領的科技浪潮中，機遇與挑戰並存，唯有積極擁抱變革、持續創新並勇於承擔社會責任者，方能立於不敗之地。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-black/70 text-slate-400 text-center p-4 mt-8 border-t border-purple-500/30">
+        <p class="text-sm">&copy; 2025 G//O I/O REPORT_ANALYSIS_v2.5 // SYS.CYBERPUNK_THEME // FOR_DEMO_USE_ONLY</p>
+    </footer>
+
+    <script>
+        const navLinks = document.querySelectorAll('#main-nav .nav-link');
+        const sections = document.querySelectorAll('main > .section-content.section-container'); 
+        const headerElement = document.querySelector('header');
+
+        function smoothScrollToSection(sectionId, event) {
+            if (event) {
+              event.preventDefault(); 
+            }
+            const sectionElement = document.getElementById(sectionId);
+            if (sectionElement && headerElement) {
+                const headerOffset = headerElement.offsetHeight;
+                const elementPosition = sectionElement.offsetTop;
+                const offsetPosition = elementPosition - headerOffset - 24; // Increased offset for cyberpunk theme
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (event) => {
+                const sectionId = link.dataset.section;
+                smoothScrollToSection(sectionId, event);
+            });
+        });
+        
+        function activateNavLinkOnScroll() {
+            const headerHeight = headerElement ? headerElement.offsetHeight : 0;
+            const scrollPositionWithOffset = window.scrollY + headerHeight + 30; // Adjusted buffer
+
+            let currentActiveSectionId = null;
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                if (scrollPositionWithOffset >= sectionTop && scrollPositionWithOffset < (sectionTop + sectionHeight)) {
+                    currentActiveSectionId = section.id;
+                }
+            });
+            
+            if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 30) { 
+                 if (sections.length > 0) {
+                    currentActiveSectionId = sections[sections.length - 1].id;
+                 }
+            }
+            else if (window.scrollY < (sections.length > 0 ? sections[0].offsetTop - headerHeight - 30 : 200) ) { // Check if sections exist
+                 currentActiveSectionId = 'home';
+            }
+            if (!currentActiveSectionId && sections.length > 0) {
+                for (let i = sections.length - 1; i >= 0; i--) {
+                    if (scrollPositionWithOffset >= sections[i].offsetTop) {
+                        currentActiveSectionId = sections[i].id;
+                        break;
+                    }
+                }
+                if (!currentActiveSectionId) {
+                    currentActiveSectionId = 'home';
+                }
+            }
+
+
+            navLinks.forEach(link => {
+                if (link.dataset.section === currentActiveSectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', activateNavLinkOnScroll);
+
+        const innovationsTabs = document.querySelectorAll('#innovations-tabs .tab-button');
+        const futureTabs = document.querySelectorAll('#future-tabs .tab-button');
+
+        function handleTabClick(tabs, subSectionsContainerId) {
+            const subSections = document.querySelectorAll(`#${subSectionsContainerId} .sub-section-content`);
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const subSectionId = tab.dataset.subsection;
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    subSections.forEach(ss => {
+                        ss.classList.remove('active');
+                        if (ss.id === subSectionId) {
+                            ss.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+        handleTabClick(innovationsTabs, 'ai-innovations');
+        handleTabClick(futureTabs, 'future-platforms');
+        
+        function toggleExpand(cardElement) {
+            cardElement.classList.toggle('expanded');
+            const icon = cardElement.querySelector('.expand-icon');
+            if (cardElement.classList.contains('expanded')) {
+                icon.textContent = '－';
+                 icon.style.color = '#f443b2'; // Pink when expanded
+            } else {
+                icon.textContent = '＋';
+                icon.style.color = '#66fcf1'; // Cyan when collapsed
+            }
+        }
+
+        function formatLabel(str, maxwidth){
+            let sections = [];
+            let words = str.split(" ");
+            let temp = "";
+
+            words.forEach((item, index) => {
+                if(temp.length > 0) { temp += " " + item; } else { temp = item; }
+                if(temp.length > maxwidth){ sections.push(temp); temp = ""; }
+                if(index === words.length - 1 && temp.length > 0){ sections.push(temp); }
+            });
+            return sections;
+        }
+
+        Chart.defaults.font.family = "'Inter', 'Noto Sans TC', sans-serif";
+        Chart.defaults.color = '#c0c0e0'; // Light lavender for chart text
+
+        const cyberpunkPalette = {
+            primary: 'rgba(102, 252, 241, 0.8)', // Neon Cyan
+            secondary: 'rgba(244, 67, 178, 0.8)', // Neon Pink
+            tertiary: 'rgba(80, 250, 123, 0.8)', // Neon Green
+            quaternary: 'rgba(250, 243, 80, 0.8)', // Neon Yellow
+            gridColor: 'rgba(79, 81, 140, 0.5)', // Purple grid lines
+            tooltipBg: 'rgba(13, 15, 26, 0.9)',
+            tooltipText: '#e0e0ff'
+        };
+
+        const geminiCtx = document.getElementById('geminiChart')?.getContext('2d');
+        if (geminiCtx) {
+            new Chart(geminiCtx, {
+                type: 'bar',
+                data: { 
+                    labels: ['Gemini Pro Elo 評分提升 (點)', 'Gemini Pro 上下文窗口 (Token)', 'GPT-4o 上下文窗口 (Token)'],
+                    datasets: [{
+                        label: 'Gemini 2.5 Pro 表現',
+                        data: [300, 1000000, 128000],
+                        backgroundColor: [cyberpunkPalette.primary, cyberpunkPalette.secondary, cyberpunkPalette.tertiary],
+                        borderColor: [cyberpunkPalette.primary.replace('0.8', '1'), cyberpunkPalette.secondary.replace('0.8', '1'), cyberpunkPalette.tertiary.replace('0.8', '1')],
+                        borderWidth: 1, borderRadius: 4,
+                    }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: cyberpunkPalette.gridColor }, ticks: { color: Chart.defaults.color, callback: function(value) { if (value >= 1000000) return (value / 1000000) + 'M'; if (value >= 1000) return (value / 1000) + 'K'; return value; } } },
+                        x: { grid: { display: false }, ticks: { color: Chart.defaults.color, callback: function(value, index) { return formatLabel(this.getLabelForValue(value), 10); } } }
+                    },
+                    plugins: { legend: { display: true, position: 'top', labels: { color: Chart.defaults.color } }, tooltip: { backgroundColor: cyberpunkPalette.tooltipBg, titleColor: cyberpunkPalette.tooltipText, bodyColor: cyberpunkPalette.tooltipText, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { let value = context.parsed.y; if (value >= 1000000) label += (value / 1000000) + 'M Token'; else if (value >=1000 && context.label.includes('Token')) label += (value / 1000) + 'K Token'; else if (context.label.includes('評分提升')) label += value + ' 點'; else label += value; } return label; } } } }
+                }
+            });
+        }
+
+        const aiOverviewsCtx = document.getElementById('aiOverviewsChart')?.getContext('2d');
+        if (aiOverviewsCtx) {
+            new Chart(aiOverviewsCtx, {
+                type: 'doughnut',
+                data: { 
+                    labels: ['相關查詢使用量增長', '其他查詢'],
+                    datasets: [{ label: 'AI Overviews 影響', data: [10, 90], backgroundColor: [cyberpunkPalette.secondary, 'rgba(79, 81, 140, 0.3)'], borderColor: [cyberpunkPalette.secondary.replace('0.8','1'), 'rgba(79, 81, 140, 0.6)'], borderWidth: 1 }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: Chart.defaults.color } }, tooltip: { backgroundColor: cyberpunkPalette.tooltipBg, titleColor: cyberpunkPalette.tooltipText, bodyColor: cyberpunkPalette.tooltipText, callbacks: { label: function(context) { return context.label + ': ' + context.parsed + '%'; } } } }
+                }
+            });
+        }
+
+        const devAdoptionCtx = document.getElementById('developerAdoptionChart')?.getContext('2d');
+        if (devAdoptionCtx) {
+            new Chart(devAdoptionCtx, {
+                type: 'bar',
+                data: { 
+                    labels: ['Gemini 開發者 (百萬)', 'Gemini 開發者年增長 (倍)', 'Vertex AI Gemini 使用量增長 (倍)'],
+                    datasets: [{ label: '開發者採用趨勢', data: [7, 5, 40], backgroundColor: [cyberpunkPalette.tertiary, cyberpunkPalette.quaternary, cyberpunkPalette.primary], borderColor: [cyberpunkPalette.tertiary.replace('0.8','1'), cyberpunkPalette.quaternary.replace('0.8','1'), cyberpunkPalette.primary.replace('0.8','1')], borderWidth: 1, borderRadius: 4, }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    scales: { x: { beginAtZero: true, grid: { color: cyberpunkPalette.gridColor }, ticks: { color: Chart.defaults.color } }, y: { grid: { display: false }, ticks: { color: Chart.defaults.color, callback: function(value, index) { return formatLabel(this.getLabelForValue(value), 15); } } } },
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: cyberpunkPalette.tooltipBg, titleColor: cyberpunkPalette.tooltipText, bodyColor: cyberpunkPalette.tooltipText, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } let value = context.parsed.x; if (context.label.includes('百萬')) { label += value + ' 百萬'; } else if (context.label.includes('倍')) { label += value + ' 倍'; } else { label += value; } return label; } } } }
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            activateNavLinkOnScroll();
+            if (window.scrollY === 0 && navLinks.length > 0) {
+                 navLinks.forEach(link => link.classList.remove('active'));
+                 const homeLink = document.querySelector('.nav-link[data-section="home"]');
+                 if (homeLink) homeLink.classList.add('active');
+            }
+        });
+
+    </script>
+</body>
+</html>
