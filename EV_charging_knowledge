@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣電動車充電互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #030712; /* bg-gray-950 */
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #60a5fa; /* lighter blue for dark theme */
+            border-bottom-color: #60a5fa;
+            font-weight: 600;
+        }
+        .connector-btn {
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+        .connector-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); /* Subtle blue glow */
+            border-color: #3b82f6;
+        }
+        .connector-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+        .section {
+            padding-top: 80px; 
+            margin-top: -80px; 
+        }
+        .card {
+            background-color: #111827; /* bg-gray-900 */
+            border-color: #374151; /* border-gray-700 */
+        }
+        .text-header {
+            color: #e5e7eb; /* text-gray-200 */
+        }
+        .text-subheader {
+            color: #9ca3af; /* text-gray-400 */
+        }
+        .text-body {
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .text-accent {
+            color: #60a5fa; /* lighter blue */
+        }
+        .border-accent {
+            border-color: #3b82f6;
+        }
+        input[type="number"], select {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-color: #4b5563; /* border-gray-600 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        input[type="number"]:focus, select:focus {
+            border-color: #3b82f6;
+            ring-color: #3b82f6;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen">
+        <header class="bg-gray-950/80 backdrop-blur-md shadow-lg shadow-blue-500/10 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">🔌</span>
+                        <h1 class="text-xl md:text-2xl font-bold text-header">台灣電動車充電指南</h1>
+                    </div>
+                    <nav id="main-nav" class="hidden md:flex space-x-6">
+                        <a href="#overview" class="nav-link text-gray-400 hover:text-blue-400 border-b-2 border-transparent pb-1">總覽</a>
+                        <a href="#home-charging" class="nav-link text-gray-400 hover:text-blue-400 border-b-2 border-transparent pb-1">在家充電</a>
+                        <a href="#public-charging" class="nav-link text-gray-400 hover:text-blue-400 border-b-2 border-transparent pb-1">公共充電</a>
+                        <a href="#calculator" class="nav-link text-gray-400 hover:text-blue-400 border-b-2 border-transparent pb-1">速度計算機</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+            <section id="overview" class="section space-y-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-header sm:text-4xl">台灣電動車充電生態速覽</h2>
+                    <p class="mt-4 text-lg leading-8 text-subheader">本節提供台灣充電規格的市場分佈概況，幫助您快速了解主流趨勢。透過互動式圖表，您可以清晰地看到直流快充與交流慢充的現況。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <div class="card p-6 rounded-xl shadow-lg border">
+                        <h3 class="text-xl font-semibold text-center text-header">DC 直流快充規格市佔率</h3>
+                        <p class="text-center text-sm text-subheader mt-1 mb-4">(截至 2024 Q1)</p>
+                        <div class="chart-container">
+                            <canvas id="dc-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6 rounded-xl shadow-lg border">
+                        <h3 class="text-xl font-semibold text-center text-header">AC 交流慢充規格市佔率</h3>
+                        <p class="text-center text-sm text-subheader mt-1 mb-4">(截至 2024 Q1)</p>
+                        <div class="chart-container">
+                            <canvas id="ac-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="home-charging" class="section space-y-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-header sm:text-4xl">在家充電：您的私人加油站</h2>
+                    <p class="mt-4 text-lg leading-8 text-subheader">家是電動車最主要的充電場所。本節將比較台灣最常見的兩種家用充電方式，並說明安裝壁掛式充電樁的注意事項，幫助您做出最適合的選擇。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card p-8 rounded-xl shadow-lg border">
+                        <h3 class="text-2xl font-bold text-header">110V 家用插座 (Level 1)</h3>
+                        <p class="mt-2 text-body">使用隨車附贈的便攜式充電器，可直接插入標準牆壁插座。</p>
+                        <ul class="mt-6 space-y-4 text-body">
+                            <li class="flex items-center"><span class="text-2xl mr-3">⚡️</span><div><strong class="font-semibold text-gray-100">功率：</strong>約 1-2 kW</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">⏱️</span><div><strong class="font-semibold text-gray-100">速度：</strong>每小時約增加 5-8 公里續航</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">👍</span><div><strong class="font-semibold text-gray-100">優點：</strong>無需安裝、便利性高</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">👎</span><div><strong class="font-semibold text-gray-100">缺點：</strong>速度極慢，僅適合應急或 PHEV</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 p-8 rounded-xl shadow-lg border border-blue-700">
+                        <h3 class="text-2xl font-bold text-accent">220V 壁掛式充電樁 (Level 2)</h3>
+                        <p class="mt-2 text-blue-400">主流家用充電方案，需由專業人員安裝專用電路與充電樁。</p>
+                        <ul class="mt-6 space-y-4 text-blue-300">
+                            <li class="flex items-center"><span class="text-2xl mr-3">⚡️⚡️</span><div><strong class="font-semibold text-blue-200">功率：</strong>約 7-11 kW</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">⏱️</span><div><strong class="font-semibold text-blue-200">速度：</strong>每小時約增加 40-60 公里續航</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">👍</span><div><strong class="font-semibold text-blue-200">優點：</strong>速度快，可在一夜間充滿，電費較低</div></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">👎</span><div><strong class="font-semibold text-blue-200">缺點：</strong>需安裝費用，社區大樓可能需協調</div></li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card p-8 rounded-xl shadow-lg mt-8 border">
+                    <h3 class="text-2xl font-bold text-header">家用充電樁安裝考量</h3>
+                    <p class="mt-2 text-body">安裝220V壁掛式充電樁是提升用車體驗的關鍵。以下是在台灣安裝時需要注意的幾個重點：</p>
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-100">1. 法規與安全</h4>
+                            <p class="mt-1 text-body">安裝需符合台電「用戶用電設備裝置規則」，由合格電工施作，確保線路、斷路器規格正確，並確實接地。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-100">2. 社區協調</h4>
+                            <p class="mt-1 text-body">居住在公寓大廈是最大的挑戰。通常需要取得管委會同意，並可能涉及與鄰居溝通電力負載、安全及費用分攤等問題。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-100">3. 安裝成本</h4>
+                            <p class="mt-1 text-body">費用包含充電樁設備、場勘費及安裝施工費。總價依電纜長度、鑽孔、電箱升級等因素而異，一般約在新台幣 3 萬至 10 萬元不等。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-100">4. 申請獨立電錶</h4>
+                            <p class="mt-1 text-body">可以向台電申請專為電動車設計的時間電價電錶，利用離峰時段充電可大幅節省電費。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="public-charging" class="section space-y-12">
+                 <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-header sm:text-4xl">公共充電：旅途中的能量補給</h2>
+                    <p class="mt-4 text-lg leading-8 text-subheader">台灣充電規格眾多，搞懂它們是順暢出遊的關鍵。本節提供一個互動式指南，點擊下方任何一個充電接頭，即可查看其詳細規格與在台應用情況。</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                    <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="ccs2">
+                        <span class="text-4xl">🇪🇺</span>
+                        <span class="mt-2 font-semibold text-sm">CCS2</span>
+                    </button>
+                    <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="ccs1">
+                        <span class="text-4xl">🇺🇸</span>
+                        <span class="mt-2 font-semibold text-sm">CCS1</span>
+                    </button>
+                     <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="j1772">
+                        <span class="text-4xl">🔌</span>
+                        <span class="mt-2 font-semibold text-sm">Type 1 (J1772)</span>
+                    </button>
+                    <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="type2">
+                        <span class="text-4xl">💡</span>
+                        <span class="mt-2 font-semibold text-sm">Type 2</span>
+                    </button>
+                    <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="nacs">
+                        <span class="text-4xl">🇹</span>
+                        <span class="mt-2 font-semibold text-sm">NACS/TPC</span>
+                    </button>
+                    <button class="connector-btn flex flex-col items-center p-4 bg-gray-800 rounded-lg shadow-md border-2 border-gray-700 text-gray-200" data-connector="chademo">
+                        <span class="text-4xl">🇯🇵</span>
+                        <span class="mt-2 font-semibold text-sm">CHAdeMO</span>
+                    </button>
+                </div>
+
+                <div id="connector-details" class="card p-8 rounded-xl shadow-lg transition-all duration-500 min-h-[300px] border">
+                </div>
+            </section>
+
+            <section id="calculator" class="section space-y-12">
+                 <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-header sm:text-4xl">充電速度與時間計算機</h2>
+                    <p class="mt-4 text-lg leading-8 text-subheader">想知道充電要花多久時間嗎？使用下方的計算機，輸入您的車輛與充電樁資訊，即可快速估算理論充電時間。請注意，實際速度會受多種因素影響。</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card p-8 rounded-xl shadow-lg border">
+                        <h3 class="text-2xl font-bold text-header">預估充電時間</h3>
+                        <div class="space-y-4 mt-6">
+                            <div>
+                                <label for="battery-size" class="block text-sm font-medium text-gray-400">1. 電池總容量 (kWh)</label>
+                                <input type="number" id="battery-size" class="mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" value="60">
+                            </div>
+                            <div>
+                                <label for="current-soc" class="block text-sm font-medium text-gray-400">2. 目前電量 (%)</label>
+                                <input type="number" id="current-soc" class="mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" value="20">
+                            </div>
+                            <div>
+                                <label for="target-soc" class="block text-sm font-medium text-gray-400">3. 目標電量 (%)</label>
+                                <input type="number" id="target-soc" class="mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" value="80">
+                            </div>
+                            <div>
+                                <label for="charger-power" class="block text-sm font-medium text-gray-400">4. 充電功率 (kW)</label>
+                                <select id="charger-power" class="mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="7">7 kW (家用/公用AC)</option>
+                                    <option value="11">11 kW (家用/公用AC)</option>
+                                    <option value="50">50 kW (DC快充)</option>
+                                    <option value="120" selected>120 kW (DC快充)</option>
+                                    <option value="180">180 kW (DC快充)</option>
+                                    <option value="350">350 kW (DC快充)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="calculate-btn" class="mt-8 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-500 transition duration-300 shadow-md hover:shadow-blue-500/50">計算時間</button>
+                        <div id="calculation-result" class="mt-6 text-center bg-gray-800 p-6 rounded-lg" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="bg-gray-900 p-8 rounded-xl border border-gray-700">
+                        <h3 class="text-2xl font-bold text-header">影響實際充電速度的關鍵因素</h3>
+                        <p class="mt-2 text-body">理論計算提供一個基準，但實際充電是個動態過程。以下因素會讓充電時間變長：</p>
+                        <ul class="mt-6 space-y-4">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-800 text-blue-200 flex items-center justify-center font-bold">1</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-gray-100">充電曲線 (SoC)</h4>
+                                    <p class="text-body">電池在 20%-80% 區間充電最快。為了保護電池，當電量超過 80% 後，充電速度會顯著下降。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-800 text-blue-200 flex items-center justify-center font-bold">2</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-gray-100">電池溫度</h4>
+                                    <p class="text-body">電池太冷或太熱都會影響充電效率。車輛的電池管理系統(BMS)會調節功率以維持最佳溫度。</p>
+                                </div>
+                            </li>
+                             <li class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-800 text-blue-200 flex items-center justify-center font-bold">3</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-gray-100">車輛本身限制</h4>
+                                    <p class="text-body">實際充電功率取決於「充電樁」和「車輛」兩者中的較低者。例如，您的車AC充電上限為11kW，即使接上22kW的AC充電樁，速度也只會有11kW。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-800 text-blue-200 flex items-center justify-center font-bold">4</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-gray-100">充電樁實際輸出</h4>
+                                    <p class="text-body">充電站的功率可能會因電網負載或多車同時充電而動態分配，導致實際輸出低於標示功率。</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Chart.defaults.color = '#d1d5db'; // Default text color for charts (text-gray-300)
+            const chartFont = {
+                family: 'Inter, "Noto Sans TC", sans-serif'
+            };
+
+            const dcChartData = {
+                labels: ['CCS2', 'CCS1', 'NACS/TPC', 'CHAdeMO'],
+                datasets: [{
+                    label: 'DC 快充市佔率',
+                    data: [44.2, 33.8, 18.8, 3.2],
+                    backgroundColor: [
+                        '#3b82f6', // blue-500
+                        '#60a5fa', // blue-400
+                        '#93c5fd', // blue-300
+                        '#bfdbfe', // blue-200
+                    ],
+                    borderColor: '#111827', // bg-gray-900 (card background)
+                    borderWidth: 4,
+                }]
+            };
+
+            const acChartData = {
+                labels: ['Type 1 (J1772)', 'NACS/TPC', 'Type 2'],
+                datasets: [{
+                    label: 'AC 慢充市佔率',
+                    data: [74.1, 16.0, 9.9],
+                    backgroundColor: [
+                        '#22c55e', // green-500
+                        '#4ade80', // green-400
+                        '#86efac', // green-300
+                    ],
+                    borderColor: '#111827', // bg-gray-900 (card background)
+                    borderWidth: 4,
+                }]
+            };
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: chartFont,
+                            color: '#9ca3af', // text-gray-400
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: chartFont,
+                        titleFont: chartFont,
+                        backgroundColor: '#1f2937', // bg-gray-800
+                        titleColor: '#e5e7eb', // text-gray-200
+                        bodyColor: '#d1d5db', // text-gray-300
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.raw + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%',
+            };
+
+            if (document.getElementById('dc-chart')) {
+                const dcCtx = document.getElementById('dc-chart').getContext('2d');
+                new Chart(dcCtx, {
+                    type: 'doughnut',
+                    data: dcChartData,
+                    options: chartOptions
+                });
+            }
+
+            if (document.getElementById('ac-chart')) {
+                const acCtx = document.getElementById('ac-chart').getContext('2d');
+                new Chart(acCtx, {
+                    type: 'doughnut',
+                    data: acChartData,
+                    options: chartOptions
+                });
+            }
+            
+
+            const connectorData = {
+                ccs2: {
+                    name: 'CCS2 (Combined Charging System 2)',
+                    type: 'AC/DC 整合快充',
+                    power: 'DC: 50-350+ kW | AC: 最高 22 kW',
+                    features: '歐洲主流標準，整合 Type 2 AC 接頭與 DC 快充針腳。',
+                    prevalence: '台灣 DC 快充最大宗且成長最快，為新款 Tesla 及眾多歐系車款採用。'
+                },
+                ccs1: {
+                    name: 'CCS1 (Combined Charging System 1)',
+                    type: 'AC/DC 整合快充',
+                    power: 'DC: 50-350 kW | AC: 最高 7.4 kW',
+                    features: '北美主流標準，整合 J1772 AC 接頭與 DC 快充針腳。',
+                    prevalence: '台灣 DC 快充第二大規格，為眾多美系、韓系及部分歐系車款採用。'
+                },
+                j1772: {
+                    name: 'Type 1 (SAE J1772)',
+                    type: 'AC 交流慢充',
+                    power: '3.5 kW - 7.4 kW (常見)',
+                    features: '5 針腳設計，北美及日本 AC 充電標準。',
+                    prevalence: '台灣公共 AC 慢充的絕對主流，普及度最高。'
+                },
+                type2: {
+                    name: 'Type 2 (Mennekes)',
+                    type: 'AC 交流慢充',
+                    power: '7 kW - 22 kW (視單/三相電)',
+                    features: '7 針腳設計，歐洲 AC 充電標準，支援三相電。',
+                    prevalence: '隨 CCS2 車輛增加，在台灣的能見度與成長率均快速提升。'
+                },
+                nacs: {
+                    name: 'NACS / TPC (Tesla Connector)',
+                    type: 'AC/DC 整合規格',
+                    power: 'DC: 最高 250 kW | AC: 依車輛 OBC',
+                    features: 'Tesla 專有規格，設計輕巧，單一接頭支援慢充與超充。',
+                    prevalence: '適用於 2021 年第三季前的舊款 Tesla。新車已改為 CCS2。'
+                },
+                chademo: {
+                    name: 'CHAdeMO',
+                    type: 'DC 直流快充',
+                    power: '約 50 - 62.5 kW',
+                    features: '日本發展的快充標準，名稱為 "CHArge de MOve" 的縮寫。',
+                    prevalence: '在台灣市佔率極低且持續萎縮，主要為 Nissan Leaf 等日系車款使用。'
+                }
+            };
+            
+            const connectorBtns = document.querySelectorAll('.connector-btn');
+            const detailsPanel = document.getElementById('connector-details');
+
+            function updateDetails(connectorId) {
+                const data = connectorData[connectorId];
+                if (!data || !detailsPanel) return;
+
+                detailsPanel.innerHTML = `
+                    <h3 class="text-2xl font-bold text-header">${data.name}</h3>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div>
+                            <p class="text-sm font-medium text-subheader">類型</p>
+                            <p class="text-lg font-semibold text-body">${data.type}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-subheader">常見功率</p>
+                            <p class="text-lg font-semibold text-body">${data.power}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-sm font-medium text-subheader">主要特點</p>
+                            <p class="text-lg font-semibold text-body">${data.features}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-sm font-medium text-subheader">在台普及狀況</p>
+                            <p class="text-lg font-semibold text-body">${data.prevalence}</p>
+                        </div>
+                    </div>
+                `;
+                
+                connectorBtns.forEach(btn => {
+                    btn.classList.remove('active', 'border-accent');
+                    if(btn.dataset.connector === connectorId) {
+                        btn.classList.add('active', 'border-accent');
+                    }
+                });
+            }
+
+            if (connectorBtns.length > 0 && detailsPanel) {
+                connectorBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        updateDetails(btn.dataset.connector);
+                    });
+                });
+                updateDetails('ccs2'); 
+            }
+            
+
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultDiv = document.getElementById('calculation-result');
+            if (calculateBtn && resultDiv) {
+                calculateBtn.addEventListener('click', () => {
+                    const batterySize = parseFloat(document.getElementById('battery-size').value);
+                    const currentSoc = parseFloat(document.getElementById('current-soc').value);
+                    const targetSoc = parseFloat(document.getElementById('target-soc').value);
+                    const power = parseFloat(document.getElementById('charger-power').value);
+
+                    if (isNaN(batterySize) || isNaN(currentSoc) || isNaN(targetSoc) || isNaN(power) || batterySize <= 0 || power <= 0) {
+                        resultDiv.innerHTML = `<p class="font-bold text-red-500">請輸入有效的數值</p>`;
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (currentSoc >= targetSoc) {
+                        resultDiv.innerHTML = `<p class="font-bold text-red-500">目標電量需大於目前電量</p>`;
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+
+                    const kwhNeeded = batterySize * (targetSoc - currentSoc) / 100;
+                    const timeHours = kwhNeeded / power;
+                    const hours = Math.floor(timeHours);
+                    const minutes = Math.round((timeHours - hours) * 60);
+
+                    resultDiv.innerHTML = `
+                        <p class="text-subheader">從 ${currentSoc}% 充到 ${targetSoc}% (${kwhNeeded.toFixed(1)} kWh):</p>
+                        <p class="text-4xl font-bold text-accent mt-2">${hours} 小時 ${minutes} 分鐘</p>
+                        <p class="text-xs text-gray-500 mt-3">此為理論估算值，實際時間可能因多種因素而異。</p>
+                    `;
+                    resultDiv.style.display = 'block';
+                });
+            }
+            
+            const navMenu = document.getElementById('main-nav');
+            const navLinks = navMenu ? navMenu.querySelectorAll('.nav-link') : [];
+            const sections = document.querySelectorAll('.section');
+            const headerOffset = 80; 
+
+            function changeNavOnScroll() {
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - headerOffset - 10; 
+                    const sectionBottom = sectionTop + section.offsetHeight;
+                    if (window.scrollY >= sectionTop && window.scrollY < sectionBottom) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + currentSectionId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            if (navLinks.length > 0 && sections.length > 0) {
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href');
+                        const targetSection = document.querySelector(targetId);
+                        if (targetSection) {
+                            if(history.pushState) {
+                                history.pushState(null, null, targetId);
+                            } else {
+                                window.location.hash = targetId;
+                            }
+                            navLinks.forEach(lnk => lnk.classList.remove('active'));
+                            link.classList.add('active');
+                            
+                            // Manually trigger scroll to the section after hash update
+                            // as smooth scroll might not always fire correctly with pushState
+                            // or if the element is already in view but not perfectly aligned.
+                            window.scrollTo({
+                                top: targetSection.offsetTop - headerOffset,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+
+                window.addEventListener('scroll', changeNavOnScroll);
+                
+                let initialHash = window.location.hash;
+                if (initialHash) {
+                    const activeLink = navMenu.querySelector(`a[href="${initialHash}"]`);
+                    if (activeLink) {
+                         navLinks.forEach(lnk => lnk.classList.remove('active'));
+                         activeLink.classList.add('active');
+                         const targetSection = document.querySelector(initialHash);
+                         if (targetSection) {
+                            setTimeout(() => { // Ensure layout is complete
+                                window.scrollTo({
+                                    top: targetSection.offsetTop - headerOffset,
+                                    behavior: 'auto' // Use auto for initial load jump
+                                });
+                            }, 0);
+                         }
+                    } else if (navLinks.length > 0) {
+                        navLinks[0]?.classList.add('active');
+                    }
+                } else if (navLinks.length > 0) {
+                    navLinks[0].classList.add('active');
+                }
+                changeNavOnScroll(); 
+            }
+        });
+    </script>
+</body>
+</html>
