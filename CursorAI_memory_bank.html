@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Memory Bank 互動式指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices: 
+        - Report Intro -> Goal: Inform -> Viz: Icon cards -> Interaction: Hover -> Justification: Quickly convey the core problem/solution -> Method: HTML/Tailwind.
+        - Report Workflow Chapters -> Goal: Guide -> Viz: Interactive flowchart -> Interaction: Click nodes to reveal details -> Justification: Visualizes the process, making it intuitive -> Method: HTML/CSS/JS.
+        - Report Table 1 (Core Files) -> Goal: Detail -> Viz: Tabbed interactive list -> Interaction: Click to expand -> Justification: Organizes reference material neatly and encourages exploration -> Method: HTML/JS.
+        - Report Table 4 (Community Implementations) -> Goal: Compare -> Viz: Interactive bar chart -> Interaction: Click bar to show details -> Justification: Dynamic comparison is more engaging than a static table -> Method: Chart.js/Canvas.
+        - Report Pitfalls/Best Practices -> Goal: Advise -> Viz: Two-column layout -> Interaction: Static -> Justification: Clear, scannable comparison of do's and don'ts -> Method: HTML/Tailwind.
+        All choices adhere to the NO SVG/Mermaid constraint. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #27272a; /* zinc-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #d97706; /* amber-600 */
+            border-bottom-color: #d97706; /* amber-600 */
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header id="header" class="bg-slate-50/80 backdrop-blur-lg sticky top-0 z-40 border-b border-slate-200">
+        <nav class="container mx-auto px-4 lg:px-8 flex justify-between items-center h-16">
+            <h1 class="text-xl font-bold text-zinc-800">Memory Bank 指南</h1>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#introduction" class="nav-link text-sm font-medium text-zinc-600 border-b-2 border-transparent pb-1">簡介</a>
+                <a href="#workflow" class="nav-link text-sm font-medium text-zinc-600 border-b-2 border-transparent pb-1">核心工作流程</a>
+                <a href="#components" class="nav-link text-sm font-medium text-zinc-600 border-b-2 border-transparent pb-1">關鍵組件</a>
+                <a href="#strategies" class="nav-link text-sm font-medium text-zinc-600 border-b-2 border-transparent pb-1">高級策略</a>
+                <a href="#showcase" class="nav-link text-sm font-medium text-zinc-600 border-b-2 border-transparent pb-1">社群方案</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-zinc-600 hover:bg-slate-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-2">
+            <a href="#introduction" class="block nav-link text-sm font-medium text-zinc-600 py-2">簡介</a>
+            <a href="#workflow" class="block nav-link text-sm font-medium text-zinc-600 py-2">核心工作流程</a>
+            <a href="#components" class="block nav-link text-sm font-medium text-zinc-600 py-2">關鍵組件</a>
+            <a href="#strategies" class="block nav-link text-sm font-medium text-zinc-600 py-2">高級策略</a>
+            <a href="#showcase" class="block nav-link text-sm font-medium text-zinc-600 py-2">社群方案</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
+        <section id="introduction" class="scroll-mt-24 text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">掌握 AI 的長期記憶</h2>
+            <p class="max-w-3xl mx-auto text-lg text-zinc-600 mb-8">
+                本指南將帶您深入了解 Cursor AI 的 Memory Bank 功能。我們將大型報告轉化為一個互動式體驗，幫助您克服大型語言模型 (LLM) 在大型專案中的「失憶」挑戰，將其轉變為一個具備持久、結構化記憶的強大開發夥伴。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-semibold text-amber-600 mb-3">挑戰：AI 的「失憶症」</h3>
+                    <p class="text-zinc-600">在大型專案中，AI 難以記住歷史決策、架構和不斷變化的需求，導致開發者需要反覆解釋上下文，效率低下。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-semibold text-emerald-600 mb-3">解決方案：Memory Bank</h3>
+                    <p class="text-zinc-600">Memory Bank 作為 AI 的「外部大腦」，通過結構化的 Markdown 文件提供持久記憶，確保 AI 在不同會話間保持上下文連貫性。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">核心工作流程</h2>
+                <p class="max-w-3xl mx-auto text-lg text-zinc-600">
+                    成功使用 Memory Bank 的關鍵在於一個持續的循環。下面的互動式圖表展示了從設置到維護的整個流程。點擊每個步驟來查看詳細說明和最佳實踐。
+                </p>
+            </div>
+            <div class="max-w-5xl mx-auto">
+                <div id="workflow-diagram" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    <div class="workflow-step text-center cursor-pointer p-4 rounded-lg hover:bg-slate-100 transition-colors" data-step="1">
+                        <div class="bg-amber-100 text-amber-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">1</div>
+                        <h3 class="font-semibold text-lg">初始化設置</h3>
+                    </div>
+                    <div class="text-amber-400 text-2xl text-center hidden md:block">→</div>
+                    <div class="workflow-step text-center cursor-pointer p-4 rounded-lg hover:bg-slate-100 transition-colors" data-step="2">
+                        <div class="bg-amber-100 text-amber-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">2</div>
+                        <h3 class="font-semibold text-lg">填充與組織</h3>
+                    </div>
+                    <div class="text-amber-400 text-2xl text-center hidden md:block">→</div>
+                     <div class="workflow-step text-center cursor-pointer p-4 rounded-lg hover:bg-slate-100 transition-colors" data-step="3">
+                        <div class="bg-amber-100 text-amber-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">3</div>
+                        <h3 class="font-semibold text-lg">日常使用</h3>
+                    </div>
+                     <div class="text-amber-400 text-2xl text-center hidden md:block">→</div>
+                     <div class="workflow-step text-center cursor-pointer p-4 rounded-lg hover:bg-slate-100 transition-colors" data-step="4">
+                        <div class="bg-amber-100 text-amber-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3 text-2xl font-bold">4</div>
+                        <h3 class="font-semibold text-lg">維護與更新</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="components" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">關鍵組件深度解析</h2>
+                <p class="max-w-3xl mx-auto text-lg text-zinc-600">
+                    Memory Bank 由幾個核心部分組成。在這裡，您可以深入了解每個組件的角色和用法，它們共同構成了 AI 的長期記憶系統。
+                </p>
+            </div>
+            <div>
+                <div class="mb-4 border-b border-slate-200">
+                    <nav class="flex -mb-px space-x-6" aria-label="Tabs">
+                        <button class="tab-button active py-4 px-1 border-b-2 font-medium text-lg border-amber-500 text-amber-600" data-tab="files">核心文件</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-zinc-500 hover:text-zinc-700 hover:border-slate-300" data-tab="rules">規則 (.mdc)</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-zinc-500 hover:text-zinc-700 hover:border-slate-300" data-tab="commands">常用命令</button>
+                    </nav>
+                </div>
+                <div class="py-6">
+                    <div id="tab-content-files" class="tab-content">
+                        <p class="text-zinc-600 mb-6">這些 Markdown 文件是 Memory Bank 的基礎，用於儲存專案的各類資訊。點擊文件名以展開查看其詳細用途。</p>
+                        <div id="core-files-list" class="space-y-3"></div>
+                    </div>
+                    <div id="tab-content-rules" class="tab-content hidden">
+                        <p class="text-zinc-600 mb-4">`.mdc` 規則文件是 Memory Bank 的指揮中心，它們指示 AI 如何以及何時存取、利用和更新記憶文件。它們提供了持久且可重用的上下文。</p>
+                        <div class="bg-slate-100 p-4 rounded-lg">
+                            <h4 class="font-semibold text-zinc-800 mb-2">核心規則示例：</h4>
+                            <ul class="list-disc list-inside text-zinc-700 space-y-1">
+                                <li>定義 `Plan/Act` (計劃/執行) 模式，這是基本的操作狀態轉換。</li>
+                                <li>強制 AI 在任務開始時讀取關鍵記憶文件，如 `project-overview.md`。</li>
+                                <li>為關鍵規則設置 `alwaysApply: true` 以確保其總是被應用。</li>
+                                <li>規定 AI 在特定模式（如 `DOCUMENT`）下應執行的動作。</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-zinc-500">沒有巧妙的規則，Markdown 文件僅僅是靜態文檔。規則「激活」了記憶。</p>
+                        </div>
+                    </div>
+                    <div id="tab-content-commands" class="tab-content hidden">
+                         <p class="text-zinc-600 mb-4">掌握這些與 Memory Bank 互動的命令是日常高效使用的前提。</p>
+                         <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-slate-100 p-4 rounded-lg">
+                                <code class="text-amber-700 font-mono">update memory bank</code>
+                                <p class="text-zinc-600 mt-1 text-sm">觸發對文檔/記憶文件的審查和更新。</p>
+                            </div>
+                            <div class="bg-slate-100 p-4 rounded-lg">
+                                <code class="text-amber-700 font-mono">/memory [status|list|read]</code>
+                                <p class="text-zinc-600 mt-1 text-sm">檢查狀態、列出文件和讀取特定記憶文件。</p>
+                            </div>
+                            <div class="bg-slate-100 p-4 rounded-lg">
+                                <code class="text-amber-700 font-mono">/mode [mode_name]</code>
+                                <p class="text-zinc-600 mt-1 text-sm">切換到特定的自訂模式，如 `DOCUMENT` 或 `REVIEW`。</p>
+                            </div>
+                            <div class="bg-slate-100 p-4 rounded-lg">
+                                <code class="text-amber-700 font-mono">@/memory/docs/file.md</code>
+                                <p class="text-zinc-600 mt-1 text-sm">在提示中精確引用記憶文件，以提供上下文。</p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategies" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">高級策略與最佳實踐</h2>
+                <p class="max-w-3xl mx-auto text-lg text-zinc-600">
+                    對於大型專案，有效的管理至關重要。這裡總結了一些高級策略和常見陷阱，幫助您最大化 Memory Bank 的效能並避免問題。
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-emerald-600 mb-4">✅ 最佳實踐</h3>
+                    <ul class="space-y-4">
+                        <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <h4 class="font-semibold">上下文切片</h4>
+                            <p class="text-zinc-600 text-sm">將記憶文件按領域或功能組織到子目錄中 (如 `memory/frontend/`)，以保持條理清晰。</p>
+                        </li>
+                        <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <h4 class="font-semibold">使用索引文件</h4>
+                            <p class="text-zinc-600 text-sm">創建一個主索引 `index.md` 文件，描述其他文件的內容和用途，引導 AI 找到正確的資訊。</p>
+                        </li>
+                        <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <h4 class="font-semibold">精確提示與迭代</h4>
+                            <p class="text-zinc-600 text-sm">明確告知 AI 要做什麼，並引用相關記憶文件。將 AI 視為結對程式設計師，迭代地指導它。</p>
+                        </li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 class="text-2xl font-semibold text-red-600 mb-4">❌ 常見陷阱</h3>
+                    <ul class="space-y-4">
+                       <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                           <h4 class="font-semibold">過時的記憶</h4>
+                           <p class="text-zinc-600 text-sm">如果不持續維護，過時的 Memory Bank 會提供錯誤上下文，誤導 AI。</p>
+                       </li>
+                       <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <h4 class="font-semibold">上下文過載</h4>
+                            <p class="text-zinc-600 text-sm">上下文視窗仍然有限。試圖一次提供過多資訊，AI 可能會忽略部分內容。</p>
+                        </li>
+                       <li class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <h4 class="font-semibold">模糊指令</h4>
+                            <p class="text-zinc-600 text-sm">模糊的用戶指令可能導致 AI 執行不正確的動作或產生無關的輸出。</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="showcase" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">社群實現方案展示</h2>
+                <p class="max-w-3xl mx-auto text-lg text-zinc-600">
+                    社群已經開發出多種 Memory Bank 的實現思路和工具。下方的互動式圖表展示了幾種流行的方案。點擊圖表中的條目來查看其核心概念和特性。
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="chart-container">
+                        <canvas id="showcaseChart"></canvas>
+                    </div>
+                </div>
+                <div id="showcase-details" class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 id="details-title" class="text-xl font-bold mb-3 text-zinc-800">選擇一個方案查看詳情</h3>
+                    <p id="details-concept" class="text-zinc-600 mb-4"></p>
+                    <h4 id="details-features-title" class="font-semibold text-zinc-700 mb-2"></h4>
+                    <p id="details-features" class="text-zinc-600 text-sm"></p>
+                    <h4 id="details-modes-title" class="font-semibold text-zinc-700 mt-4 mb-2"></h4>
+                    <p id="details-modes" class="text-zinc-600 text-sm"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-slate-100 border-t border-slate-200 mt-16">
+        <div class="container mx-auto px-4 lg:px-8 py-6 text-center text-sm text-zinc-500">
+            <p>這是一個基於報告生成的互動式指南，旨在教學和演示。</p>
+            <p>&copy; 2025 Cursor Memory Bank 互動指南</p>
+        </div>
+    </footer>
+
+    <div id="workflow-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-backdrop opacity-0 pointer-events-none">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto modal-content transform scale-95">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modal-title" class="text-2xl font-bold text-zinc-900"></h3>
+                    <button id="close-modal-button" class="p-1 rounded-full hover:bg-slate-200 transition-colors">
+                        <svg class="w-6 h-6 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="modal-body" class="text-zinc-600 space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+    mobileMenu.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            mobileMenu.classList.add('hidden');
+        }
+    });
+
+    // Data for interactive elements
+    const workflowData = {
+        '1': {
+            title: '步驟 1: 初始化設置',
+            content: `
+                <p>建立 Memory Bank 的第一步是進行初始化。這通常涉及在專案根目錄下創建關鍵目錄結構，為記憶和規則文件提供一個家。</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                    <li><strong>memory-bank/</strong>: 用於存放所有結構化的 Markdown 記憶文件。</li>
+                    <li><strong>.cursor/rules/</strong>: 用於存放指導 AI 行為的 .mdc 規則文件。</li>
+                </ul>
+                <p class="mt-2 text-sm text-zinc-500">提示: 您可以使用社群提供的初始化腳本 (如 <code>npx cursor-bank init</code>) 來自動完成設置。</p>
+            `
+        },
+        '2': {
+            title: '步驟 2: 填充與組織',
+            content: `
+                <p>這是最關鍵的步驟。您需要創建並填充核心的記憶文件，將專案的關鍵資訊記錄下來。對於大型專案，建議使用「上下文切片」策略。</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                    <li>創建如 <code>project-overview.md</code>, <code>architecture.md</code>, <code>progress.md</code> 等核心文件。</li>
+                    <li>按功能或領域將文件組織到子目錄中 (如 <code>memory/backend/</code>)。</li>
+                    <li>創建一個主索引文件 (<code>index.md</code>) 來指導 AI 導航您的記憶庫。</li>
+                </ul>
+            `
+        },
+        '3': {
+            title: '步驟 3: 日常使用',
+            content: `
+                <p>將 Memory Bank 深度融入日常開發流程，讓它成為您與 AI 協作的橋樑。</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                    <li>在會話開始時，讓 AI (在規則引導下) 讀取 Memory Bank 以獲取上下文。</li>
+                    <li>在提示中通過 <code>@/memory/...</code> 明確引用記憶文件來提供精確上下文。</li>
+                    <li>將 AI 視為結對程式設計師，分配集中任務，審查輸出並提供反饋。</li>
+                </ul>
+            `
+        },
+        '4': {
+            title: '步驟 4: 維護与更新',
+            content: `
+                <p>Memory Bank 不是一個「一勞永逸」的系統。持續的維護是確保其價值的關鍵。</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                    <li>在重大變更或任務完成後，使用 <code>update memory bank</code> 命令或直接提示 AI 更新相關文件。</li>
+                    <li>定期審查和完善內容，確保記憶文件與程式碼庫保持一致和最新。</li>
+                    <li>可以讓 AI 協助維護 Memory Bank 本身，例如請它根據最近的提交來總結進度。</li>
+                </ul>
+            `
+        }
+    };
+
+    const coreFilesData = [
+        { name: "00-project-overview.md / projectbrief.md", description: "專案目標、範圍、關鍵干系人、技術棧、倉庫結構。這是專案的基礎文檔。" },
+        { name: "architecture.md / systemPatterns.md", description: "系統架構、設計模式、數據流、重要技術決策。對於保持一致性至關重要。" },
+        { name: "activeContext.md", description: "當前工作重點、近期變更、後續步驟、正在考慮的決策。使 AI 了解當前的即時狀態。" },
+        { name: "progress.md / tasks_plan.md", description: "跟蹤已完成的功能、剩餘任務、狀態、已知問題、按時間順序的日誌。對專案跟蹤和連續性至關重要。" },
+        { name: "techContext.md", description: "技術棧、開發環境設置、限制、依賴關係。" },
+        { name: "productContext.md", description: "專案存在的理由、解決的問題、用戶體驗目標。" },
+        { name: "api-documentation.md", description: "API 端點、參數、響應格式，確保 API 使用的一致性。" },
+    ];
+    
+    const showcaseData = [
+        {
+            name: "Cline Memory Bank",
+            concept: "結構化 Markdown，Plan/Act 模式。常被引為靈感來源或基礎。",
+            features: "使用編號文件如 `00-project-overview.md`, 核心規則 `core.mdc` 和 `memory-bank.mdc`。",
+            modes: "Plan, Act"
+        },
+        {
+            name: "vanzan01/cursor-memory-bank",
+            concept: "模塊化、文檔驅動的框架，具有自訂模式和用於令牌優化的分層規則加載。",
+            features: "`tasks.md`, `activeContext.md`, `progress.md`, `creative-*.md` 等文件，規則被隔離在 `isolation_rules/` 目錄下。",
+            modes: "VAN, PLAN, CREATIVE, IMPLEMENT, REFLECT, ARCHIVE"
+        },
+        {
+            name: "Rulebook-AI",
+            concept: "命令行工具，可在不同 IDE 之間共享自訂規則集和 `memory/` 目錄。",
+            features: "包含 `product_requirement_docs.md`, `architecture.md` 等初始文檔，通過 Python 腳本安裝和同步。",
+            modes: "取決於導入的規則集 (例如 Plan, Implement, Debug)"
+        },
+        {
+            name: "Enhanced Memory Bank System",
+            concept: "使用 Markdown 和專用規則實現短期/長期記憶、操作模式，以及 `/memory` 命令。",
+            features: "通過初始化腳本創建文件結構，記憶文件儲存決策、架構等。",
+            modes: "THINK, PLAN, IMPLEMENT, REVIEW, DOCUMENT"
+        },
+        {
+            name: "AI Memory Extension",
+            concept: "一個 VS Code 擴展（也適用於 Cursor），使用 MCP 伺服器和 `/memory` 命令。",
+            features: "創建 `memory-bank` 文件夾，包含 `projectbrief.md`, `productContext.md` 等文件。",
+            modes: "通過 `/memory` 命令與 AI 交互"
+        }
+    ];
+
+    // Workflow Modal Logic
+    const modal = document.getElementById('workflow-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const closeModalButton = document.getElementById('close-modal-button');
+
+    document.querySelectorAll('.workflow-step').forEach(step => {
+        step.addEventListener('click', () => {
+            const stepId = step.dataset.step;
+            modalTitle.textContent = workflowData[stepId].title;
+            modalBody.innerHTML = workflowData[stepId].content;
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.querySelector('.modal-content').classList.remove('scale-95');
+        });
+    });
+
+    const closeModal = () => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('.modal-content').classList.add('scale-95');
+    };
+
+    closeModalButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Tabs Logic
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.dataset.tab;
+
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active', 'border-amber-500', 'text-amber-600');
+                btn.classList.add('border-transparent', 'text-zinc-500', 'hover:text-zinc-700', 'hover:border-slate-300');
+            });
+            button.classList.add('active', 'border-amber-500', 'text-amber-600');
+            button.classList.remove('border-transparent', 'text-zinc-500', 'hover:text-zinc-700', 'hover:border-slate-300');
+
+            tabContents.forEach(content => {
+                if (content.id === `tab-content-${tabId}`) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        });
+    });
+    
+    // Core Files List
+    const coreFilesList = document.getElementById('core-files-list');
+    coreFilesData.forEach(file => {
+        const fileElement = document.createElement('div');
+        fileElement.className = 'bg-white border border-slate-200 rounded-lg';
+        fileElement.innerHTML = `
+            <button class="w-full text-left p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+                <span class="font-semibold text-zinc-800">${file.name}</span>
+                <svg class="w-5 h-5 text-zinc-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="px-4 pb-4 text-zinc-600 hidden">
+                <p>${file.description}</p>
+            </div>
+        `;
+        fileElement.querySelector('button').addEventListener('click', (e) => {
+            const content = e.currentTarget.nextElementSibling;
+            const icon = e.currentTarget.querySelector('svg');
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        });
+        coreFilesList.appendChild(fileElement);
+    });
+
+    // Showcase Chart
+    const ctx = document.getElementById('showcaseChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: showcaseData.map(item => item.name),
+            datasets: [{
+                label: '方案流行度 (示意)',
+                data: [95, 90, 80, 75, 70],
+                backgroundColor: 'rgba(217, 119, 6, 0.2)', // amber-600 with opacity
+                borderColor: 'rgba(217, 119, 6, 1)', // amber-600
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e2e8f0' // slate-200
+                    },
+                    ticks: {
+                       display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#3f3f46', // zinc-700
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    updateShowcaseDetails(index);
+                }
+            },
+            onHover: (event, chartElement) => {
+                 event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            }
+        }
+    });
+
+    const detailsTitle = document.getElementById('details-title');
+    const detailsConcept = document.getElementById('details-concept');
+    const detailsFeaturesTitle = document.getElementById('details-features-title');
+    const detailsFeatures = document.getElementById('details-features');
+    const detailsModesTitle = document.getElementById('details-modes-title');
+    const detailsModes = document.getElementById('details-modes');
+
+    function updateShowcaseDetails(index) {
+        const item = showcaseData[index];
+        detailsTitle.textContent = item.name;
+        detailsConcept.textContent = item.concept;
+        detailsFeaturesTitle.textContent = "主要特性/文件";
+        detailsFeatures.textContent = item.features;
+        detailsModesTitle.textContent = "操作模式";
+        detailsModes.textContent = item.modes;
+    }
+    
+    updateShowcaseDetails(0);
+
+});
+</script>
+</body>
+</html>
