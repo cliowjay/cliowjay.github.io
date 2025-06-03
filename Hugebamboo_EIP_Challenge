@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巨竹電子表單簽核系統 - 系統概覽</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; /* Added Noto Sans TC for better CJK character rendering */
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar for a cleaner look (optional) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .content-section {
+            padding-top: 4rem; /* Adjust based on nav height if fixed */
+            margin-bottom: 2rem;
+        }
+        /* Simple card styling */
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem; /* 24px */
+            margin-bottom: 1.5rem; /* 24px */
+        }
+        .card h3 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            margin-bottom: 0.75rem; /* 12px */
+            color: #1f2937; /* gray-800 */
+        }
+        .card p, .card ul {
+            color: #4b5563; /* gray-600 */
+            font-size: 0.95rem; /* ~15px for better readability */
+            line-height: 1.6;
+        }
+        .card ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+        .card ul li {
+            margin-bottom: 0.5rem; /* 8px */
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">巨竹電子表單簽核系統</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="#introduction" class="text-slate-600 hover:text-indigo-600 transition-colors">專案簡介</a></li>
+                    <li><a href="#features" class="text-slate-600 hover:text-indigo-600 transition-colors">系統設計</a></li>
+                    <li><a href="#challenges" class="text-slate-600 hover:text-indigo-600 transition-colors">挑戰與方案</a></li>
+                    <li><a href="#hurdles" class="text-slate-600 hover:text-indigo-600 transition-colors">開發困境</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+
+        <section id="introduction" class="content-section min-h-screen flex flex-col justify-center">
+            <div class="text-center">
+                <h2 class="text-4xl font-bold mb-6 text-slate-700">專案簡介</h2>
+                <div class="max-w-2xl mx-auto card">
+                    <h3>核心目標</h3>
+                    <p>「巨竹電子表單簽核系統」旨在建立一個高效、無紙化的電子表單處理與簽核平台，以優化現有工作流程，提升整體行政效率及數據管理的準確性。</p>
+                    <p class="mt-2">本系統致力於簡化申請、審批及追蹤流程，讓員工操作更便捷，管理更透明。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="content-section">
+            <h2 class="text-3xl font-bold mb-8 text-center text-slate-700">系統設計與功能</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3><span class="tag">設計</span>響應式網頁設計</h3>
+                    <p>系統介面將採用響應式網頁設計 (RWD)，確保在各種裝置（桌上型電腦、筆記型電腦、平板電腦及智慧型手機）上均能提供一致且最佳化的使用者瀏覽與操作體驗。網頁內容會根據螢幕尺寸自動調整佈局。</p>
+                </div>
+                <div class="card">
+                    <h3><span class="tag">安全</span>數據安全策略</h3>
+                    <p>所有電子表單的內容與相關數據將儲存於公司內部網路的專用資料庫中，有效防止外部網路的直接存取。僅會針對特定外部服務（如Zalo通知）開放必要且經過安全驗證的 API 接口，最大限度降低資訊安全風險。</p>
+                </div>
+                <div class="card">
+                    <h3><span class="tag">整合</span>EIP 系統整合</h3>
+                    <p>本系統將與現有的企業資訊入口網站 (EIP) 緊密整合：</p>
+                    <ul class="list-disc">
+                        <li>行政員工可透過 EIP 網站管理員工日常資料，如考勤薪資計算、請假申請、加班提報、設備報修等。</li>
+                        <li>未來，所有單位的各類申請表簽核流程，都將統一在 EIP 平台上進行，實現一站式管理。</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3><span class="tag">流程</span>電子簽核流程</h3>
+                    <p>電子簽核流程的設計概念如下：</p>
+                    <ul class="list-disc">
+                        <li>將一張申請表的送簽過程視為一條「線」，由申請者發起。</li>
+                        <li>流程中的每一位負責審核和簽名的主管或員工，均視為一個「節點」。</li>
+                        <li>採用 <strong class="text-indigo-600">n8n</strong> 自動化流程工具進行簽核流程的開發與實現。此工具已於去年底成功部署並完成初步試驗，能有效支援複雜流程的客製化需求。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="content-section">
+            <h2 class="text-3xl font-bold mb-8 text-center text-slate-700">簽核方式的挑戰與解決方案</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card bg-red-50 border border-red-200">
+                    <h3 class="text-red-700">EIP 網頁簽核的侷限</h3>
+                    <ul class="list-disc text-red-600">
+                        <li><strong>通知易遺漏：</strong> 網頁長時間閒置後，可能因瀏覽器或手機系統的省電機制而被登出或忽略，導致簽核通知無法即時送達。</li>
+                        <li><strong>推廣困難：</strong> 公司內部已有多個資訊系統，要求員工僅為簽核而登入EIP，將增加其操作負擔與困擾，不利於系統推廣。</li>
+                        <li><strong>開發與維護成本高：</strong> 網頁推播通知的效率和即時性不如原生 App。若獨立開發 App，則需投入額外的時間與金錢成本（尤其 Apple iOS 平台需要購買開發者授權）。</li>
+                    </ul>
+                </div>
+                <div class="card bg-green-50 border border-green-200">
+                    <h3 class="text-green-700">Zalo 整合方案 (建議方案)</h3>
+                    <p class="text-green-600">為解決 EIP 網頁簽核的不足，提升通知即時性與使用便利性，規劃整合 Zalo 即時通訊平台：</p>
+                    <ul class="list-disc text-green-600">
+                        <li><strong>帳號與設定：</strong> 已在 Zalo Developers 平台成功建立開發者帳號，並完成基礎串接設定。</li>
+                        <li><strong>使用者授權：</strong> 員工可透過掃描 QR Code 或點擊特定連結，在 Zalo App 中完成授權，允許系統存取其 Zalo User ID。</li>
+                        <li><strong>即時通知與操作：</strong> 取得授權後，系統可利用 Zalo User ID，透過 Zalo App 向使用者發送即時的簽核通知。未來亦可考慮開發 Zalo Mini App，讓使用者直接在 Zalo 內完成部分簽核操作。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="hurdles" class="content-section">
+            <h2 class="text-3xl font-bold mb-8 text-center text-slate-700">當前開發困境</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6"> 
+                <div class="card">
+                    <h3><span class="tag bg-amber-100 text-amber-800">挑戰</span>人力資源短缺</h3>
+                    <p>目前開發團隊（含專案負責人）僅有兩名成員，需同時負責多方面的工作：</p>
+                    <ul class="list-disc">
+                        <li><strong>前端開發與維護：</strong>EIP 網頁、電子表單網頁、溫濕度監控 Dashboard 網頁。</li>
+                        <li><strong>後端開發與管理：</strong>API 服務開發、資料庫設計與管理、伺服器維護、應用程式部署。</li>
+                        <li><strong>硬體與第三方服務串接：</strong>如人臉辨識設備等。</li>
+                    </ul>
+                    <p class="mt-2">由於 EIP 人事相關功能正處於與使用者反覆確認及修改階段，幾乎所有開發精力均集中於此，對其他專案（包括本電子表單系統）的進度造成顯著影響。亟需討論未來工作分配及人員編制的擴充計畫。</p>
+                </div>
+                <div class="card">
+                    <h3><span class="tag bg-amber-100 text-amber-800">挑戰</span>資源投入方向偏差</h3>
+                    <p>目前開發資源過度集中於 EIP 人事功能的修改，主要原因如下：</p>
+                    <ul class="list-disc">
+                        <li>人事部門代表（阿好）在需求溝通上，其視野較為侷限，未能充分理解 EIP 系統的長遠目標。</li>
+                        <li>其意見逐漸將網頁開發導向模仿舊有「阿威系統」的操作模式，例如要求將考勤結算結果表設計成類似 Excel 的複雜格式。</li>
+                    </ul>
+                    <p class="mt-2">此現象可能導致開發成果偏離 EIP 系統的初衷與現代化設計理念，影響系統的整體效益與使用者體驗。需加強溝通，確保開發方向符合專案的戰略目標。</p>
+                </div>
+                <div class="card">
+                    <h3><span class="tag bg-rose-100 text-rose-800">挑戰</span>缺乏主導行政SOP的PM</h3>
+                    <p>目前開發流程是基於使用者過去的經驗和體驗，IT團隊在不偏離原則的情況下配合修改。每週召開的人事系統會議，持續針對使用者提出的便利性功能進行優化，卻缺乏一位能夠主導標準作業流程 (SOP) 調整的專案經理 (PM)。</p>
+                    <p class="mt-2">有想法與能力的成員缺乏實權主導方向，導致功能開發如同無頭蒼蠅：解決一個問題後衍生出新的問題，修復了A與B問題後又發現更多未預期的狀況，嚴重影響開發效率與系統穩定性。</p>
+                </div>
+                <div class="card">
+                    <h3><span class="tag bg-sky-100 text-sky-800">挑戰</span>整合Zalo開發遇到的問題</h3>
+                    <p>無論是透過 Zalo 發送通知及訊息至用戶端，或是開發 Zalo Mini Apps，均需要先開立一個經過驗證的「巨竹公司Zalo官方帳號」(Zalo Official Account, OA)。</p>
+                    <p class="mt-2">此官方帳號的申請流程繁瑣，需要提交多項證明文件。詳細的申請規定與流程可參考 <a href="https://oa.zalo.me/home/documents/policy/quy-dinh-ve-dang-ky-va-su-dung-tai-khoan-zalo-official-account-doanh-nghiep_3002576019495799852?gidzl=HEJx1vDanIf7__m3aNBDBq7my06DSSefLw7x0jOcboi4fFm0r2IN9bBrh5g1Sv5y1QIW1Z3YjGWUac32A0" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">Zalo官方文件</a>。</p>
+                    <p class="mt-2">完成帳號申請與驗證後，還需進一步評估是否需要訂閱 Zalo 提供的每月付費服務項目，以滿足系統的完整功能需求。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 text-center py-8 mt-12">
+        <p>&copy; <span id="currentYear"></span> 巨竹公司內部系統. All rights reserved.</p>
+        <p class="text-sm mt-1">此頁面為系統概覽，詳細功能以實際系統為準。</p>
+    </footer>
+
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Calculate offset if header is fixed
+                    const headerOffset = document.querySelector('header').offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Simple animation for cards on scroll (optional)
+        const cards = document.querySelectorAll('.card');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeIn'); // Requires defining this animation
+                }
+            });
+        }, { threshold: 0.1 });
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</body>
+</html>
