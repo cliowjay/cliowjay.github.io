@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Visualization & Content Choices: 
+        - Report Info: Zalo Core Components -> Goal: Inform & Organize -> Viz/Method: Interactive Diagram (HTML/CSS/JS) -> Interaction: Hover to reveal details -> Justification: Visually represents the ecosystem structure, more engaging than a bulleted list.
+        - Report Info: ZNS vs. OA API Comparison -> Goal: Compare -> Viz/Method: Side-by-side layout (HTML/Tailwind) & a simple Bar Chart (Chart.js) -> Interaction: Clickable tabs for detail sections (Use Case, API Call). -> Justification: Direct comparison facilitates decision-making for developers. The chart provides a quick visual summary.
+        - Report Info: Mini App Development Lifecycle -> Goal: Organize/Show Process -> Viz/Method: Clickable Flowchart (HTML/Tailwind/JS) -> Interaction: Click a step to expand details. -> Justification: Transforms a linear process description into an intuitive, interactive journey, making it easier to follow.
+        - Report Info: Checklists (OA Setup, Mini App Submission) -> Goal: Organize -> Viz/Method: Interactive Lists (HTML/JS) -> Interaction: Click to expand/reveal notes. -> Justification: Cleaner UI than a static table, allows users to focus on one item at a time.
+        - Library/Method: All visualizations and interactions will use HTML, Tailwind CSS, and vanilla JavaScript. Charting will be done exclusively with Chart.js on a <canvas> element. No SVG or Mermaid will be used, as per the constraints. -->
+    <title>互動式 Zalo 整合指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA;
+        }
+        .tab-active {
+            border-color: #3B82F6;
+            color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .flowchart-step {
+            transition: all 0.3s ease;
+        }
+        .flowchart-step.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border-color: #3B82F6;
+        }
+        .flowchart-line::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1.5rem;
+        }
+        .flowchart-step:last-child .flowchart-line::after {
+            content: '';
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">互動式 Zalo 整合指南</h1>
+            <p class="mt-2 text-lg text-slate-600">一個將複雜技術報告轉化為易於探索的體驗</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8">
+            <nav class="flex flex-wrap justify-center gap-2 md:gap-4">
+                <button data-tab="intro" class="tab-btn tab-active text-sm md:text-base px-4 py-2 font-semibold border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">🚀 引言</button>
+                <button data-tab="foundation" class="tab-btn text-sm md:text-base px-4 py-2 font-semibold border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">🛠️ 基礎設定</button>
+                <button data-tab="notifications" class="tab-btn text-sm md:text-base px-4 py-2 font-semibold border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">🔔 主動通知</button>
+                <button data-tab="miniapp" class="tab-btn text-sm md:text-base px-4 py-2 font-semibold border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">📱 迷你應用程式</button>
+                <button data-tab="bestpractices" class="tab-btn text-sm md:text-base px-4 py-2 font-semibold border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">✅ 最佳實務</button>
+            </nav>
+        </div>
+        
+        <main id="main-content">
+            <section id="intro" class="content-section active p-4 md:p-8 bg-white rounded-lg shadow-md animate-fade-in">
+                <h2 class="text-2xl font-bold mb-4 text-slate-800">歡迎來到 Zalo 整合工作坊</h2>
+                <p class="mb-6 text-slate-600">本指南旨在將<span class="font-semibold text-blue-600">「整合 Zalo 以實現主動客戶通知和迷你應用程式服務」</span>報告中的複雜流程，拆解為清晰、可互動的模組。Zalo 作為越南領先的通訊平台，為企業提供了無與倫比的機會。您可以透過此工具，快速掌握整合 Zalo 所需的核心知識與步驟，無論您的目標是發送交易通知，還是打造一個無縫的迷你應用程式體驗。</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <p class="text-4xl font-bold text-blue-600">7,400萬+</p>
+                        <p class="mt-2 text-slate-700 font-semibold">活躍用戶</p>
+                    </div>
+                    <div class="bg-emerald-50 p-6 rounded-lg">
+                        <p class="text-4xl font-bold text-emerald-600">17億+</p>
+                        <p class="mt-2 text-slate-700 font-semibold">日均訊息量</p>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold mb-4 text-slate-800">核心組件概覽</h3>
+                    <p class="mb-4 text-slate-600">Zalo 生態系統由幾個關鍵部分組成，它們共同為企業提供強大的客戶互動能力。將滑鼠懸停在下方卡片上以了解更多資訊。</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="component-card group border border-gray-200 p-4 rounded-lg hover:shadow-lg hover:border-blue-400 transition cursor-pointer">
+                            <h4 class="font-bold text-lg text-slate-700">官方帳號 (OA)</h4>
+                            <p class="text-sm text-slate-500 mt-1">企業在 Zalo 上的官方門面，用於互動與資訊發布。</p>
+                        </div>
+                        <div class="component-card group border border-gray-200 p-4 rounded-lg hover:shadow-lg hover:border-emerald-400 transition cursor-pointer">
+                            <h4 class="font-bold text-lg text-slate-700">通知服務 (ZNS)</h4>
+                            <p class="text-sm text-slate-500 mt-1">專為發送交易性通知（如訂單狀態、OTP）而設的高可靠性服務。</p>
+                        </div>
+                        <div class="component-card group border border-gray-200 p-4 rounded-lg hover:shadow-lg hover:border-purple-400 transition cursor-pointer">
+                            <h4 class="font-bold text-lg text-slate-700">OA API</h4>
+                            <p class="text-sm text-slate-500 mt-1">提供更廣泛的通訊能力，用於客戶支援、聊天機器人等。</p>
+                        </div>
+                        <div class="component-card group border border-gray-200 p-4 rounded-lg hover:shadow-lg hover:border-amber-400 transition cursor-pointer">
+                            <h4 class="font-bold text-lg text-slate-700">迷你應用程式</h4>
+                            <p class="text-sm text-slate-500 mt-1">無需安裝，直接在 Zalo 內運行的輕量級應用程式。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="foundation" class="content-section p-4 md:p-8 bg-white rounded-lg shadow-md">
+                 <h2 class="text-2xl font-bold mb-4 text-slate-800">基礎設定：建立您的 Zalo 業務基礎</h2>
+                 <p class="mb-6 text-slate-600">在開始發送通知或開發應用之前，您必須先建立並驗證您的 Zalo 官方帳號 (OA)，並註冊一個開發者應用程式。這是所有後續整合工作的起點，確保您的企業在 Zalo 上擁有一個可信的官方身份和必要的技術憑證。</p>
+                 <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">1. 建立並驗證 Zalo 官方帳號 (OA)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">這是您在 Zalo 上的官方品牌身份。驗證過程至關重要，最多可能需要 7 個工作日。</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><span class="font-semibold">帳號類型：</span> 對於多數企業，應選擇「企業」類型。</li>
+                            <li><span class="font-semibold">命名規則：</span> 名稱需遵循 `[前綴] + 主要名稱 + [後綴]` 格式，且主要名稱需與營業執照或商標相符。</li>
+                            <li><span class="font-semibold">必要文件：</span> 準備好您的營業執照和法人代表的身份證明文件以供驗證。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">2. 註冊開發者應用程式</h3>
+                        <p class="text-slate-600 mt-2 mb-4">此應用程式是您內部系統與 Zalo API 溝通的橋樑。您將在此獲取 `App ID` 和 `App Secret Key`。</p>
+                         <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><span class="font-semibold">開發者入口網站：</span> 前往 `developers.zalo.me` 進行註冊。</li>
+                            <li><span class="font-semibold">憑證安全：</span> `App Secret Key` 是機密訊息，必須安全地儲存在伺服器端，絕不能洩漏。</li>
+                            <li><span class="font-semibold">連結 OA：</span> 將您建立的開發者應用程式與您的 OA 帳號連結，以授予必要的互動權限。</li>
+                        </ul>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="notifications" class="content-section p-4 md:p-8 bg-white rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 text-slate-800">主動通知：ZNS vs. OA API</h2>
+                <p class="mb-6 text-slate-600">Zalo 提供了兩種主要的方式來向用戶發送訊息：Zalo 通知服務 (ZNS) 和官方帳號 API (OA API)。了解它們的區別對於選擇正確的工具至關重要。ZNS 專為高優先級的交易通知而設計，而 OA API 則適用於更廣泛的客戶互動。</p>
+                
+                <div class="chart-container mb-8">
+                    <canvas id="notificationApiChart"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border border-emerald-200 bg-emerald-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-emerald-800">Zalo 通知服務 (ZNS)</h3>
+                        <p class="text-sm mt-1 text-emerald-700">高可靠性的交易通知</p>
+                        <ul class="mt-4 space-y-3 text-emerald-900">
+                            <li><span class="font-semibold">✔️ 主要用途：</span>OTP、訂單確認、出貨通知、預約提醒。</li>
+                            <li><span class="font-semibold">✔️ 目標對象：</span>任何提供手機號碼的用戶（無需關注 OA）。</li>
+                            <li><span class="font-semibold">✔️ 核心要求：</span>訊息內容必須基於<span class="font-bold">預先批准的範本</span>，且嚴禁廣告。</li>
+                            <li><span class="font-semibold">✔️ 成本：</span>按成功發送的訊息計費，成本效益高。</li>
+                        </ul>
+                    </div>
+                    <div class="border border-purple-200 bg-purple-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-purple-800">官方帳號 API (OA API)</h3>
+                        <p class="text-sm mt-1 text-purple-700">靈活的客戶互動</p>
+                         <ul class="mt-4 space-y-3 text-purple-900">
+                            <li><span class="font-semibold">✔️ 主要用途：</span>客戶支援、聊天機器人、內容推播、行銷活動。</li>
+                            <li><span class="font-semibold">✔️ 目標對象：</span>僅限於已關注 OA 或主動發起對話的用戶。</li>
+                            <li><span class="font-semibold">✔️ 核心要求：</span>溝通更靈活，可發送文字、圖片、帶按鈕的互動訊息。</li>
+                            <li><span class="font-semibold">✔️ 成本：</span>通常在一定時間窗口內回覆用戶是免費的，主動推播可能有限制或成本。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="miniapp" class="content-section p-4 md:p-8 bg-white rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 text-slate-800">Zalo 迷你應用程式開發生命週期</h2>
+                 <p class="mb-8 text-slate-600">Zalo 迷你應用程式是一種無需安裝、直接在 Zalo 內運行的輕量級應用，為提供服務和電子商務提供了絕佳途徑。其開發遵循一個結構化的生命週期，從概念設計到最終發佈。點擊下方流程中的每一步，以了解其核心任務和所需工具。</p>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div id="step-1" class="flowchart-step active relative cursor-pointer border-2 border-blue-500 bg-white p-4 rounded-lg shadow-lg w-full md:w-48 text-center">
+                        <h4 class="font-bold">1. 註冊與設定</h4>
+                        <div class="flowchart-line hidden md:block"></div>
+                    </div>
+                    <div id="step-2" class="flowchart-step relative cursor-pointer border-2 border-gray-300 bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center">
+                        <h4 class="font-bold">2. 開發</h4>
+                        <div class="flowchart-line hidden md:block"></div>
+                    </div>
+                    <div id="step-3" class="flowchart-step relative cursor-pointer border-2 border-gray-300 bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center">
+                        <h4 class="font-bold">3. 測試與偵錯</h4>
+                        <div class="flowchart-line hidden md:block"></div>
+                    </div>
+                    <div id="step-4" class="flowchart-step relative cursor-pointer border-2 border-gray-300 bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center">
+                        <h4 class="font-bold">4. 部署與審核</h4>
+                    </div>
+                </div>
+
+                <div id="step-details" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 min-h-[200px]">
+                    </div>
+            </section>
+
+            <section id="bestpractices" class="content-section p-4 md:p-8 bg-white rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 text-slate-800">關鍵考量與最佳實務</h2>
+                <p class="mb-6 text-slate-600">成功的整合不僅僅是技術實現，更需要遵守平台政策、保護用戶隱私並確保系統的穩健性。以下是您在整個整合過程中應始終牢記的核心原則。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-lg flex items-start">
+                        <span class="text-2xl mr-4">🛡️</span>
+                        <div>
+                            <h4 class="font-bold text-lg">安全第一</h4>
+                            <p class="text-slate-600 mt-1">妥善保管您的 `App Secret Key` 和存取權杖。所有 API 通訊都應使用 HTTPS。驗證 Webhook 請求的來源以防止偽造。</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg flex items-start">
+                        <span class="text-2xl mr-4">🔒</span>
+                        <div>
+                            <h4 class="font-bold text-lg">用戶同意與隱私</h4>
+                            <p class="text-slate-600 mt-1">明確獲取用戶同意。在迷你應用程式中請求敏感權限時，需清晰說明原因。提供易於存取的隱私政策。</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg flex items-start">
+                        <span class="text-2xl mr-4">📜</span>
+                        <div>
+                            <h4 class="font-bold text-lg">遵守 Zalo 政策</h4>
+                            <p class="text-slate-600 mt-1">嚴格遵守 ZNS 範本的內容指南（禁止廣告）和迷你應用程式的審核標準。濫用平台可能導致服務被中止。</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg flex items-start">
+                        <span class="text-2xl mr-4">⚙️</span>
+                        <div>
+                            <h4 class="font-bold text-lg">穩健的錯誤處理</h4>
+                            <p class="text-slate-600 mt-1">您的系統必須能夠自動處理存取權杖過期的情況，並使用 `Refresh Token` 重新獲取。為所有 API 呼叫實作重試和日誌記錄機制。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.content-section');
+            const mainContent = document.getElementById('main-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+
+                    tabs.forEach(t => t.classList.remove('tab-active'));
+                    tab.classList.add('tab-active');
+
+                    sections.forEach(s => s.classList.remove('active'));
+                    const activeSection = document.getElementById(target);
+                    activeSection.classList.add('active');
+
+                    if (target === 'notifications') {
+                        renderNotificationChart();
+                    }
+                    if (target === 'miniapp') {
+                        handleMiniAppFlowchart('step-1');
+                    }
+                });
+            });
+
+            let notificationChartInstance = null;
+            function renderNotificationChart() {
+                if (notificationChartInstance) {
+                    notificationChartInstance.destroy();
+                }
+                const ctx = document.getElementById('notificationApiChart').getContext('2d');
+                notificationChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['目標廣度', '訊息靈活性', '互動性', '發送成本'],
+                        datasets: [{
+                            label: 'ZNS (通知服務)',
+                            data: [9, 3, 2, 7],
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: 'OA API (官方帳號)',
+                            data: [5, 8, 8, 5],
+                            backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        if (value === 0) return '低';
+                                        if (value === 5) return '中';
+                                        if (value === 10) return '高';
+                                        return null;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'ZNS vs OA API 特性比較 (示意評分)',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += `評分 ${context.parsed.y}/10`;
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const miniAppSteps = document.querySelectorAll('.flowchart-step');
+            const stepDetailsContainer = document.getElementById('step-details');
+            
+            const stepDetailsContent = {
+                'step-1': {
+                    title: '1. 註冊與設定',
+                    content: '此階段是所有工作的基礎。您需要在 `developers.zalo.me` 註冊一個開發者應用程式以獲取 `App ID`，並在 `mini.zalo.me` 上建立一個迷你應用程式實例以獲取 `Zalo Mini App ID`。這兩個 ID 都需要在您的開發環境中進行配置。'
+                },
+                'step-2': {
+                    title: '2. 開發',
+                    content: '使用標準網頁技術 (HTML, CSS, JavaScript) 進行開發。強烈建議使用 <span class="font-semibold">Zalo Mini App Extension for VS Code</span>，它可以幫助您初始化專案、使用 Zalo 的 UI 框架 (ZaUI)，並利用豐富的平台 API（如支付、地理位置、用戶資訊等）。'
+                },
+                'step-3': {
+                    title: '3. 測試與偵錯',
+                    content: 'VS Code 擴充功能支援熱重載，讓您可以在 Zalo 應用程式中即時預覽變更。您還可以使用 Chrome/Edge 開發者工具進行斷點偵錯、主控台檢查等，以確保應用程式的穩定性和功能正確性。'
+                },
+                'step-4': {
+                    title: '4. 部署與審核',
+                    content: '開發完成後，您可以將應用程式打包並部署為「測試」版本。此版本將提交給 Zalo 進行審核。Zalo 會根據 UI/UX、功能穩定性、API 使用目的和品牌一致性等標準進行評估。通過後，您便可以將其正式發佈給所有 Zalo 用戶。'
+                }
+            };
+            
+            function handleMiniAppFlowchart(stepId) {
+                miniAppSteps.forEach(s => s.classList.remove('active', 'border-blue-500', 'shadow-lg'));
+                miniAppSteps.forEach(s => s.classList.add('border-gray-300', 'shadow-md'));
+                
+                const activeStep = document.getElementById(stepId);
+                activeStep.classList.add('active', 'border-blue-500', 'shadow-lg');
+                activeStep.classList.remove('border-gray-300', 'shadow-md');
+
+                const details = stepDetailsContent[stepId];
+                stepDetailsContainer.innerHTML = `
+                    <h4 class="text-lg font-bold text-slate-800 mb-2">${details.title}</h4>
+                    <p class="text-slate-600">${details.content}</p>
+                `;
+            }
+
+            miniAppSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    handleMiniAppFlowchart(step.id);
+                });
+            });
+
+            // Initial load
+            handleMiniAppFlowchart('step-1');
+        });
+    </script>
+</body>
+</html>
