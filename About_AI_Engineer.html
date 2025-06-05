@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 工程師深度解析儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a sticky top navigation bar for easy access to five thematic sections: '總覽 (Overview)', '薪資行情 (Salary Insights)', '技能對比 (Skill Comparison)', '知識基石 (Knowledge Base)', and '轉型路徑 (Transition Path)'. This structure transforms the linear report into an exploratory dashboard, allowing users (e.g., students, career changers, recruiters) to directly access the information most relevant to them. The flow is designed to be non-linear, encouraging exploration through interactive elements like charts and clickable cards, which makes the dense information more digestible and engaging than a long-scroll document. -->
+    <!-- Visualization & Content Choices: 
+        1. Salary Data: Report Info -> Global & Taiwan Salaries (Table 1). Goal -> Compare. Viz -> Interactive Bar Chart. Interaction -> Buttons to switch between 'Average' and 'Senior' salary views. Justification -> Bar charts are ideal for comparing salary figures across countries. Interactivity prevents information overload and allows user-driven exploration. Library -> Chart.js.
+        2. AI vs. SWE Skills: Report Info -> Comparison of roles (Table 2). Goal -> Compare/Organize. Viz -> Two-column interactive layout with icons. Interaction -> Clickable tabs to reveal different comparison facets (Core Focus, Skills, Methodology). Justification -> More dynamic and visually scannable than a static table, enhancing comprehension. Method -> HTML/Tailwind/JS.
+        3. Knowledge Base: Report Info -> Key math/CS areas (Table 3). Goal -> Organize/Inform. Viz -> Grid of interactive cards. Interaction -> Hover effect on cards to show details. Justification -> Transforms a list into an engaging, explorable element, encouraging discovery of foundational concepts. Method -> HTML/Tailwind/JS.
+        4. Transition Path: Report Info -> 5-stage transition plan (Table 4). Goal -> Organize/Change. Viz -> Vertical step-by-step diagram. Interaction -> Each step is visually distinct and presents clear, sequential information. Justification -> A process flow visualization makes the complex transition path easy to follow and understand. Method -> HTML/Tailwind/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF6;
+            color: #3C3633;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #E07A5F;
+            border-bottom-color: #E07A5F;
+        }
+        .tab-btn.active {
+            background-color: #E07A5F;
+            color: #FFFFFF;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip:hover .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center py-4">
+                <h1 class="text-xl md:text-2xl font-bold text-[#E07A5F]">AI 工程師職業解析</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#overview" class="nav-link text-gray-600 hover:text-[#E07A5F] border-b-2 border-transparent pb-1">總覽</a>
+                    <a href="#salary" class="nav-link text-gray-600 hover:text-[#E07A5F] border-b-2 border-transparent pb-1">薪資行情</a>
+                    <a href="#comparison" class="nav-link text-gray-600 hover:text-[#E07A5F] border-b-2 border-transparent pb-1">技能對比</a>
+                    <a href="#knowledge" class="nav-link text-gray-600 hover:text-[#E07A5F] border-b-2 border-transparent pb-1">知識基石</a>
+                    <a href="#transition" class="nav-link text-gray-600 hover:text-[#E07A5F] border-b-2 border-transparent pb-1">轉型路徑</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4">AI 工程師：浪潮之巔的新興力量</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                AI 工程師是負責設計、開發、部署和維護 AI 系統的專業技術人員。他們將機器學習、深度學習等技術應用於解決實際問題，是連接 AI 研究與產業應用的關鍵橋樑。本節將深入探討 AI 工程師的核心職責，了解他們在 AI 模型整個生命週期中扮演的角色。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">⚙️ 系統設計與實現</h3>
+                    <p class="text-gray-700">根據業務問題選擇合適演算法，設計並實現機器學習與深度學習模型，將理論轉化為可執行的程式碼。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">📊 數據收集與處理</h3>
+                    <p class="text-gray-700">AI 模型的基石是數據。工程師需進行數據清洗、轉換、標註和特徵工程，以確保數據質量。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">🚀 模型訓練與優化</h3>
+                    <p class="text-gray-700">使用處理好的數據訓練模型，並透過不斷調試和優化模型參數，提升模型的準確性與泛化能力。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">☁️ 系統部署與監控</h3>
+                    <p class="text-gray-700">將訓練好的模型成功部署到生產環境，並持續監控其運行狀態與性能，應對數據漂移等問題。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">🤝 跨職能團隊協作</h3>
+                    <p class="text-gray-700">與數據科學家、產品經理等專家緊密合作，確保 AI 解決方案滿足業務需求與用戶期望。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="text-xl font-bold mb-2 text-[#81B29A]">🧠 研究與應用新技術</h3>
+                    <p class="text-gray-700">AI 領域技術日新月異，需持續學習研究最新技術、演算法和工具，保持技術領先。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Salary Insights -->
+        <section id="salary" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4">薪資行情與市場趨勢</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                因其專業技能的稀缺性與市場需求的旺盛，AI工程師通常享有較高的薪資待遇。此處的互動圖表展示了全球部分地區的薪資水平比較。您可以點擊按鈕切換查看不同經驗等級的薪資數據，以了解地理位置和資歷對薪酬的影響。
+            </p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="text-center mb-4">
+                    <button id="avgSalaryBtn" class="tab-btn bg-[#E07A5F] text-white py-2 px-4 rounded-l-lg">平均年薪</button>
+                    <button id="seniorSalaryBtn" class="tab-btn bg-gray-200 text-gray-700 py-2 px-4 rounded-r-lg">高級年薪</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Skill Comparison -->
+        <section id="comparison" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4">AI 工程師 vs. 軟體工程師</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                雖然都屬於技術領域，但 AI 工程師與軟體工程師在職責、技能和開發流程上存在顯著差異。AI 工程師更像打造系統「大腦」的專家，而軟體工程師則是構建「身體」的建築師。點擊下方頁籤，探索他們在不同維度上的核心區別。
+            </p>
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div id="comparison-tabs" class="flex justify-center border-b mb-6">
+                    <button data-content="focus" class="comparison-tab p-4 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-[#E07A5F] active">核心焦點</button>
+                    <button data-content="skills" class="comparison-tab p-4 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-[#E07A5F]">主要技能</button>
+                    <button data-content="methodology" class="comparison-tab p-4 text-lg font-medium border-b-2 border-transparent text-gray-500 hover:text-[#E07A5F]">開發方法</button>
+                </div>
+                <div id="comparison-content" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Knowledge Base -->
+        <section id="knowledge" class="mb-16 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4">成功的知識基石</h2>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                要成為一名合格的AI工程師，僅掌握程式設計是遠遠不夠的。深厚的數學功底與紮實的電腦科學基礎是不可或缺的。數學是AI和機器學習的核心語言。將滑鼠懸停在下方的卡片上，可以了解各個關鍵數學領域在AI中的具體應用與重要性。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#81B29A] text-white">
+                            <p class="text-2xl font-bold">線性代數</p>
+                        </div>
+                        <div class="card-back bg-white text-gray-700 border-2 border-[#81B29A]">
+                            <p>數據在AI模型中的標準表示方式（向量、矩陣、張量）。用於數據表示、降維和特徵提取。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#E07A5F] text-white">
+                            <p class="text-2xl font-bold">微積分</p>
+                        </div>
+                        <div class="card-back bg-white text-gray-700 border-2 border-[#E07A5F]">
+                            <p>理解AI模型如何學習和優化的關鍵。核心演算法（如梯度下降）依賴導數和梯度來指導參數更新。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#3D405B] text-white">
+                            <p class="text-2xl font-bold">統計與機率</p>
+                        </div>
+                         <div class="card-back bg-white text-gray-700 border-2 border-[#3D405B]">
+                            <p>為在不確定性環境下做決策提供理論框架。廣泛應用於模型構建、性能評估和異常檢測。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#F2CC8F] text-gray-800">
+                            <p class="text-2xl font-bold">優化理論</p>
+                        </div>
+                         <div class="card-back bg-white text-gray-700 border-2 border-[#F2CC8F]">
+                            <p>旨在找到給定約束下的最佳解。用於AI模型的參數調整和決策制定，以提升效率和性能。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#6A994E] text-white">
+                            <p class="text-2xl font-bold">演算法與數據結構</p>
+                        </div>
+                         <div class="card-back bg-white text-gray-700 border-2 border-[#6A994E]">
+                            <p>高效的數據結構和演算法對於處理大規模數據、優化AI模型性能至關重要。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card-flip h-48">
+                    <div class="card-flip-inner">
+                        <div class="card-front bg-[#A98467] text-white">
+                            <p class="text-2xl font-bold">軟體工程原理</p>
+                        </div>
+                         <div class="card-back bg-white text-gray-700 border-2 border-[#A98467]">
+                            <p>良好的工程實踐，如模塊化設計、版本控制和測試，是構建穩定、可靠AI應用的基礎。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Transition Path -->
+        <section id="transition" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-4">軟體工程師轉型路徑圖</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                對於希望轉向 AI 領域的軟體工程師，其既有的編程和系統設計能力是寶貴資產。成功轉型需要一個系統性的學習過程，重塑知識體系並積累實戰經驗。以下是建議的五個關鍵階段，為您的轉型之旅提供清晰的指引。
+            </p>
+            <div class="relative">
+                <!-- The connecting line -->
+                <div class="absolute left-1/2 top-0 h-full w-0.5 bg-[#81B29A]/50 hidden md:block" style="transform: translateX(-50%);"></div>
+                <!-- Path Items -->
+                <div class="space-y-12">
+                    <!-- Step 1 -->
+                    <div class="md:flex items-center w-full">
+                        <div class="md:w-1/2 md:pr-8">
+                           <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#E07A5F]">
+                                <p class="text-gray-500 text-sm">階段一</p>
+                                <h3 class="text-2xl font-bold text-[#E07A5F] mb-3">基礎強化</h3>
+                                <p class="text-gray-700">鞏固線性代數、微積分、機率論與統計學的數學基礎。這是理解AI模型原理的基石，也是轉型最關鍵的一步。</p>
+                           </div>
+                        </div>
+                         <div class="hidden md:flex justify-center items-center w-12 h-12 rounded-full bg-[#E07A5F] text-white font-bold text-2xl z-10 mx-auto">1</div>
+                         <div class="md:w-1/2"></div>
+                    </div>
+                    <!-- Step 2 -->
+                     <div class="md:flex items-center w-full">
+                         <div class="md:w-1/2"></div>
+                         <div class="hidden md:flex justify-center items-center w-12 h-12 rounded-full bg-[#E07A5F] text-white font-bold text-2xl z-10 mx-auto">2</div>
+                        <div class="md:w-1/2 md:pl-8">
+                           <div class="bg-white p-6 rounded-lg shadow-lg border-r-4 border-[#81B29A] md:text-right">
+                                <p class="text-gray-500 text-sm">階段二</p>
+                                <h3 class="text-2xl font-bold text-[#81B29A] mb-3">核心理論學習</h3>
+                                <p class="text-gray-700">深入學習機器學習、深度學習的基本原理、主流演算法和模型架構，理解不同模型的優缺點和適用場景。</p>
+                           </div>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="md:flex items-center w-full">
+                        <div class="md:w-1/2 md:pr-8">
+                           <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#E07A5F]">
+                                <p class="text-gray-500 text-sm">階段三</p>
+                                <h3 class="text-2xl font-bold text-[#E07A5F] mb-3">工具與框架掌握</h3>
+                                <p class="text-gray-700">熟練使用 Python 及主流 AI/ML 框架 (TensorFlow, PyTorch, Scikit-learn) 和數據處理工具 (Pandas, NumPy)。</p>
+                           </div>
+                        </div>
+                         <div class="hidden md:flex justify-center items-center w-12 h-12 rounded-full bg-[#E07A5F] text-white font-bold text-2xl z-10 mx-auto">3</div>
+                         <div class="md:w-1/2"></div>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="md:flex items-center w-full">
+                         <div class="md:w-1/2"></div>
+                         <div class="hidden md:flex justify-center items-center w-12 h-12 rounded-full bg-[#E07A5F] text-white font-bold text-2xl z-10 mx-auto">4</div>
+                        <div class="md:w-1/2 md:pl-8">
+                           <div class="bg-white p-6 rounded-lg shadow-lg border-r-4 border-[#81B29A] md:text-right">
+                                <p class="text-gray-500 text-sm">階段四</p>
+                                <h3 class="text-2xl font-bold text-[#81B29A] mb-3">實戰與作品集建構</h3>
+                                <p class="text-gray-700">將理論應用於實際問題，通過個人專案、Kaggle 競賽或開源貢獻積累經驗，打造可展示的個人作品集。</p>
+                           </div>
+                        </div>
+                    </div>
+                    <!-- Step 5 -->
+                     <div class="md:flex items-center w-full">
+                        <div class="md:w-1/2 md:pr-8">
+                           <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#E07A5F]">
+                                <p class="text-gray-500 text-sm">階段五</p>
+                                <h3 class="text-2xl font-bold text-[#E07A5F] mb-3">持續學習與社群參與</h3>
+                                <p class="text-gray-700">跟蹤 AI 領域最新進展，閱讀論文，參與社群活動。學習是貫穿整個職業生涯的持續需求。</p>
+                           </div>
+                        </div>
+                         <div class="hidden md:flex justify-center items-center w-12 h-12 rounded-full bg-[#E07A5F] text-white font-bold text-2xl z-10 mx-auto">5</div>
+                         <div class="md:w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 AI 工程師職業解析儀表板。基於研究報告生成。</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data
+            const salaryData = {
+                average: {
+                    labels: ['美國', '瑞士', '加拿大', '中國', '英國', '日本', '印度'],
+                    data: [147524, 145560, 110018, 82853, 74628, 64195, 17323]
+                },
+                senior: {
+                    labels: ['美國', '瑞士', '加拿大', '中國', '英國', '日本', '印度'],
+                    data: [204444, 180000, 140000, 120000, 95000, 85000, 35000] // Estimated senior salaries
+                }
+            };
+            
+            const comparisonData = {
+                focus: `
+                    <div class="p-4">
+                        <h4 class="text-lg font-bold mb-2 text-[#E07A5F]">AI 工程師</h4>
+                        <p>數據驅動的智能系統、機器學習/深度學習模型、演算法性能、預測與決策。</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-lg font-bold mb-2 text-[#81B29A]">軟體工程師</h4>
+                        <p>應用程式功能、系統架構、用戶體驗、軟體可靠性與效率。</p>
+                    </div>`,
+                skills: `
+                    <div class="p-4">
+                        <h4 class="text-lg font-bold mb-2 text-[#E07A5F]">AI 工程師</h4>
+                        <p>Python, ML/DL框架 (TensorFlow, PyTorch), 數學 (線性代數, 微積分, 統計), 數據處理, 演算法理解。</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-lg font-bold mb-2 text-[#81B29A]">軟體工程師</h4>
+                        <p>多種程式語言 (Java, JS), 系統設計, 數據庫, API, DevOps, 測試。</p>
+                    </div>`,
+                methodology: `
+                    <div class="p-4">
+                        <h4 class="text-lg font-bold mb-2 text-[#E07A5F]">AI 工程師</h4>
+                        <p>實驗性、迭代性強，始於數據，終於模型持續監控與優化。處理概率性問題。</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-lg font-bold mb-2 text-[#81B29A]">軟體工程師</h4>
+                        <p>結構化或迭代式 (敏捷)，側重功能交付和需求滿足。處理確定性問題。</p>
+                    </div>`
+            };
+
+            // Salary Chart
+            const ctx = document.getElementById('salaryChart').getContext('2d');
+            const salaryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: salaryData.average.labels,
+                    datasets: [{
+                        label: '年薪 (美元)',
+                        data: salaryData.average.data,
+                        backgroundColor: '#81B29A',
+                        borderColor: '#6A994E',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value / 1000 + 'k';
+                                }
+                            }
+                        },
+                        x: {
+                           ticks: {
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 16) {
+                                        return label.slice(0, 16) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateChart(level) {
+                salaryChart.data.labels = salaryData[level].labels;
+                salaryChart.data.datasets[0].data = salaryData[level].data;
+                salaryChart.update();
+            }
+
+            const avgSalaryBtn = document.getElementById('avgSalaryBtn');
+            const seniorSalaryBtn = document.getElementById('seniorSalaryBtn');
+            
+            avgSalaryBtn.addEventListener('click', () => {
+                updateChart('average');
+                avgSalaryBtn.classList.add('bg-[#E07A5F]', 'text-white');
+                avgSalaryBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                seniorSalaryBtn.classList.add('bg-gray-200', 'text-gray-700');
+                seniorSalaryBtn.classList.remove('bg-[#E07A5F]', 'text-white');
+            });
+
+            seniorSalaryBtn.addEventListener('click', () => {
+                updateChart('senior');
+                seniorSalaryBtn.classList.add('bg-[#E07A5F]', 'text-white');
+                seniorSalaryBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                avgSalaryBtn.classList.add('bg-gray-200', 'text-gray-700');
+                avgSalaryBtn.classList.remove('bg-[#E07A5F]', 'text-white');
+            });
+            
+            // Comparison Tabs
+            const comparisonTabs = document.getElementById('comparison-tabs');
+            const comparisonContent = document.getElementById('comparison-content');
+            
+            function updateComparisonContent(contentKey) {
+                 comparisonContent.innerHTML = comparisonData[contentKey];
+            }
+
+            comparisonTabs.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    const contentKey = e.target.dataset.content;
+                    updateComparisonContent(contentKey);
+                    
+                    // Update active tab style
+                    const buttons = comparisonTabs.querySelectorAll('button');
+                    buttons.forEach(button => button.classList.remove('active', 'text-[#E07A5F]', 'border-[#E07A5F]'));
+                    e.target.classList.add('active', 'text-[#E07A5F]', 'border-[#E07A5F]');
+                }
+            });
+
+            // Set initial comparison content
+            updateComparisonContent('focus');
+            comparisonTabs.querySelector('button[data-content="focus"]').classList.add('active', 'text-[#E07A5F]', 'border-[#E07A5F]');
+
+            // Active Nav Link on Scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 150) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href').includes(current)){
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
