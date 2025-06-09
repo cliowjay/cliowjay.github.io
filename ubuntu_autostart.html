@@ -205,9 +205,11 @@
                         <div class="text-left bg-gray-800 text-white text-xs rounded mt-2 p-3 font-mono">
                             <p>[Desktop Entry]</p>
                             <p>Type=Application</p>
-                            <p class="text-yellow-300">Exec=google-chrome --kiosk "http://10.3.10.155:8585/?place=5"</p>
+                            <p class="text-yellow-300">google-chrome --no-sandbox --kiosk http://10.3.10.155:8585/?place=5</p>
                             <p>Hidden=false</p>
+                            <p>NoDisplay=false</p>
                             <p>Name=Chrome Kiosk</p>
+                            <p>Comment=Launch Chrome in kiosk mode</p>
                         </div>
                     </div>
                     
