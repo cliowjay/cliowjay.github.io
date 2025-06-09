@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 自動啟動終極指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 
+    Infographic Plan:
+    Narrative: Guide a user from understanding the problem to implementing the best-practice solution for autostarting Anydesk and Chrome on Ubuntu.
+    Structure: 
+    1.  Hero/Header: Title of the guide.
+    2.  Section 1: The Goal - What are we trying to achieve?
+    3.  Section 2: Method Comparison - Visualize the report's comparison table to explain WHY certain methods are chosen.
+    4.  Section 3: Recommended Solutions - Clearly state the chosen path for each app.
+    5.  Section 4: Anydesk Setup - A step-by-step process flow.
+    6.  Section 5: Chrome Setup - A step-by-step process flow.
+    7.  Section 6: Verification & Troubleshooting - Quick reference guide.
+    8.  Footer.
+
+    Visualization Choices (NO SVG / NO MERMAID JS CONFIRMED):
+    -   Method Comparison: Goal: Compare. Visualization: Styled HTML Table. Justification: Best for comparing multiple qualitative attributes across different items, superior to a chart here. Method: HTML table with Tailwind CSS. NO SVG.
+    -   Process Flows (Anydesk/Chrome): Goal: Organize. Visualization: Flow Chart. Justification: Clearly shows sequential steps. Method: Structured HTML divs with flexbox, borders, and Unicode arrow characters for connections. NO SVG. NO MERMAID JS.
+    -   Key Command Callouts: Goal: Inform. Visualization: Large, stylized text blocks. Justification: Highlights critical information. Method: Styled HTML divs. NO SVG.
+    -   Icons: Goal: Inform. Visualization: Unicode characters (e.g., ⚙️, 🖥️). Justification: Simple, effective visual cues without images or SVG.
+
+    Color Palette Selection:
+    -   Chosen Palette: Brilliant Blues (#00A1E4, #00B8C4, #00C4A4, #7DD247) from the provided image.
+    -   Justification: Professional, vibrant, and has a tech-oriented feel suitable for the subject matter. Provides good contrast.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+        .text-primary { color: #00A1E4; }
+        .text-secondary { color: #00B8C4; }
+        .text-accent { color: #00C4A4; }
+        .bg-primary { background-color: #00A1E4; }
+        .bg-secondary { background-color: #00B8C4; }
+        .border-primary { border-color: #00A1E4; }
+        .border-secondary { border-color: #00B8C4; }
+
+        .brand-gradient {
+            background: linear-gradient(90deg, #00A1E4, #00B8C4, #00C4A4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .flow-step {
+            @apply bg-white rounded-lg shadow-md p-4 w-full max-w-md text-center border-l-4 transition-transform duration-300 hover:scale-105;
+        }
+
+        .flow-connector {
+            @apply text-2xl font-bold my-4 text-gray-400;
+        }
+
+        .card {
+            @apply bg-white rounded-xl shadow-lg overflow-hidden p-6 sm:p-8;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-8 max-w-5xl">
+
+        <header class="text-center my-8 sm:my-12">
+            <h1 class="text-4xl sm:text-6xl font-black brand-gradient">Ubuntu 自動啟動終極指南</h1>
+            <p class="mt-4 text-lg text-gray-600">為 Anydesk 和 Chrome 設定可靠、安全的自動啟動</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="goal" class="card text-center">
+                <h2 class="text-2xl font-bold text-primary mb-4">🎯 我們的目標</h2>
+                <p class="text-lg">本指南將引導您完成在 Ubuntu 系統上，針對兩種不同類型的應用程式配置自動啟動的完整流程。目標是確保遠端桌面工具和專用顯示瀏覽器都能在開機後無縫、可靠地運行。</p>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl flex items-center"><span class="text-2xl mr-3">⚙️</span>AnyDesk 服務</h3>
+                        <p class="mt-2 text-gray-700">需在系統開機後、使用者登入前就以背景服務形式啟動，以便隨時進行遠端存取和無人值守管理。</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl flex items-center"><span class="text-2xl mr-3">🖥️</span>Chrome 資訊站</h3>
+                        <p class="mt-2 text-gray-700">需在使用者登入圖形介面後自動啟動，開啟指定的內部網址 <code class="bg-gray-200 text-sm px-1 rounded">http://10.3.10.155:8585</code> 並進入全螢幕資訊站 (Kiosk) 模式。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="comparison" class="card">
+                <h2 class="text-2xl font-bold text-primary mb-2 text-center">🛠️ 瞭解您的工具：啟動方法比較</h2>
+                <p class="text-center text-gray-600 mb-6">選擇正確的工具是成功的關鍵。Ubuntu 提供多種自動啟動機制，每種機制都有其特定的適用場景。下表比較了主要的幾種方法，並解釋了我們為何為 Anydesk 和 Chrome 選擇不同的路徑。</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-max text-sm text-left">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 font-bold text-gray-700">方法</th>
+                                <th class="p-3 font-bold text-gray-700">範圍</th>
+                                <th class="p-3 font-bold text-gray-700">執行時機</th>
+                                <th class="p-3 font-bold text-gray-700">穩健性</th>
+                                <th class="p-3 font-bold text-gray-700">最佳用途</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-semibold text-secondary">systemd 服務</td>
+                                <td class="p-3">系統層級</td>
+                                <td class="p-3">開機時 (登入前)</td>
+                                <td class="p-3"><span class="font-bold text-green-600">高</span></td>
+                                <td class="p-3 font-medium">背景服務、守護程式 (如 Anydesk)</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-semibold text-secondary">使用者 .desktop 檔</td>
+                                <td class="p-3">使用者專屬</td>
+                                <td class="p-3">使用者登入後</td>
+                                <td class="p-3"><span class="font-bold text-yellow-600">中</span></td>
+                                <td class="p-3 font-medium">需要圖形介面的應用程式 (如 Chrome)</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-semibold text-secondary">圖形化啟動工具</td>
+                                <td class="p-3">使用者專屬</td>
+                                <td class="p-3">使用者登入後</td>
+                                <td class="p-3"><span class="font-bold text-yellow-600">中</span></td>
+                                <td class="p-3 font-medium">簡單的圖形應用程式</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-semibold text-secondary">Cron @reboot</td>
+                                <td class="p-3">系統/使用者</td>
+                                <td class="p-3">Cron 啟動時</td>
+                                <td class="p-3"><span class="font-bold text-red-600">低</span></td>
+                                <td class="p-3 font-medium">不依賴 GUI 或網路的簡單腳本</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                 <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                    <h4 class="font-bold text-blue-800">決策依據</h4>
+                    <p class="text-blue-700 text-sm mt-1">Anydesk 需要在無人登入時也能遠端連線，因此必須使用系統層級的 `systemd`。Chrome 需要圖形介面，因此必須在使用者登入後透過 `.desktop` 檔案啟動，以確保顯示環境已就緒。</p>
+                </div>
+            </section>
+            
+            <section id="anydesk-setup" class="card md:col-span-2">
+                <h2 class="text-2xl font-bold text-primary mb-6 text-center">⚙️ AnyDesk 系統層級啟動流程</h2>
+                 <p class="text-center text-gray-600 mb-8">要讓 Anydesk 作為一個可靠的背景服務運行，我們使用 `systemd`。這個流程確保了即使在系統重啟後，您也能立即進行遠端連線，無需等待任何人登入。</p>
+                <div class="flex flex-col items-center">
+                    
+                    <div class="flow-step border-primary">
+                        <p class="font-bold text-lg">1. 安裝並更新 Anydesk</p>
+                        <p class="text-sm text-gray-600 mt-1">確保您已從官方網站下載並安裝了最新版本的 Anydesk DEB 套件。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">sudo apt update && sudo dpkg -i anydesk_*.deb</code>
+                    </div>
+
+                    <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-primary">
+                        <p class="font-bold text-lg">2. 啟用 Anydesk 服務</p>
+                        <p class="text-sm text-gray-600 mt-1">此命令會讓 Anydesk 在每次系統開機時自動啟動。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">sudo systemctl enable anydesk.service</code>
+                    </div>
+
+                    <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-primary">
+                        <p class="font-bold text-lg">3. 設定無人值守存取</p>
+                        <p class="text-sm text-gray-600 mt-1">在 Anydesk 設定中，進入「安全性」頁面，啟用「無人值守存取」並設定一個強密碼。</p>
+                    </div>
+                    
+                    <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-primary">
+                        <p class="font-bold text-lg">4. 驗證服務狀態</p>
+                        <p class="text-sm text-gray-600 mt-1">檢查服務是否正在運行並且已設定為開機啟動。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">systemctl status anydesk.service</code>
+                    </div>
+
+                </div>
+            </section>
+            
+            <section id="chrome-setup" class="card md:col-span-2">
+                <h2 class="text-2xl font-bold text-primary mb-6 text-center">🖥️ Chrome 使用者登入啟動流程</h2>
+                <p class="text-center text-gray-600 mb-8">對於需要圖形介面的 Chrome，我們使用 `.desktop` 檔案。這個檔案會在您登入桌面後，自動執行一個帶有特定參數的命令，以您想要的方式啟動 Chrome。</p>
+                <div class="flex flex-col items-center">
+
+                    <div class="flow-step border-secondary">
+                        <p class="font-bold text-lg">1. 建立 Autostart 目錄 (若不存在)</p>
+                        <p class="text-sm text-gray-600 mt-1">這是存放使用者自動啟動設定檔的地方。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">mkdir -p ~/.config/autostart</code>
+                    </div>
+
+                    <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-secondary">
+                        <p class="font-bold text-lg">2. 建立 .desktop 檔案</p>
+                        <p class="text-sm text-gray-600 mt-1">使用文字編輯器建立一個新的設定檔。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">nano ~/.config/autostart/chrome-kiosk.desktop</code>
+                    </div>
+
+                    <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-secondary">
+                        <p class="font-bold text-lg">3. 填入配置內容</p>
+                        <p class="text-sm text-gray-600 mt-1">將以下內容貼入檔案中。`Exec` 行是關鍵，它定義了要執行的命令。</p>
+                        <div class="text-left bg-gray-800 text-white text-xs rounded mt-2 p-3 font-mono">
+                            <p>[Desktop Entry]</p>
+                            <p>Type=Application</p>
+                            <p class="text-yellow-300">Exec=google-chrome --kiosk "http://10.3.10.155:8585/?place=5"</p>
+                            <p>Hidden=false</p>
+                            <p>Name=Chrome Kiosk</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flow-connector">⬇️</div>
+
+                     <div class="flow-step border-secondary">
+                        <p class="font-bold text-lg">4. 賦予執行權限</p>
+                        <p class="text-sm text-gray-600 mt-1">確保系統可以執行這個設定檔。</p>
+                        <code class="block bg-gray-800 text-white text-xs rounded mt-2 p-2 font-mono">chmod +x ~/.config/autostart/chrome-kiosk.desktop</code>
+                    </div>
+                    
+                     <div class="flow-connector">⬇️</div>
+
+                    <div class="flow-step border-secondary">
+                        <p class="font-bold text-lg">5. 重新登入以測試</p>
+                        <p class="text-sm text-gray-600 mt-1">登出後再重新登入，Chrome 應會自動以資訊站模式啟動。</p>
+                    </div>
+
+                </div>
+            </section>
+            
+            <section id="verification" class="card">
+                <h2 class="text-2xl font-bold text-primary mb-6 text-center">🔍 驗證與故障排除</h2>
+                <p class="text-center text-gray-600 mb-6">設定完成後，進行快速檢查以確保一切正常。如果遇到問題，這些命令是您診斷的第一步。</p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="bg-primary text-white rounded-full h-8 w-8 text-center leading-8 font-bold mr-4 flex-shrink-0">1</span>
+                        <div>
+                            <h4 class="font-bold">檢查 Anydesk 服務</h4>
+                            <p class="text-sm text-gray-600">確認服務為 `active (running)` 且 `enabled`。</p>
+                            <code class="block bg-gray-100 text-xs rounded mt-1 p-2 font-mono text-gray-700">sudo systemctl status anydesk.service</code>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-primary text-white rounded-full h-8 w-8 text-center leading-8 font-bold mr-4 flex-shrink-0">2</span>
+                        <div>
+                            <h4 class="font-bold">檢查 Chrome 程序</h4>
+                            <p class="text-sm text-gray-600">登入後，檢查 `google-chrome` 程序是否存在。</p>
+                            <code class="block bg-gray-100 text-xs rounded mt-1 p-2 font-mono text-gray-700">pgrep -a google-chrome</code>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-primary text-white rounded-full h-8 w-8 text-center leading-8 font-bold mr-4 flex-shrink-0">3</span>
+                        <div>
+                            <h4 class="font-bold">查閱系統日誌</h4>
+                            <p class="text-sm text-gray-600">如果 Anydesk 啟動失敗，日誌中通常會有詳細的錯誤訊息。</p>
+                            <code class="block bg-gray-100 text-xs rounded mt-1 p-2 font-mono text-gray-700">journalctl -u anydesk.service</code>
+                        </div>
+                    </li>
+                     <li class="flex items-start">
+                        <span class="bg-primary text-white rounded-full h-8 w-8 text-center leading-8 font-bold mr-4 flex-shrink-0">4</span>
+                        <div>
+                            <h4 class="font-bold">檢查 `.desktop` 檔案</h4>
+                            <p class="text-sm text-gray-600">如果 Chrome 未啟動，請確認 `~/.config/autostart/` 中的檔案路徑、內容和權限是否正確。</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 py-6 border-t border-gray-200">
+            <p class="text-sm text-gray-500">&copy; 2025 系統自動化指南。基於深度研究報告製作。</p>
+        </footer>
+
+    </div>
+</body>
+</html>
