@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投資SpaceX：台灣投資人互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: A user-journey-centric, single-page application guiding users through a decision funnel. It starts with a key qualifying question ('Are you an Accredited Investor?'), which then dynamically tailors the displayed investment paths. This structure simplifies a complex topic by personalizing the information, making it more digestible and actionable than a linear report. Subsequent sections on practical steps (brokerage, KYC) and critical risks (especially an interactive tax comparison) are structured to support the user's chosen path, leading to a clear, conclusive action plan. -->
+    <!-- Visualization & Content Choices: 
+        1. Accredited Investor Check: (Goal: Segment user) -> (Method: Interactive buttons) -> (Interaction: Click to reveal/hide content) -> (Justification: Personalizes the journey) -> (Library: Vanilla JS).
+        2. Investment Options: (Goal: Compare) -> (Method: Card layout) -> (Justification: Easy scanning) -> (Library: Tailwind).
+        3. Minimum Investment Chart: (Goal: Compare entry barriers) -> (Method: Horizontal Bar Chart) -> (Justification: Clear visual comparison of quantitative data) -> (Library: Chart.js/Canvas).
+        4. Fund Holdings Chart: (Goal: Show proportion) -> (Method: Donut Chart) -> (Justification: Quick view of SpaceX weight in funds) -> (Library: Chart.js/Canvas).
+        5. Tax Comparison: (Goal: Clarify complex rules) -> (Method: Interactive Table) -> (Interaction: Click buttons to update table content) -> (Justification: Makes the most complex topic (taxes) interactive and less intimidating) -> (Library: Vanilla JS).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .tab-button.active {
+            border-color: #4A5568;
+            background-color: #F7FAFC;
+            font-weight: 700;
+        }
+        .content-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .content-section.visible {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F7F4] text-[#3D405B]">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold">🚀 投資SpaceX指南</span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#path-selector" class="hover:text-[#81B29A] transition-colors">投資路徑</a>
+                    <a href="#manual" class="hover:text-[#81B29A] transition-colors">實戰手冊</a>
+                    <a href="#risks" class="hover:text-[#81B29A] transition-colors">風險與稅務</a>
+                    <a href="#conclusion" class="hover:text-[#81B29A] transition-colors">行動建議</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center py-16">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">投資SpaceX：您的專屬路徑指南</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                SpaceX是一家革命性的私人公司，其股票無法在公開市場直接購買。本指南將帶您探索作為一名台灣投資人，如何參與其私募股權投資，並找到最適合您的道路。
+            </p>
+            <a href="#path-selector" class="bg-[#81B29A] text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg">
+                開始評估我的投資路徑
+            </a>
+        </section>
+
+        <!-- Path Selector -->
+        <section id="path-selector" class="py-16 bg-white rounded-2xl shadow-lg my-12">
+            <div class="text-center px-6">
+                <h2 class="text-3xl font-bold mb-4">第一步：確認您的投資資格</h2>
+                <p class="max-w-2xl mx-auto text-gray-600 mb-8">美國證券法規將投資人分為不同類型，這決定了您可以採取的投資途徑。請根據以下說明，選擇最符合您情況的選項。</p>
+                <div class="max-w-4xl mx-auto bg-[#F8F7F4] p-6 rounded-lg border border-gray-200 mb-8">
+                    <h3 class="font-bold text-lg mb-2">什麼是美國「合格投資人」(Accredited Investor)？</h3>
+                    <p class="text-sm text-gray-700">您必須至少滿足以下一項條件：</p>
+                    <ul class="list-disc list-inside text-left text-sm text-gray-600 mt-2 space-y-1">
+                        <li><span class="font-semibold">收入門檻：</span>過去兩年個人年收入超過20萬美元（或與配偶共同收入超過30萬美元），並預期今年也能達到此標準。</li>
+                        <li><span class="font-semibold">淨資產門檻：</span>個人或與配偶的共同淨資產超過100萬美元（不包含主要住宅價值）。</li>
+                         <li><span class="font-semibold">專業資格：</span>持有特定的金融專業證照 (如 Series 7, 65, 82)。</li>
+                    </ul>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button id="accredited-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition shadow-md">
+                        是，我符合「合格投資人」資格
+                    </button>
+                    <button id="non-accredited-btn" class="bg-gray-700 text-white font-bold py-3 px-8 rounded-full hover:bg-gray-800 transition shadow-md">
+                        否，我不符合資格／不確定
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Area -->
+        <div id="investment-paths">
+            <!-- Accredited Investor Path -->
+            <section id="accredited-path" class="content-section py-12">
+                <h2 class="text-3xl font-bold text-center mb-2">您的路徑：私募二級市場直接投資</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">作為合格投資人，您可以直接透過二級市場平台購買現有股東（如員工或早期投資者）釋出的SpaceX股票。這是最直接的方式，但也伴隨著較高的門檻與盡職調查要求。</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">主要二級市場平台</h3>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-white rounded-lg shadow">
+                                <h4 class="font-bold">Forge Global</h4>
+                                <p class="text-sm text-gray-600">全球最大的私人股票市場之一，提供專家指導完成交易。</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow">
+                                <h4 class="font-bold">EquityZen</h4>
+                                <p class="text-sm text-gray-600">以相對較低的最低投資額（約$5,000美元起）著稱。</p>
+                            </div>
+                             <div class="p-4 bg-white rounded-lg shadow">
+                                <h4 class="font-bold">Nasdaq Private Market</h4>
+                                <p class="text-sm text-gray-600">機構級交易平台，主要服務合格實體與機構投資者。</p>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-bold mt-8 mb-4">平台最低投資額比較</h3>
+                        <p class="text-sm text-gray-600 mb-4">不同平台的最低投資門檻差異顯著，為不同資金規模的合格投資人提供選擇。以下圖表僅為例示，實際金額以平台公告為準。</p>
+                        <div class="chart-container">
+                            <canvas id="minInvestmentChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">投資流程概覽</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start p-4">
+                                <div class="flex-shrink-0 bg-[#81B29A] text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">1</div>
+                                <div class="ml-4">
+                                    <h4 class="font-bold">選擇平台並註冊</h4>
+                                    <p class="text-sm text-gray-600">研究並選擇符合您需求的二級市場平台。</p>
+                                </div>
+                            </div>
+                             <div class="flex items-start p-4">
+                                <div class="flex-shrink-0 bg-[#81B29A] text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">2</div>
+                                <div class="ml-4">
+                                    <h4 class="font-bold">資格驗證 (Verification)</h4>
+                                    <p class="text-sm text-gray-600">提交財務文件（如稅單、銀行對帳單）證明您的合格投資人身份。</p>
+                                </div>
+                            </div>
+                             <div class="flex items-start p-4">
+                                <div class="flex-shrink-0 bg-[#81B29A] text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">3</div>
+                                <div class="ml-4">
+                                    <h4 class="font-bold">盡職調查 (Due Diligence)</h4>
+                                    <p class="text-sm text-gray-600">由於資訊不公開，需自行或聘請專家對SpaceX進行深入研究。</p>
+                                </div>
+                            </div>
+                             <div class="flex items-start p-4">
+                                <div class="flex-shrink-0 bg-[#81B29A] text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">4</div>
+                                <div class="ml-4">
+                                    <h4 class="font-bold">交易執行</h4>
+                                    <p class="text-sm text-gray-600">與賣方協商價格並完成交易，此過程通常需要SpaceX公司批准。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Non-Accredited Investor Path -->
+            <section id="non-accredited-path" class="content-section py-12">
+                <h2 class="text-3xl font-bold text-center mb-2">您的路徑：透過基金或上市公司間接投資</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">雖然無法直接購買SpaceX股票，但您可以透過投資持有其股權的基金或上市公司，來間接分享SpaceX的成長潛力。這是一種門檻較低、風險相對分散的方式。</p>
+                
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center">途徑一：投資持有SpaceX的基金</h3>
+                        <p class="text-sm text-gray-600 mb-6 text-center">一些基金（包括ETF和共同基金）將SpaceX作為其核心持股之一。部分基金甚至對非合格投資人開放。</p>
+                         <div class="chart-container mb-8">
+                            <canvas id="fundHoldingsChart"></canvas>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-white rounded-lg shadow">
+                                <h4 class="font-bold">ARK Venture Fund (ARKVX)</h4>
+                                <p class="text-sm text-gray-600">由方舟投資(ARK Invest)管理，SpaceX為其最大持股之一，可透過特定平台投資。</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow">
+                                <h4 class="font-bold">Destiny Tech100 Fund (DXYZ)</h4>
+                                <p class="text-sm text-gray-600">專注投資頂級私人科技公司的封閉式基金，SpaceX佔比極高。</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center">途徑二：投資持有SpaceX的上市公司</h3>
+                        <p class="text-sm text-gray-600 mb-6 text-center">一些大型上市公司是SpaceX的早期投資者。購買這些公司的股票，您的投資組合中也會間接包含SpaceX的價值。</p>
+                        <div class="space-y-4 mt-16">
+                             <div class="p-6 bg-white rounded-lg shadow-lg text-center">
+                                <div class="text-4xl mb-4">GOOGL</div>
+                                <h4 class="text-xl font-bold">Alphabet Inc.</h4>
+                                <p class="text-sm text-gray-600 mt-2">Google的母公司，在2015年對SpaceX進行了重大投資，並持續參與後續融資。</p>
+                            </div>
+                             <div class="p-6 bg-white rounded-lg shadow-lg text-center">
+                                 <div class="text-4xl mb-4">BAC</div>
+                                <h4 class="text-xl font-bold">Bank of America</h4>
+                                <p class="text-sm text-gray-600 mt-2">美國銀行在2018年領投了SpaceX的一輪融資。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Practical Manual -->
+        <section id="manual" class="py-16 my-12">
+             <h2 class="text-3xl font-bold text-center mb-2">台灣投資人實戰手冊</h2>
+             <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">無論選擇哪條路徑，您都需要完成以下步驟才能在美國市場進行投資。這部分將為您提供清晰的指引。</p>
+            <div class="max-w-4xl mx-auto">
+                <div class="border-b border-gray-300 mb-8">
+                    <nav class="flex flex-wrap -mb-px" id="manual-tabs">
+                        <button data-tab="broker" class="tab-button active w-1/3 text-center p-4 border-b-2 font-medium text-lg">券商選擇</button>
+                        <button data-tab="kyc" class="tab-button w-1/3 text-center p-4 border-b-2 font-medium text-lg">開戶與KYC</button>
+                        <button data-tab="funds" class="tab-button w-1/3 text-center p-4 border-b-2 font-medium text-lg">資金匯款</button>
+                    </nav>
+                </div>
+                <div id="manual-content">
+                    <div id="tab-broker" class="space-y-6">
+                        <h3 class="text-xl font-bold">如何選擇您的交易券商？</h3>
+                        <p>要投資美國市場，您需要一個能交易美國證券的券商帳戶。</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg mb-2">台灣券商「複委託」</h4>
+                                <p class="text-sm mb-2">透過您在台灣的現有券商下單，由券商去美國幫您交易。</p>
+                                <ul class="text-sm space-y-1">
+                                    <li><span class="text-green-600 font-semibold">✓ 優點：</span>介面熟悉，資金不需匯出海外。</li>
+                                    <li><span class="text-red-600 font-semibold">✗ 缺點：</span>交易手續費通常較高，投資標的可能受限。</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg border-2 border-[#81B29A]">
+                                <h4 class="font-bold text-lg mb-2">國際線上券商 (推薦)</h4>
+                                <p class="text-sm mb-2">直接在支援台灣客戶的國際券商（如 Interactive Brokers - IBKR, XTB）開戶。</p>
+                                <ul class="text-sm space-y-1">
+                                    <li><span class="text-green-600 font-semibold">✓ 優點：</span>手續費低廉，投資產品多元，功能強大。</li>
+                                    <li><span class="text-red-600 font-semibold">✗ 缺點：</span>需自行將資金電匯至海外，介面為英文。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-kyc" class="hidden space-y-6">
+                        <h3 class="text-xl font-bold">什麼是KYC？我需要準備什麼？</h3>
+                        <p>KYC (Know Your Customer) 是所有金融機構必須執行的身份驗證程序，以防止洗錢等非法活動。您需要準備以下文件的數位檔案：</p>
+                        <ul class="grid sm:grid-cols-2 gap-4 text-center">
+                            <li class="bg-white p-6 rounded-lg shadow-sm">
+                                <div class="text-3xl mb-2">👤</div>
+                                <span class="font-semibold">身份證明</span>
+                                <p class="text-sm text-gray-500">有效的護照或國民身分證</p>
+                            </li>
+                            <li class="bg-white p-6 rounded-lg shadow-sm">
+                                <div class="text-3xl mb-2">🏠</div>
+                                <span class="font-semibold">地址證明</span>
+                                <p class="text-sm text-gray-500">近三個月的水電費帳單、銀行對帳單等</p>
+                            </li>
+                        </ul>
+                         <p class="text-sm text-gray-600">平台可能還會要求您填寫個人財務狀況（收入、淨資產）及投資經驗問卷。誠實填寫是順利通過審核的關鍵。</p>
+                    </div>
+                    <div id="tab-funds" class="hidden space-y-6">
+                        <h3 class="text-xl font-bold">如何將資金匯入我的國際券商帳戶？</h3>
+                        <p>開設國際券商帳戶後，您需要透過國際電匯將資金存入。主要流程如下，並需注意相關成本：</p>
+                         <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                           <li><span class="font-semibold">換匯：</span>在您的台灣銀行將新台幣兌換成美元。</li>
+                           <li><span class="font-semibold">填寫電匯單：</span>向銀行提供您的國際券商帳戶資訊（收款人名稱、地址、銀行、帳號、SWIFT Code等）。</li>
+                           <li><span class="font-semibold">支付費用：</span>此過程會產生<span class="text-[#E07A5F] font-bold">匯率轉換成本</span>、台灣銀行的<span class="text-[#E07A5F] font-bold">電匯手續費</span>以及中間行或收款行可能收取的<span class="text-[#E07A5F] font-bold">額外費用</span>。</li>
+                       </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Risks & Taxation -->
+        <section id="risks" class="py-16 bg-white rounded-2xl shadow-lg my-12">
+            <div class="max-w-5xl mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">關鍵風險與稅務影響</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">私募股權投資是高風險高回報的領域。在投入資金前，必須清楚了解以下風險，特別是複雜的跨國稅務問題。</p>
+                
+                <h3 class="text-2xl font-bold mb-6 text-center">投資本身的主要風險</h3>
+                <div class="grid md:grid-cols-3 gap-6 text-center mb-12">
+                     <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                        <div class="text-4xl mb-3">💧</div>
+                        <h4 class="font-bold text-lg mb-2">低流動性</h4>
+                        <p class="text-sm text-gray-600">私人股票無法隨時買賣，資金可能被長期鎖定，直到公司上市或被收購。</p>
+                    </div>
+                    <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                        <div class="text-4xl mb-3">⚖️</div>
+                        <h4 class="font-bold text-lg mb-2">估值不確定性</h4>
+                        <p class="text-sm text-gray-600">估值基於內部融資，而非公開市場價格，存在較大波動與不確定性。</p>
+                    </div>
+                     <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                        <div class="text-4xl mb-3">⏳</div>
+                        <h4 class="font-bold text-lg mb-2">投資期限長</h4>
+                        <p class="text-sm text-gray-600">這是一項長達數年甚至十年的長期投資，不適合短期獲利需求。</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-6 text-center">互動式稅務影響分析 (台灣投資人)</h3>
+                <p class="text-center text-gray-600 mb-6">點擊下方按鈕，了解不同情境下的美、台雙重稅務影響。</p>
+                <div class="flex justify-center gap-2 md:gap-4 mb-6 flex-wrap" id="tax-buttons">
+                    <button data-tax="gains" class="tax-button bg-gray-200 py-2 px-4 rounded-full text-sm md:text-base">賣出獲利 (資本利得)</button>
+                    <button data-tax="dividends" class="tax-button bg-gray-200 py-2 px-4 rounded-full text-sm md:text-base">收到股息</button>
+                    <button data-tax="estate" class="tax-button bg-red-200 text-red-800 py-2 px-4 rounded-full text-sm md:text-base font-bold">不幸身故 (遺產稅)</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-max bg-white border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-4 border-b text-left w-1/4">稅務項目</th>
+                                <th class="p-4 border-b text-left w-1/4">美國稅務處理</th>
+                                <th class="p-4 border-b text-left w-1/4">台灣稅務處理</th>
+                                <th class="p-4 border-b text-left w-1/4">⚠️ 注意事項</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tax-table-body">
+                            <!-- JS will populate this -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion" class="text-center py-16">
+            <h2 class="text-3xl font-bold mb-4">結論：您的行動建議</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+                投資SpaceX充滿潛力，但也極為複雜。我們強烈建議您遵循以下三步驟，並在做出任何決定前尋求專業協助。
+            </p>
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-3xl mb-3">1️⃣</div>
+                    <h3 class="font-bold text-xl mb-2">自我評估</h3>
+                    <p class="text-sm text-gray-600">誠實評估您是否符合「合格投資人」資格，這將決定您的主要投資方向。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-3xl mb-3">2️⃣</div>
+                    <h3 class="font-bold text-xl mb-2">研究路徑</h3>
+                    <p class="text-sm text-gray-600">根據您的資格，深入研究直接投資（二級市場）或間接投資（基金）的具體平台與標的。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-2 border-[#E07A5F]">
+                    <div class="text-3xl mb-3">3️⃣</div>
+                    <h3 class="font-bold text-xl mb-2">諮詢專家</h3>
+                    <p class="text-sm text-gray-600">這是最關鍵的一步。務必諮詢您的會計師與稅務顧問，全面規劃稅務（尤其是美國遺產稅）與法律風險。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-6">
+        <p class="text-sm">本指南僅供資訊參考，不構成任何投資建議。所有投資決策應基於個人獨立研究與專業顧問建議。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Path selection logic
+            const accreditedBtn = document.getElementById('accredited-btn');
+            const nonAccreditedBtn = document.getElementById('non-accredited-btn');
+            const accreditedPath = document.getElementById('accredited-path');
+            const nonAccreditedPath = document.getElementById('non-accredited-path');
+            const investmentPathsContainer = document.getElementById('investment-paths');
+
+            function showPath(pathToShow) {
+                const paths = [accreditedPath, nonAccreditedPath];
+                paths.forEach(path => {
+                    if (path === pathToShow) {
+                        path.classList.add('visible');
+                    } else {
+                        path.classList.remove('visible');
+                    }
+                });
+                investmentPathsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            accreditedBtn.addEventListener('click', () => {
+                showPath(accreditedPath);
+                initAccreditedCharts();
+            });
+
+            nonAccreditedBtn.addEventListener('click', () => {
+                showPath(nonAccreditedPath);
+                initNonAccreditedCharts();
+            });
+
+            // Manual tabs logic
+            const manualTabs = document.getElementById('manual-tabs');
+            const manualContent = document.getElementById('manual-content');
+
+            manualTabs.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const tabId = e.target.dataset.tab;
+                    
+                    // Update button styles
+                    manualTabs.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // Update content visibility
+                    Array.from(manualContent.children).forEach(content => {
+                        if (content.id === `tab-${tabId}`) {
+                            content.style.display = 'block';
+                        } else {
+                            content.style.display = 'none';
+                        }
+                    });
+                }
+            });
+
+            // Tax table logic
+            const taxData = {
+                gains: {
+                    item: '賣出獲利 (資本利得)',
+                    us: '對外國人通常不課徵資本利得稅。',
+                    tw: '計入海外所得。若總所得超過免稅額(NTD 750萬)，可能需繳納最低稅負(AMT)。',
+                    notes: '雖然美國不課稅，但仍需在台灣誠實申報海外所得。'
+                },
+                dividends: {
+                    item: '收到股息',
+                    us: '預扣30%的股息稅。因台美無租稅協定，無法享有較低稅率。',
+                    tw: '計入海外所得。在美已繳稅款可在台灣的應納稅額中扣抵。',
+                    notes: '30%是相當高的預扣稅率，會直接影響現金流。'
+                },
+                estate: {
+                    item: '不幸身故 (遺產稅)',
+                    us: '⚠️<strong class="text-red-700">高風險！</strong>外國人免稅額僅6萬美元，超過部分稅率最高可達40%。',
+                    tw: '全球資產皆需納入台灣遺產計算。',
+                    notes: '這是投資美股最大的潛在陷阱，大額投資者必須進行專業的遺產規劃！'
+                }
+            };
+            
+            const taxButtons = document.getElementById('tax-buttons');
+            const taxTableBody = document.getElementById('tax-table-body');
+
+            function updateTaxTable(type) {
+                const data = taxData[type];
+                taxTableBody.innerHTML = `
+                    <tr>
+                        <td class="p-4 border-b">${data.item}</td>
+                        <td class="p-4 border-b">${data.us}</td>
+                        <td class="p-4 border-b">${data.tw}</td>
+                        <td class="p-4 border-b">${data.notes}</td>
+                    </tr>
+                `;
+                 // Update button styles
+                taxButtons.querySelectorAll('button').forEach(btn => {
+                    if(btn.dataset.tax === type) {
+                        btn.style.backgroundColor = '#3D405B';
+                        btn.style.color = 'white';
+                    } else {
+                         if(btn.dataset.tax === 'estate') {
+                             btn.style.backgroundColor = '#FECACA'; // red-200
+                             btn.style.color = '#991B1B'; // red-800
+                         } else {
+                            btn.style.backgroundColor = '#E5E7EB'; // gray-200
+                            btn.style.color = '#1F2937'; // gray-800
+                         }
+                    }
+                });
+            }
+            
+            taxButtons.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    updateTaxTable(e.target.dataset.tax);
+                }
+            });
+
+            // Default view
+            updateTaxTable('gains');
+
+            // Smooth scrolling for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Chart initialization logic
+            let minInvestmentChartInstance = null;
+            let fundHoldingsChartInstance = null;
+
+            function initAccreditedCharts() {
+                if (minInvestmentChartInstance) return;
+                const ctx = document.getElementById('minInvestmentChart').getContext('2d');
+                minInvestmentChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['EquityZen', 'EquityBee', 'Hiive', 'StartEngine Private'],
+                        datasets: [{
+                            label: '最低投資額 (美元)',
+                            data: [5000, 10000, 25000, 32000],
+                            backgroundColor: ['#81B29A', '#F2CC8F', '#E07A5F', '#3D405B'],
+                            borderColor: 'rgba(255, 255, 255, 0.8)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.x !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(context.parsed.x);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '美元 ($)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initNonAccreditedCharts() {
+                if (fundHoldingsChartInstance) return;
+                const ctx = document.getElementById('fundHoldingsChart').getContext('2d');
+                fundHoldingsChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Destiny Tech100 (DXYZ)', 'ARK Venture Fund (ARKVX)', 'Baron Partners Fund (BPTRX)', 'ERShares ETF (XOVR)'],
+                        datasets: [{
+                            label: 'SpaceX 持股佔比',
+                            data: [38, 15.88, 13, 12.3],
+                            backgroundColor: ['#3D405B', '#81B29A', '#E07A5F', '#F2CC8F'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: '各基金中SpaceX持股佔比 (%)'
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
