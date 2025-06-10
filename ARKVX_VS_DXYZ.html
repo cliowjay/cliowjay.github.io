@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARKVX vs. DXYZ 基金互動分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page, vertically-scrolling application with a sticky top navigation bar for smooth scrolling to sections. This structure facilitates a direct, sequential comparison of the two funds. The flow is: 1) High-level overview table for quick comparison. 2) Interactive portfolio visualization (donut charts) to highlight concentration differences. 3) Performance & Risk section using bar charts to emphasize DXYZ's premium and stat cards for clarity. 4) A text-based investor guide for actionable advice. This design was chosen to break down complex financial data into digestible, visually engaging components, making it more user-friendly than a static report. -->
+    <!-- Visualization & Content Choices: 
+        - Overview: Goal: Compare. Method: HTML Table. Interaction: None. Justification: Clear, direct comparison of core facts.
+        - Holdings: Goal: Compare Concentration. Method: Side-by-side Chart.js Donut Charts. Interaction: Tooltips. Justification: Visually powerful way to show DXYZ's extreme concentration in SpaceX vs. ARKVX.
+        - DXYZ Premium: Goal: Inform on Risk. Method: Chart.js Bar Chart. Interaction: Tooltips. Justification: Dramatically visualizes the huge gap between NAV and market price, the key risk for DXYZ.
+        - DXYZ Volatility: Goal: Illustrate Risk. Method: Chart.js Line Chart. Interaction: Tooltips. Justification: Shows the price instability mentioned in the report.
+        - Risk Summary: Goal: Organize/Inform. Method: Tabbed content sections (HTML/JS). Interaction: Click to switch views. Justification: Keeps the UI clean and separates complex risk factors for easier reading.
+        - Investor Guide: Goal: Inform/Advise. Method: Styled HTML cards. Interaction: None. Justification: Improves readability of text-heavy recommendations.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4; 
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #0d9488; /* teal-600 */
+        }
+        .active-link {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-active {
+            background-color: #0d9488 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-teal-700">基金比較</h1>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="nav-link py-2 border-b-2 border-transparent">基金概覽</a>
+                    <a href="#portfolio" class="nav-link py-2 border-b-2 border-transparent">持股比較</a>
+                    <a href="#performance" class="nav-link py-2 border-b-2 border-transparent">表現與風險</a>
+                    <a href="#guide" class="nav-link py-2 border-b-2 border-transparent">投資指南</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+                        <option value="#overview">基金概覽</option>
+                        <option value="#portfolio">持股比較</option>
+                        <option value="#performance">表現與風險</option>
+                        <option value="#guide">投資指南</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="intro" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">ARKVX vs. DXYZ 互動分析</h2>
+            <p class="max-w-3xl mx-auto text-slate-600">
+                本頁將 ARK Venture Fund (ARKVX) 與 Destiny Tech100 Fund (DXYZ) 的詳細報告轉化為互動式體驗。透過視覺化圖表和清晰的並排比較，深入了解這兩檔專注於顛覆性私營科技公司的基金，探索其策略、持股、表現和潛在風險。
+            </p>
+        </section>
+
+        <section id="overview" class="mb-16 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-slate-800 text-center mb-8">基金概覽：核心差異一目了然</h3>
+             <p class="max-w-3xl mx-auto text-slate-600 text-center mb-10">
+                此區塊直接比較 ARKVX 和 DXYZ 的核心特性。透過下方的表格，您可以快速掌握兩者在基金結構、投資策略、流動性機制及投資者可及性方面的根本差異，為後續的深入分析打下基礎。
+            </p>
+            <div class="overflow-x-auto bg-white rounded-lg shadow-lg p-4">
+                <table class="w-full text-left text-sm md:text-base">
+                    <thead class="bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-4 font-semibold text-slate-700">特性</th>
+                            <th class="p-4 font-semibold text-slate-700">ARK Venture Fund (ARKVX)</th>
+                            <th class="p-4 font-semibold text-slate-700">Destiny Tech100 Fund (DXYZ)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body" class="divide-y">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="portfolio" class="mb-16 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-slate-800 text-center mb-8">持股比較：揭示投資組合秘密</h3>
+            <p class="max-w-3xl mx-auto text-slate-600 text-center mb-10">
+                本節深入剖析兩檔基金的投資組合。下方的甜甜圈圖直觀地展示了各自前十大持股的權重分佈，讓您一眼看出其持股集中度的差異。您會發現兩者都重倉 SpaceX，但 DXYZ 的集中度遠高於 ARKVX。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold text-center mb-4">ARKVX 主要持股分佈</h4>
+                    <div class="chart-container">
+                        <canvas id="arkvxHoldingsChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold text-center mb-4">DXYZ 主要持股分佈</h4>
+                    <div class="chart-container">
+                        <canvas id="dxyzHoldingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="performance" class="mb-16 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-slate-800 text-center mb-8">表現與風險：機遇背後的挑戰</h3>
+             <p class="max-w-3xl mx-auto text-slate-600 text-center mb-10">
+                在這裡，我們將探討兩檔基金的表現數據和各自面臨的主要風險。ARKVX 的表現基於其淨值(NAV)，而 DXYZ 則面臨市場價格波動和巨大的溢價風險。下方的圖表和卡片將重點呈現這些關鍵的財務指標與風險因素。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold text-center mb-4">DXYZ: 股價 vs. 淨值 (NAV) 溢價風險</h4>
+                     <p class="text-sm text-slate-600 text-center mb-4">此圖表顯示了 DXYZ 的市場股價與其基礎資產淨值之間的巨大差距，這是投資 DXYZ 最顯著的風險之一。</p>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="dxyzPremiumChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold text-center mb-4">ARKVX: 淨值 (NAV) 表現</h4>
+                    <p class="text-sm text-slate-600 text-center mb-4">ARKVX 不在交易所交易，其表現以淨值衡量。以下是關鍵的淨值回報數據。</p>
+                    <div id="arkvx-performance-cards" class="flex flex-col justify-center items-center h-full space-y-4 pt-4">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h4 class="text-xl font-bold text-center mb-6">主要投資風險比較</h4>
+                <div class="flex justify-center mb-6 border-b">
+                    <button id="arkvx-risk-btn" class="tab-button tab-active px-6 py-2 -mb-px border-b-2 border-transparent font-medium rounded-t-lg">ARKVX 風險</button>
+                    <button id="dxyz-risk-btn" class="tab-button px-6 py-2 -mb-px border-b-2 border-transparent font-medium rounded-t-lg">DXYZ 風險</button>
+                </div>
+                <div id="risk-content">
+                    <div id="arkvx-risk-content">
+                        <ul id="arkvx-risk-list" class="space-y-3 list-disc list-inside text-slate-700"></ul>
+                    </div>
+                    <div id="dxyz-risk-content" class="hidden">
+                        <ul id="dxyz-risk-list" class="space-y-3 list-disc list-inside text-slate-700"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-slate-800 text-center mb-8">投資指南</h3>
+             <p class="max-w-3xl mx-auto text-slate-600 text-center mb-10">
+                本節提供基於報告分析的投資建議。內容涵蓋了適合投資這類基金的投資者類型、關鍵的投資考量因素，以及針對台灣投資者的購買途徑說明。請注意，所有投資決策都應基於個人情況並諮詢專業意見。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold mb-4 text-teal-700">適合的投資者類型</h4>
+                    <ul id="investor-profile-list" class="space-y-3 text-slate-700"></ul>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-xl font-bold mb-4 text-teal-700">投資考量與注意事項</h4>
+                    <ul id="investment-considerations-list" class="space-y-3 text-slate-700"></ul>
+                </div>
+            </div>
+            <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+                <h4 class="text-xl font-bold mb-4 text-teal-700">台灣投資者如何購買？</h4>
+                <div id="how-to-buy-content"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center text-sm">
+            <p>本頁面內容基於公開報告分析，僅供參考，不構成任何投資建議。</p>
+            <p>&copy; 2025 互動式基金分析。所有資訊請以基金公司官方文件為準。</p>
+        </div>
+    </footer>
+
+    <script>
+        const appData = {
+            comparison: [
+                { feature: '基金類型', arkvx: '區間基金 (Interval Fund)', dxyz: '封閉式基金 (Closed-end Fund)' },
+                { feature: '發行機構', arkvx: 'ARK Investment Management', dxyz: 'Destiny XYZ' },
+                { feature: '上市狀態', arkvx: '不在交易所上市', dxyz: '紐約證券交易所 (NYSE) 上市' },
+                { feature: '流動性', arkvx: '受限，每季度最多回購 5%', dxyz: '高，可在交易日隨時買賣' },
+                { feature: '核心策略', arkvx: '投資於顛覆性創新的私營和上市公司', dxyz: '投資於 100 家頂尖風險投資支持的私營科技公司' },
+                { feature: '主要風險', arkvx: '流動性風險、估值不確定性', dxyz: '極高的股價溢價風險、高度集中風險' }
+            ],
+            arkvxHoldings: {
+                labels: ['SpaceX', 'Lambda, Inc.', 'Anthropic, Inc.', 'Blockdaemon Inc.', 'Epic Games, Inc.', '其他'],
+                data: [16.96, 4.05, 4.05, 3.87, 3.12, 100-16.96-4.05-4.05-3.87-3.12]
+            },
+            dxyzHoldings: {
+                labels: ['SpaceX (經濟敞口)', 'Revolut', 'OpenAI (經濟敞口)', 'Axiom Space', 'Epic Games', '其他'],
+                data: [52.86, 9.03, 5.25, 4.67, 3.36, 100-52.86-9.03-5.25-4.67-3.36] // 38.72+11.53+2.61 = 52.86
+            },
+            dxyzPremium: {
+                price: 39.74,
+                nav: 6.44
+            },
+            arkvxPerformance: [
+                { label: '自成立以來總回報率', value: '17.12%', color: 'bg-teal-100', textColor: 'text-teal-800' },
+                { label: '2023 年淨值回報率', value: '61.24%', color: 'bg-green-100', textColor: 'text-green-800' },
+                { label: '2024 年淨值回報率', value: '6.69%', color: 'bg-blue-100', textColor: 'text-blue-800' },
+                { label: '最新淨值 (NAV)', value: '$30.52', color: 'bg-slate-100', textColor: 'text-slate-800' }
+            ],
+            risks: {
+                arkvx: [
+                    '**流動性風險**：股份不在交易所上市，僅能依賴基金每季度有限的回購要約。',
+                    '**估值不確定性**：私營公司估值缺乏透明度，NAV 可能波動。',
+                    '**非多元化風險**：基金可將較高比例資產集中於少數公司。',
+                    '**高失敗率**：投資的早期公司面臨較高的經營失敗風險。'
+                ],
+                dxyz: [
+                    '**高溢價風險**：市場股價遠超其淨值，溢價若收縮可能導致重大資本損失。',
+                    '**集中度風險**：對 SpaceX 的經濟敞口超過 50%，基金表現高度依賴單一公司。',
+                    '**高股價波動性**：股價每日波動劇烈，曾觸發交易暫停。',
+                    '**管理費**：每年收取 2.5% 的管理費，可能侵蝕回報。'
+                ]
+            },
+            investorProfile: [
+                '✔ **高風險承受能力者**：能承受顯著資本波動甚至本金損失。',
+                '✔ **長期投資視野者**：有耐心持有數年以待投資的公司成長。',
+                '✔ **對顛覆性創新有信念者**：理解並相信相關科技領域的潛力。',
+                '✔ **無需即時流動性者**：投入的應為長期閒置資金。'
+            ],
+            investmentConsiderations: [
+                '**多元化配置**：僅應佔投資組合中的一小部分，作為衛星配置。',
+                '**評估 DXYZ 高溢價**：這是投資 DXYZ 最關鍵的風險，需極其謹慎。',
+                '**了解 ARKVX 流動性限制**：接受其股份的非流動性，回購非保證。',
+                '**注意費用結構**：高費用會直接影響淨回報。',
+                '**諮詢專業意見**：在投資前務必閱讀公開說明書並諮詢財務顧問。'
+            ],
+            howToBuy: `
+                <p class="mb-4 text-slate-700">對於台灣投資者，購買這兩檔基金的主要途徑是透過提供美股交易的海外券商。請注意，具體可行性需直接與券商確認。</p>
+                <div class="space-y-4">
+                    <div>
+                        <h5 class="font-semibold text-slate-800">DXYZ (公開上市基金)</h5>
+                        <p class="text-slate-600">由於在紐約證券交易所 (NYSE) 上市，購買相對直接。您可以透過如盈透證券 (Interactive Brokers) 或嘉信理財 (Charles Schwab) 等國際券商開戶後，像買賣一般美股一樣進行交易。</p>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-slate-800">ARKVX (區間基金)</h5>
+                        <p class="text-slate-600">購買途徑較為受限，因其不在交易所交易。它主要透過 SoFi、Titan 等平台或向顧問開放的 Schwab 平台提供。台灣投資者需確認是否能在這些平台開戶並滿足其對非美國居民的購買資格要求。其流動性受限於季度回購，不適合需要隨時變現的投資者。</p>
+                    </div>
+                     <div>
+                        <h5 class="font-semibold text-slate-800">法規考量</h5>
+                        <p class="text-slate-600">直接投資此類基金可能需要符合台灣「專業投資人」資格。在做出任何投資決策前，建議諮詢您的金融顧問，了解相關法規與稅務影響。</p>
+                    </div>
+                </div>
+            `
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            function populateTable() {
+                const tableBody = document.getElementById('comparison-table-body');
+                appData.comparison.forEach(item => {
+                    const row = `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-4 font-medium text-slate-800">${item.feature}</td>
+                            <td class="p-4 text-slate-600">${item.arkvx}</td>
+                            <td class="p-4 text-slate-600">${item.dxyz}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            }
+            
+            function createDonutChart(canvasId, chartData) {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            data: chartData.data,
+                            backgroundColor: ['#0d9488', '#0f766e', '#115e59', '#134e4a', '#14532d', '#d1d5db'],
+                            borderColor: '#f8f7f4',
+                            borderWidth: 4,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed.toFixed(2) + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            function createPremiumChart() {
+                const ctx = document.getElementById('dxyzPremiumChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['資產淨值 (NAV)', '市場股價'],
+                        datasets: [{
+                            label: '美元價值',
+                            data: [appData.dxyzPremium.nav, appData.dxyzPremium.price],
+                            backgroundColor: ['#64748b', '#ef4444'],
+                            borderColor: ['#475569', '#b91c1c'],
+                            borderWidth: 2,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: `溢價: ${((appData.dxyzPremium.price / appData.dxyzPremium.nav - 1) * 100).toFixed(2)}%`,
+                                font: { size: 16, weight: 'bold' },
+                                color: '#ef4444'
+                            },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `$${context.parsed.x.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: '價格 (USD)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function populatePerformanceCards() {
+                const container = document.getElementById('arkvx-performance-cards');
+                appData.arkvxPerformance.forEach(item => {
+                    const card = `
+                        <div class="text-center p-4 rounded-lg w-full max-w-xs ${item.color}">
+                            <p class="text-sm font-medium ${item.textColor}">${item.label}</p>
+                            <p class="text-3xl font-bold ${item.textColor}">${item.value}</p>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            }
+            
+            function populateRiskLists() {
+                const arkvxList = document.getElementById('arkvx-risk-list');
+                const dxyzList = document.getElementById('dxyz-risk-list');
+                
+                appData.risks.arkvx.forEach(risk => arkvxList.innerHTML += `<li>${risk.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`);
+                appData.risks.dxyz.forEach(risk => dxyzList.innerHTML += `<li>${risk.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`);
+            }
+
+            function setupRiskTabs() {
+                const arkvxBtn = document.getElementById('arkvx-risk-btn');
+                const dxyzBtn = document.getElementById('dxyz-risk-btn');
+                const arkvxContent = document.getElementById('arkvx-risk-content');
+                const dxyzContent = document.getElementById('dxyz-risk-content');
+
+                arkvxBtn.addEventListener('click', () => {
+                    arkvxBtn.classList.add('tab-active');
+                    dxyzBtn.classList.remove('tab-active');
+                    arkvxContent.classList.remove('hidden');
+                    dxyzContent.classList.add('hidden');
+                });
+
+                dxyzBtn.addEventListener('click', () => {
+                    dxyzBtn.classList.add('tab-active');
+                    arkvxBtn.classList.remove('tab-active');
+                    dxyzContent.classList.remove('hidden');
+                    arkvxContent.classList.add('hidden');
+                });
+            }
+            
+            function populateGuide() {
+                const investorList = document.getElementById('investor-profile-list');
+                const considerationsList = document.getElementById('investment-considerations-list');
+                const howToBuyContainer = document.getElementById('how-to-buy-content');
+
+                appData.investorProfile.forEach(item => {
+                    investorList.innerHTML += `<li class="flex items-start"><span class="mr-2 text-teal-600">${item.substring(0,1)}</span><span>${item.substring(2)}</span></li>`;
+                });
+                appData.investmentConsiderations.forEach(item => {
+                    considerationsList.innerHTML += `<li class="flex items-start"><span class="mr-2 text-teal-600">⚠</span><span>${item.substring(2)}</span></li>`;
+                });
+                howToBuyContainer.innerHTML = appData.howToBuy;
+            }
+            
+            function setupNavScroll() {
+                const mobileNav = document.getElementById('mobile-nav');
+                mobileNav.addEventListener('change', (e) => {
+                    const targetId = e.target.value;
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                });
+
+                const sections = document.querySelectorAll('section[id]');
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.getAttribute('id');
+                            navLinks.forEach(link => {
+                                link.classList.remove('active-link');
+                                if (link.getAttribute('href') === `#${id}`) {
+                                    link.classList.add('active-link');
+                                }
+                            });
+                             mobileNav.value = `#${id}`;
+                        }
+                    });
+                }, { rootMargin: "-50% 0px -50% 0px" });
+
+                sections.forEach(section => observer.observe(section));
+            }
+
+            // --- Initialize App ---
+            populateTable();
+            createDonutChart('arkvxHoldingsChart', appData.arkvxHoldings);
+            createDonutChart('dxyzHoldingsChart', appData.dxyzHoldings);
+            createPremiumChart();
+            populatePerformanceCards();
+            populateRiskLists();
+            setupRiskTabs();
+            populateGuide();
+            setupNavScroll();
+        });
+    </script>
+</body>
+</html>
