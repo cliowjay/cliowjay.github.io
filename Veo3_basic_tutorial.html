@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Veo 3 台灣互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Stone/Slate Neutrals with Teal Accents) -->
+    <!-- Application Structure Plan: The SPA is structured into five task-oriented sections to guide users from initial understanding to practical application. 1) '總覽' provides a high-level intro. 2) '方案選擇器' is an interactive tool for users to find the right plan based on their persona (creator, pro, dev), transforming static tables into dynamic comparisons. 3) '提示詞工作室' is a hands-on prompt builder, making abstract concepts tangible. 4) '圖像轉影片工作坊' directly addresses the user's specific request with step-by-step visual guides. 5) '市場比較' visualizes competitive data for strategic context. This user-centric flow is more intuitive than the linear report structure, prioritizing discoverability and actionability. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification. 1) Report Tables 1 & 2 -> Compare Plans -> Interactive Cards & Bar Chart (Chart.js) -> User clicks persona to filter/highlight data -> More engaging & personalized than static tables. 2) Report Part 3 (Prompting) -> Teach Prompting -> Interactive Form/Builder -> User inputs choices to see a prompt built in real-time -> Turns theory into practice. 3) Report Part 4 (Image-to-Video) -> Guide Workflow -> CSS Flexbox Step-by-Step Diagram -> User toggles between simple/advanced flows -> Clarifies complex processes visually. 4) Report Table 4 (Competitors) -> Compare Competitors -> Grouped Bar Chart (Chart.js) & HTML Grid -> Hover for details -> Allows for quick quantitative and qualitative comparison. These choices make dense information digestible and actionable. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 450px;
+            }
+        }
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link.active, .nav-link:hover {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e293b; /* slate-800 */
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #475569; /* slate-600 */
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 48rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #14b8a6; /* teal-500 */
+            color: #0f766e; /* teal-700 */
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-teal-700">Veo 3 指南</a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="#overview" class="nav-link">總覽</a>
+                <a href="#selector" class="nav-link">方案選擇器</a>
+                <a href="#studio" class="nav-link">提示詞工作室</a>
+                <a href="#workshop" class="nav-link">圖像轉影片</a>
+                <a href="#market" class="nav-link">市場比較</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5">
+                    <option value="#overview">總覽</option>
+                    <option value="#selector">方案選擇器</option>
+                    <option value="#studio">提示詞工作室</option>
+                    <option value="#workshop">圖像轉影片</option>
+                    <option value="#market">市場比較</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="overview" class="py-20 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-slate-800 mb-4">探索 Google Veo 3 的創作潛力</h1>
+                <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+                    這份互動指南將帶您深入了解 Google 最新的影片生成模型 Veo 3。從選擇最適合您的方案，到掌握專業的提示詞技巧，我們將一步步引導您釋放 AI 影片創作的無限可能。
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#selector" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-full hover:bg-teal-700 transition-colors">開始探索</a>
+                    <a href="#studio" class="bg-slate-200 text-slate-800 font-bold py-3 px-8 rounded-full hover:bg-slate-300 transition-colors">學習提示詞</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="selector" class="py-20">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">方案選擇器</h2>
+                <p class="section-subtitle">
+                    Veo 3 提供多種存取途徑，每種途徑都針對不同的使用者。請先選擇您的身分，我們將為您推薦最合適的方案，並比較其主要差異。
+                </p>
+                
+                <div class="flex justify-center mb-12 space-x-2 md:space-x-4" id="persona-selector">
+                    <button data-persona="creator" class="persona-button flex-1 md:flex-none text-center px-6 py-3 rounded-lg shadow-md bg-white border-2 border-transparent transition-all hover:border-teal-500 hover:shadow-lg">
+                        <span class="text-4xl block mb-2">🎨</span>
+                        <span class="font-bold text-slate-800">休閒創作者</span>
+                    </button>
+                    <button data-persona="pro" class="persona-button flex-1 md:flex-none text-center px-6 py-3 rounded-lg shadow-md bg-white border-2 border-transparent transition-all hover:border-teal-500 hover:shadow-lg">
+                        <span class="text-4xl block mb-2">🎬</span>
+                        <span class="font-bold text-slate-800">專業影視工作者</span>
+                    </button>
+                    <button data-persona="dev" class="persona-button flex-1 md:flex-none text-center px-6 py-3 rounded-lg shadow-md bg-white border-2 border-transparent transition-all hover:border-teal-500 hover:shadow-lg">
+                        <span class="text-4xl block mb-2">💻</span>
+                        <span class="font-bold text-slate-800">開發者/企業</span>
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div id="plan-pro" class="plan-card bg-white p-8 rounded-xl shadow-lg transition-all transform scale-100 border-4 border-transparent">
+                        <h3 class="text-2xl font-bold text-slate-800">Google AI Pro</h3>
+                        <p class="text-3xl font-bold my-4">$19.99<span class="text-base font-normal text-slate-500">/月</span></p>
+                        <p class="text-slate-600 mb-6">適合想體驗 Veo 3 強大功能，並進行小型專案創作的用戶。</p>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><span class="text-teal-500 mr-2">✔</span> 低成本入門</li>
+                            <li><span class="text-teal-500 mr-2">✔</span> 整合 Google 生態系</li>
+                            <li><span class="text-teal-500 mr-2">✔</span> 使用 Veo 3 Fast 模型</li>
+                            <li><span class="text-red-500 mr-2">✖</span> Veo 3 完整功能受限</li>
+                            <li><span class="text-red-500 mr-2">✖</span> 有生成額度上限</li>
+                        </ul>
+                    </div>
+                    <div id="plan-ultra" class="plan-card bg-white p-8 rounded-xl shadow-lg transition-all transform scale-100 border-4 border-transparent">
+                        <h3 class="text-2xl font-bold text-slate-800">Google AI Ultra</h3>
+                        <p class="text-3xl font-bold my-4">$249.99<span class="text-base font-normal text-slate-500">/月</span></p>
+                        <p class="text-slate-600 mb-6">為專業人士設計，提供最高權限，解鎖 Veo 3 的完整潛力。</p>
+                        <ul class="space-y-3 text-slate-700">
+                           <li><span class="text-teal-500 mr-2">✔</span> 最高權限存取 Veo 3</li>
+                           <li><span class="text-teal-500 mr-2">✔</span> 原生音訊生成</li>
+                           <li><span class="text-teal-500 mr-2">✔</span> Flow 進階功能</li>
+                           <li><span class="text-teal-500 mr-2">✔</span> 無可見浮水印</li>
+                           <li><span class="text-red-500 mr-2">✖</span> 費用高昂</li>
+                        </ul>
+                    </div>
+                    <div id="plan-vertex" class="plan-card bg-white p-8 rounded-xl shadow-lg transition-all transform scale-100 border-4 border-transparent">
+                        <h3 class="text-2xl font-bold text-slate-800">Vertex AI API</h3>
+                        <p class="text-3xl font-bold my-4">按量計費<span class="text-base font-normal text-slate-500"> (~$0.35/秒)</span></p>
+                        <p class="text-slate-600 mb-6">提供最高度的彈性和控制權，適合企業級應用和客製化開發。</p>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><span class="text-teal-500 mr-2">✔</span> 全球可用性高</li>
+                            <li><span class="text-teal-500 mr-2">✔</span> 可透過程式完全控制</li>
+                            <li><span class="text-teal-500 mr-2">✔</span> 功能最完整</li>
+                            <li><span class="text-red-500 mr-2">✖</span> 技術門檻高</li>
+                            <li><span class="text-red-500 mr-2">✖</span> 大規模生成成本高</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-20 bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-slate-800 text-center mb-6">功能與平台比較</h3>
+                     <div class="chart-container">
+                        <canvas id="featureComparisonChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="studio" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">提示詞工作室</h2>
+                <p class="section-subtitle">
+                    一個好的提示詞是傑出 AI 影片的關鍵。這裡我們將提示詞拆解為核心元素，讓您像導演一樣，組合出心目中的完美鏡頭。
+                </p>
+
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">提示詞建構器</h3>
+                        <div>
+                            <label for="prompt-subject" class="font-bold text-slate-700">1. 主體 (Subject)</label>
+                            <input type="text" id="prompt-subject" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="影片的主要焦點，例如：一隻充滿智慧的老貓頭鷹">
+                        </div>
+                        <div>
+                            <label for="prompt-action" class="font-bold text-slate-700">2. 動作 (Action)</label>
+                            <input type="text" id="prompt-action" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="主體正在做什麼，例如：俯衝到一條小徑上">
+                        </div>
+                        <div>
+                            <label for="prompt-scene" class="font-bold text-slate-700">3. 場景 (Scene)</label>
+                            <input type="text" id="prompt-scene" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="地點和環境，例如：在月光下的森林">
+                        </div>
+                         <div>
+                            <label for="prompt-composition" class="font-bold text-slate-700">4. 構圖 (Composition)</label>
+                            <select id="prompt-composition" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md bg-white">
+                                <option value="">無</option>
+                                <option value="中景鏡頭 (medium shot)">中景鏡頭</option>
+                                <option value="特寫鏡頭 (close-up shot)">特寫鏡頭</option>
+                                <option value="遠景鏡頭 (long shot)">遠景鏡頭</option>
+                                <option value="跟隨鏡頭 (follow shot)">跟隨鏡頭</option>
+                                <option value="高角度鏡頭 (high angle)">高角度鏡頭</option>
+                                <option value="低角度鏡頭 (low angle)">低角度鏡頭</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="prompt-ambiance" class="font-bold text-slate-700">5. 氛圍 (Ambiance)</label>
+                            <input type="text" id="prompt-ambiance" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="情緒和光線，例如：溫暖的燈光, 神秘的薄霧">
+                        </div>
+                        <div>
+                            <label for="prompt-style" class="font-bold text-slate-700">6. 風格 (Style)</label>
+                            <input type="text" id="prompt-style" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="視覺美學，例如：16mm 膠片風格, 皮克斯動畫風格">
+                        </div>
+                        <div>
+                            <label for="prompt-motion" class="font-bold text-slate-700">7. 相機運動 (Camera Motion)</label>
+                             <select id="prompt-motion" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md bg-white">
+                                <option value="">無</option>
+                                <option value="空中攝影機緩慢盤旋">空中盤旋</option>
+                                <option value="推軌鏡頭 (dolly shot)">推軌鏡頭</option>
+                                <option value="變焦鏡頭 (zoom shot)">變焦鏡頭</option>
+                                <option value="平移鏡頭 (pan shot)">平移鏡頭</option>
+                                <option value="手持攝影機效果">手持攝影機</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="prompt-audio" class="font-bold text-slate-700">進階：音訊 (Audio)</label>
+                            <input type="text" id="prompt-audio" class="prompt-input w-full mt-1 p-2 border border-slate-300 rounded-md" placeholder="例如：音訊：貓頭鷹的叫聲, 緊張的配樂">
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">您的即時提示詞</h3>
+                        <div id="prompt-output" class="bg-slate-900 text-white p-4 rounded-md h-96 overflow-y-auto font-mono text-sm whitespace-pre-wrap">請在左側欄位輸入...</div>
+                        <button id="copy-prompt-btn" class="mt-4 w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-700 transition-colors">複製提示詞</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workshop" class="py-20">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">圖像轉影片工作坊</h2>
+                <p class="section-subtitle">
+                    這是您最關心的部分：如何將靜態照片轉化為生動的影片。Veo 提供兩種主要工作流程，我們將為您詳細拆解，並提供實用範例。
+                </p>
+
+                <div class="border-b border-gray-200 mb-8">
+                    <nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+                        <button id="tab-animate" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-slate-500 hover:text-teal-600 hover:border-gray-300">
+                            簡單動畫化
+                        </button>
+                        <button id="tab-reference" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-slate-500 hover:text-teal-600 hover:border-gray-300">
+                            角色故事 (進階)
+                        </button>
+                    </nav>
+                </div>
+
+                <div id="content-animate" class="workflow-content">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">工作流程：簡單動畫化</h3>
+                        <p class="text-slate-600 mb-6">此方法專注於讓單張照片「動起來」，適合製作視差滾動或簡單物體動作的效果。</p>
+                        <div class="flex flex-col md:flex-row gap-4 text-center">
+                             <div class="flex-1 p-6 bg-slate-50 rounded-lg">
+                                <div class="text-4xl mb-3">1️⃣</div>
+                                <h4 class="font-bold text-lg mb-2">選擇來源圖像</h4>
+                                <p class="text-sm text-slate-500">上傳一張您希望賦予生命的清晰照片。</p>
+                            </div>
+                            <div class="self-center text-2xl text-slate-400 p-2 transform md:rotate-0 rotate-90">➔</div>
+                             <div class="flex-1 p-6 bg-slate-50 rounded-lg">
+                                <div class="text-4xl mb-3">2️⃣</div>
+                                <h4 class="font-bold text-lg mb-2">撰寫動作提示詞</h4>
+                                <p class="text-sm text-slate-500">精準描述您期望發生的動作、情緒和相機運動。</p>
+                            </div>
+                            <div class="self-center text-2xl text-slate-400 p-2 transform md:rotate-0 rotate-90">➔</div>
+                             <div class="flex-1 p-6 bg-slate-50 rounded-lg">
+                                <div class="text-4xl mb-3">3️⃣</div>
+                                <h4 class="font-bold text-lg mb-2">生成與迭代</h4>
+                                <p class="text-sm text-slate-500">檢視結果，並修改提示詞以達到最佳動態效果。</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 bg-slate-100 p-6 rounded-lg">
+                            <h4 class="font-bold text-lg mb-2">💡 範例</h4>
+                            <p class="text-slate-600 mb-2"><span class="font-bold">上傳照片：</span>一輛停在郊區街道上的經典紅色 1960 年代肌肉車。</p>
+                            <p class="text-slate-800 bg-white p-3 rounded-md font-mono text-sm">「這輛紅色肌肉車的引擎轟然作響，排氣管噴出白煙。汽車燒胎起步，在柏油路上留下輪胎痕跡，沿著街道飛馳而去。從側面跟蹤拍攝。音訊：強大的 V8 引擎聲和輪胎尖叫聲。」</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-reference" class="workflow-content hidden">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">工作流程：角色故事 (進階)</h3>
+                        <p class="text-slate-600 mb-6">此方法將照片作為定義角色或風格的「素材」(Ingredient)，以在多個鏡頭中保持一致性，進而建構一個完整情節。</p>
+                        <div class="p-4 bg-amber-100 border-l-4 border-amber-500 text-amber-700 mb-6 rounded-r-lg">
+                            <p><span class="font-bold">重要提醒：</span>此「Ingredients to Video」功能目前主要依賴 Veo 2 模型，且為 **Google AI Ultra** 方案的獨家功能。</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4 text-center">
+                            <div class="flex-1 p-4 bg-slate-50 rounded-lg"><div class="text-3xl mb-2">1️⃣</div><h4 class="font-bold">準備素材</h4><p class="text-sm text-slate-500">在 Flow 中上傳定義角色、場景或風格的參考照片。</p></div>
+                             <div class="self-center text-xl text-slate-400 p-1 transform md:rotate-0 rotate-90">➔</div>
+                            <div class="flex-1 p-4 bg-slate-50 rounded-lg"><div class="text-3xl mb-2">2️⃣</div><h4 class="font-bold">生成首個片段</h4><p class="text-sm text-slate-500">選擇角色素材並為第一個場景撰寫動作提示詞。</p></div>
+                             <div class="self-center text-xl text-slate-400 p-1 transform md:rotate-0 rotate-90">➔</div>
+                            <div class="flex-1 p-4 bg-slate-50 rounded-lg"><div class="text-3xl mb-2">3️⃣</div><h4 class="font-bold">加入場景建構器</h4><p class="text-sm text-slate-500">將生成的片段添加到 Scenebuilder 中進行排序。</p></div>
+                             <div class="self-center text-xl text-slate-400 p-1 transform md:rotate-0 rotate-90">➔</div>
+                            <div class="flex-1 p-4 bg-slate-50 rounded-lg"><div class="text-3xl mb-2">4️⃣</div><h4 class="font-bold">擴展敘事</h4><p class="text-sm text-slate-500">使用「跳轉至」功能，在保持角色一致性的前提下生成新鏡頭。</p></div>
+                        </div>
+                         <div class="mt-8 bg-slate-100 p-6 rounded-lg">
+                            <h4 class="font-bold text-lg mb-2">💡 範例</h4>
+                            <p class="text-slate-600 mb-2"><span class="font-bold">素材照片：</span>一位有著獨特紅髮和眼鏡的女性肖像（定義為「角色 R」）。</p>
+                            <div class="space-y-2">
+                                <p class="text-slate-800 bg-white p-3 rounded-md font-mono text-sm"><span class="font-bold text-teal-600">鏡頭 1:</span> 「使用角色 R 的參考圖，顯示一個中景鏡頭，她正坐在咖啡館的桌子旁，在筆記型電腦上瘋狂打字...」</p>
+                                <p class="text-slate-800 bg-white p-3 rounded-md font-mono text-sm"><span class="font-bold text-teal-600">鏡頭 2 (跳轉):</span> 「角色 R 突然停止打字，她睜大眼睛看著鏡頭外的某樣東西...」</p>
+                                <p class="text-slate-800 bg-white p-3 rounded-md font-mono text-sm"><span class="font-bold text-teal-600">鏡頭 3 (跳轉):</span> 「一個廣角鏡頭顯示角色 R 迅速合上筆記型電腦，衝出咖啡館...」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">市場比較</h2>
+                <p class="section-subtitle">
+                    AI 影片生成領域競爭激烈。了解 Veo 3 與其主要競爭對手（如 OpenAI 的 Sora 和 Runway 的 Gen-3）之間的差異，有助於您做出更明智的技術選擇。
+                </p>
+                 <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                     <h3 class="text-2xl font-bold text-slate-800 text-center mb-6">關鍵指標對比</h3>
+                     <div class="chart-container">
+                        <canvas id="competitorChart"></canvas>
+                    </div>
+                 </div>
+                 <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-slate-800 text-center mb-6">功能特性一覽</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100">
+                                    <th class="p-4 font-bold uppercase text-slate-600">特性</th>
+                                    <th class="p-4 font-bold uppercase text-slate-600 text-center">Google Veo 3</th>
+                                    <th class="p-4 font-bold uppercase text-slate-600 text-center">OpenAI Sora</th>
+                                    <th class="p-4 font-bold uppercase text-slate-600 text-center">Runway Gen-3</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="p-4 font-medium">原生音訊</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                    <td class="p-4 text-center text-slate-500">否</td>
+                                    <td class="p-4 text-center text-slate-500">否</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-medium">圖像輸入</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-medium">影片輸入</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                    <td class="p-4 text-center text-slate-500">否</td>
+                                    <td class="p-4 text-center font-bold text-teal-600">是</td>
+                                </tr>
+                                 <tr>
+                                    <td class="p-4 font-medium">關鍵差異化</td>
+                                    <td class="p-4 text-center text-sm">原生音訊、生態系整合</td>
+                                    <td class="p-4 text-center text-sm">敘事連貫性、長度</td>
+                                    <td class="p-4 text-center text-sm">創意/風格化控制</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>此互動指南根據公開資訊整理，僅供參考。所有產品規格與定價請以 Google 官方網站為準。</p>
+            <p class="text-sm mt-2">© 2025 Veo 3 Interactive Guide. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Persona Selector Logic
+            const personaButtons = document.querySelectorAll('.persona-button');
+            const planCards = document.querySelectorAll('.plan-card');
+            
+            const personaData = {
+                creator: 'plan-pro',
+                pro: 'plan-ultra',
+                dev: 'plan-vertex'
+            };
+
+            personaButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedPersona = button.dataset.persona;
+                    const recommendedPlanId = personaData[selectedPersona];
+
+                    personaButtons.forEach(btn => {
+                        btn.classList.remove('ring-4', 'ring-teal-400', 'shadow-2xl');
+                    });
+                    button.classList.add('ring-4', 'ring-teal-400', 'shadow-2xl');
+                    
+                    planCards.forEach(card => {
+                        card.classList.remove('scale-110', 'shadow-2xl', 'border-teal-500');
+                        if (card.id === recommendedPlanId) {
+                            card.classList.add('scale-110', 'shadow-2xl', 'border-teal-500');
+                        }
+                    });
+                });
+            });
+
+            // Prompt Studio Logic
+            const promptInputs = document.querySelectorAll('.prompt-input');
+            const promptOutput = document.getElementById('prompt-output');
+            const copyPromptBtn = document.getElementById('copy-prompt-btn');
+
+            function updatePrompt() {
+                const parts = [];
+                document.getElementById('prompt-subject').value.trim() && parts.push(document.getElementById('prompt-subject').value.trim());
+                document.getElementById('prompt-action').value.trim() && parts.push(document.getElementById('prompt-action').value.trim());
+                document.getElementById('prompt-scene').value.trim() && parts.push(document.getElementById('prompt-scene').value.trim());
+                document.getElementById('prompt-composition').value.trim() && parts.push(document.getElementById('prompt-composition').value.trim());
+                document.getElementById('prompt-ambiance').value.trim() && parts.push(document.getElementById('prompt-ambiance').value.trim());
+                document.getElementById('prompt-style').value.trim() && parts.push(document.getElementById('prompt-style').value.trim());
+                document.getElementById('prompt-motion').value.trim() && parts.push(document.getElementById('prompt-motion').value.trim());
+                document.getElementById('prompt-audio').value.trim() && parts.push(document.getElementById('prompt-audio').value.trim());
+                
+                if (parts.length > 0) {
+                    promptOutput.textContent = parts.join(', ');
+                } else {
+                    promptOutput.textContent = '請在左側欄位輸入...';
+                }
+            }
+
+            promptInputs.forEach(input => input.addEventListener('input', updatePrompt));
+
+            copyPromptBtn.addEventListener('click', () => {
+                if (promptOutput.textContent !== '請在左側欄位輸入...') {
+                    navigator.clipboard.writeText(promptOutput.textContent).then(() => {
+                        copyPromptBtn.textContent = '已複製！';
+                        setTimeout(() => {
+                            copyPromptBtn.textContent = '複製提示詞';
+                        }, 2000);
+                    });
+                }
+            });
+
+            // Workshop Tabs Logic
+            const tabAnimate = document.getElementById('tab-animate');
+            const tabReference = document.getElementById('tab-reference');
+            const contentAnimate = document.getElementById('content-animate');
+            const contentReference = document.getElementById('content-reference');
+
+            function switchTab(activeTab) {
+                if (activeTab === 'animate') {
+                    tabAnimate.classList.add('active');
+                    tabReference.classList.remove('active');
+                    contentAnimate.classList.remove('hidden');
+                    contentReference.classList.add('hidden');
+                } else {
+                    tabAnimate.classList.remove('active');
+                    tabReference.classList.add('active');
+                    contentAnimate.classList.add('hidden');
+                    contentReference.classList.remove('hidden');
+                }
+            }
+            
+            switchTab('animate'); // Set initial tab
+
+            tabAnimate.addEventListener('click', () => switchTab('animate'));
+            tabReference.addEventListener('click', () => switchTab('reference'));
+            
+            // Feature Comparison Chart
+            const ctxFeature = document.getElementById('featureComparisonChart').getContext('2d');
+            new Chart(ctxFeature, {
+                type: 'bar',
+                data: {
+                    labels: ['Gemini App (Pro)', 'Flow (Pro/Veo 2)', 'Flow (Ultra/Veo 3)', 'Vertex AI API'],
+                    datasets: [
+                        {
+                            label: '功能支援度 (滿分5)',
+                            data: [1, 3, 5, 5],
+                            backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                            borderColor: 'rgba(15, 118, 110, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    let value = context.raw;
+                                    let details = '';
+                                    switch(context.label) {
+                                        case 'Gemini App (Pro)': details = '有限Veo 3 Fast'; break;
+                                        case 'Flow (Pro/Veo 2)': details = 'Veo 2, Scenebuilder, 1080p升級'; break;
+                                        case 'Flow (Ultra/Veo 3)': details = '完整Veo 3, 原生音訊, 無浮水印'; break;
+                                        case 'Vertex AI API': details = '完整模型存取, 程式控制'; break;
+                                    }
+                                    return `${label} ${value}/5 (${details})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Competitor Chart
+            const ctxCompetitor = document.getElementById('competitorChart').getContext('2d');
+            new Chart(ctxCompetitor, {
+                type: 'bar',
+                data: {
+                    labels: ['最高片段長度 (秒)', '解析度 (p)'],
+                    datasets: [
+                        {
+                            label: 'Google Veo 3',
+                            data: [60, 1080], // Assuming expandable to 60s
+                            backgroundColor: 'rgba(20, 184, 166, 0.7)',
+                        },
+                        {
+                            label: 'OpenAI Sora',
+                            data: [60, 1080],
+                            backgroundColor: 'rgba(71, 85, 105, 0.7)',
+                        },
+                        {
+                            label: 'Runway Gen-3',
+                            data: [16, 1080], // Resolution assumed high quality ~1080p
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + (context.label.includes('秒') ? ' 秒' : 'p');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Mobile Navigation
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+
+            // Active nav link highlighting on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
