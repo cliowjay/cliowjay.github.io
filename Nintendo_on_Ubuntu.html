@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 復古遊戲模擬器互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Retro Harmony -->
+    <!-- Application Structure Plan: The application is designed as a task-oriented interactive guide. It starts with a primary choice (NES or Game Boy) to immediately filter the user's options. The core is a dynamic card-based comparison system, allowing users to see key emulator info at a glance and expand for details (like installation commands). This is more user-friendly than a linear report, as it guides decision-making. A dedicated interactive chart provides a quick visual comparison, while separate, clearly-defined sections for the "All-in-One" solution (RetroArch) and "Legal/Management" topics keep the main flow uncluttered. This structure prioritizes user choice and clarity, transforming the report's content into an actionable tool. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Emulator options for NES/GB. -> Goal: Compare & Choose. -> Viz/Method: Side-by-side interactive cards (HTML/Tailwind) with key data points (Best for, Ease of Use). -> Interaction: Main filter buttons (NES/GB) dynamically render the relevant cards. A "Show Details" toggle reveals installation instructions. -> Justification: Allows for quick, focused comparison without information overload.
+        - Report Info: Emulator characteristics (Accuracy, Features, etc.). -> Goal: Visual Comparison. -> Viz/Method: Interactive Bar Chart (Chart.js/Canvas). -> Interaction: Filter buttons update chart data, tooltips show specific ratings. -> Justification: Provides a high-level, data-driven overview to supplement the qualitative info in the cards.
+        - Report Info: Installation commands, legal advice. -> Goal: Organize & Inform. -> Viz/Method: Collapsible sections/accordions (HTML/JS). -> Interaction: Click to expand/collapse. -> Justification: Hides complex or dense information by default, keeping the UI clean and focused.
+        - Report Info: Legal ROM acquisition methods. -> Goal: Inform Responsibly. -> Viz/Method: Styled list with icons (HTML/Tailwind/Unicode). -> Justification: Makes critical legal information clear, digestible, and visually distinct.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .details-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .details-section.open {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">Ubuntu 復古遊戲模擬器互動指南</h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto">這是一份將詳細報告轉化而來的互動指南，旨在幫助您輕鬆選擇、安裝並遊玩任天堂紅白機 (NES) 與 Game Boy (GB/GBC/GBA) 的經典遊戲。</p>
+        </header>
+
+        <section id="platform-selector" class="mb-12">
+            <h2 class="text-2xl font-bold text-center mb-6 text-slate-800">第一步：選擇您想玩的遊戲平台</h2>
+            <div id="nav-buttons" class="flex justify-center items-center space-x-2 md:space-x-4 bg-slate-200 p-2 rounded-full max-w-md mx-auto">
+                <button data-platform="nes" class="nav-btn w-full text-center py-3 px-4 rounded-full font-semibold text-slate-700 bg-white shadow-sm">
+                    任天堂 (NES)
+                </button>
+                <button data-platform="gb" class="nav-btn w-full text-center py-3 px-4 rounded-full font-semibold text-slate-700 bg-white shadow-sm">
+                    Game Boy (全系列)
+                </button>
+            </div>
+        </section>
+
+        <section id="emulator-comparison" class="mb-12">
+             <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">模擬器比較與選擇</h2>
+                <p class="text-slate-600 mt-2">根據您的選擇，以下是推薦的模擬器。點擊卡片可查看安裝詳情。</p>
+            </div>
+            <div id="emulator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Emulator cards will be dynamically inserted here -->
+            </div>
+             <p id="initial-message" class="text-center text-slate-500 py-16">請從上方選擇一個遊戲平台開始探索。</p>
+        </section>
+
+        <section id="comparison-chart-section" class="mb-12 bg-white p-6 rounded-2xl shadow-lg" style="display: none;">
+            <h2 class="text-3xl font-bold text-slate-800 text-center mb-2">功能視覺化比較</h2>
+            <p class="text-slate-600 text-center mb-6">這張圖表根據模擬精度、易用性和功能豐富度對各模擬器進行評分，助您快速決策。</p>
+            <div class="chart-container max-w-4xl mx-auto">
+                <canvas id="emulatorChart"></canvas>
+            </div>
+        </section>
+
+        <section id="all-in-one" class="mb-12">
+            <div class="bg-indigo-700 text-white rounded-2xl p-8 shadow-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-center"> универсальне рішення：RetroArch</h2>
+                <p class="text-indigo-200 mb-6 max-w-3xl mx-auto text-center">如果您希望在一個統一的界面中管理和遊玩來自多個平台的遊戲，RetroArch 是您的終極選擇。它本身是一個前端應用，通過加載不同的「核心」(Cores) 來模擬各種遊戲機，提供了極大的靈活性和強大的功能，如濾鏡、網路對戰和完善的遊戲庫管理。</p>
+                <div class="bg-indigo-800/50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">NES 推薦核心</h4>
+                        <p class="text-indigo-200"><span class="font-semibold text-white">Mesen:</span> 提供最高的模擬精度。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">Game Boy 推薦核心</h4>
+                        <p class="text-indigo-200"><span class="font-semibold text-white">mGBA / Gambatte:</span> 兼顧性能與精準度。</p>
+                    </div>
+                </div>
+                 <div class="mt-6 text-center">
+                    <button id="retroarch-toggle" class="bg-white text-indigo-700 font-bold py-2 px-6 rounded-full hover:bg-indigo-100 transition">顯示安裝指令</button>
+                    <div id="retroarch-details" class="details-section mt-4 text-left">
+                         <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code># 透過 Snap (推薦)
+sudo snap install retroarch
+
+# 透過 Flatpak
+sudo apt install flatpak
+flatpak install flathub org.libretro.RetroArch
+
+# 透過 PPA
+sudo add-apt-repository ppa:libretro/stable
+sudo apt update
+sudo apt install retroarch</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="power-users" class="mb-12">
+            <h2 class="text-3xl font-bold text-slate-800 text-center mb-8">進階玩家工具</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Mednafen：為追求極致精度</h3>
+                    <p class="text-slate-600">一款以命令行驅動的多系統模擬器，雖然操作複雜，但其模擬精度在許多平台上（特別是 PS1）被公認為頂級。適合不畏懼挑戰、追求最純粹復古體驗的資深用戶。</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">RomM：專業遊戲庫管家</h3>
+                    <p class="text-slate-600">一個自託管的 ROM 管理工具，可以自動抓取遊戲封面、資訊，並提供美觀的瀏覽介面。它不是模擬器，而是幫助您整理龐大遊戲收藏的利器。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="rom-management" class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-slate-800 text-center mb-2">遊戲 ROM 的獲取與管理</h2>
+            <p class="text-slate-600 text-center mb-8">獲取遊戲 ROM 涉及版權問題，請務必循合法途徑。以下是一些建議與管理策略。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-4">合法獲取途徑</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">💿</span><div><strong class="text-slate-800">自行提取：</strong>從您擁有的正版遊戲卡帶中提取 ROM 備份。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">🛒</span><div><strong class="text-slate-800">官方合集：</strong>購買 Steam 等平台發行的官方復古遊戲合集。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">🏠</span><div><strong class="text-slate-800">自製遊戲 (Homebrew)：</strong>下載由社群開發的免費、合法新遊戲。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">🌍</span><div><strong class="text-slate-800">公共領域：</strong>尋找版權已過期或作者已釋出的遊戲。</div></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-4">高效管理策略</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">📁</span><div><strong class="text-slate-800">集中存放：</strong>按平台分門別類，建立有組織的文件夾結構。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">🏷️</span><div><strong class="text-slate-800">規範命名：</strong>使用一致的命名規則，方便模擬器識別。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">💾</span><div><strong class="text-slate-800">備份存檔：</strong>定期備份您的遊戲進度，防止意外遺失。</div></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-3 mt-1">🤖</span><div><strong class="text-slate-800">善用工具：</strong>利用 RetroArch 的掃描功能或 RomM 來美化和管理您的遊戲庫。</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-6 mt-8">
+        <p class="text-slate-500 text-sm">此互動指南基於公開報告生成，僅供參考與學習之用。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const emulatorsData = {
+                nes: [
+                    {
+                        id: 'mesen',
+                        name: 'Mesen',
+                        tagline: '高精度與現代功能',
+                        description: '以卓越的模擬精度聞名，並支持 HD 圖形包，能將 8-bit 遊戲提升至更高解析度，帶來現代化視覺體驗。',
+                        bestFor: '追求最高模擬品質與畫面增強的玩家',
+                        installMethods: ['手動'],
+                        features: ['極高模擬精度', 'HD 圖形增強包', '多平台支持', '開發活躍'],
+                        installCmd: ` # Mesen 需要手動安裝
+# 1. 安裝依賴
+sudo apt update
+sudo apt install libsdl2-dev dotnet-runtime-6.0 -y
+# 2. 前往官網下載最新 Linux Dev Build
+# 3. 解壓縮後，賦予執行權限
+chmod +x Mesen`,
+                        ratings: { accuracy: 9.5, easeOfUse: 6, features: 9 }
+                    },
+                    {
+                        id: 'fceux',
+                        name: 'FCEUX',
+                        tagline: '專業級工具與廣泛兼容性',
+                        description: '不僅是遊戲模擬器，更是一個強大的遊戲開發與研究平台，內建調試器、ROM-hacking工具、TAS功能等。',
+                        bestFor: 'ROM 修改者、競速玩家與開發者',
+                        installMethods: ['APT', 'Snap'],
+                        features: ['強大開發工具', 'Lua 腳本支持', '廣泛兼容性', '錄影功能'],
+                        installCmd: `# 透過 APT (推薦)
+sudo apt install fceux
+
+# 透過 Snap
+sudo snap install fceux-gui --candidate`,
+                        ratings: { accuracy: 8.5, easeOfUse: 8, features: 9.5 }
+                    }
+                ],
+                gb: [
+                    {
+                        id: 'mgba',
+                        name: 'mGBA',
+                        tagline: '性能與精準度的首選',
+                        description: '在模擬精度、運行性能和用戶友好性之間取得了極佳的平衡，是當前最受推薦的 GBA 模擬器，同時完美支持 GB/GBC。',
+                        bestFor: '絕大多數 Game Boy 玩家',
+                        installMethods: ['Snap', 'Flatpak'],
+                        features: ['性能與精度均衡', '流暢直觀的UI', '活躍開發', '腳本支持'],
+                        installCmd: `# 透過 Snap (推薦)
+sudo snap install mgba
+
+# 透過 Flatpak
+sudo apt install flatpak
+flatpak install flathub io.mgba.mGBA`,
+                        ratings: { accuracy: 9, easeOfUse: 9, features: 8.5 }
+                    },
+                    {
+                        id: 'vbam',
+                        name: 'VBA-M',
+                        tagline: '經典的現代化延續',
+                        description: '經典 VBA 模擬器的現代化分支，修復了舊版問題並持續更新。運行穩定，支持作弊碼和濾鏡，是一個輕量級的可靠選擇。',
+                        bestFor: '追求簡單、輕量級體驗的懷舊玩家',
+                        installMethods: ['Snap', 'APT'],
+                        features: ['輕量穩定', '作弊碼支持', '多種視覺濾鏡', '繼承經典'],
+                        installCmd: `# 透過 Snap
+sudo snap install visualboyadvance-m
+
+# 透過 APT
+sudo apt install visualboyadvance-m`,
+                        ratings: { accuracy: 8, easeOfUse: 8.5, features: 7.5 }
+                    }
+                ]
+            };
+
+            const emulatorGrid = document.getElementById('emulator-grid');
+            const navButtons = document.querySelectorAll('#nav-buttons button');
+            const initialMessage = document.getElementById('initial-message');
+            const chartSection = document.getElementById('comparison-chart-section');
+            const retroarchToggle = document.getElementById('retroarch-toggle');
+            const retroarchDetails = document.getElementById('retroarch-details');
+            
+            let currentPlatform = null;
+            let chart = null;
+
+            function getInstallMethodTag(method) {
+                const colors = {
+                    'APT': 'bg-green-100 text-green-800',
+                    'Snap': 'bg-yellow-100 text-yellow-800',
+                    'Flatpak': 'bg-blue-100 text-blue-800',
+                    '手動': 'bg-red-100 text-red-800'
+                };
+                return `<span class="text-xs font-medium mr-2 px-2.5 py-0.5 rounded ${colors[method] || 'bg-gray-100 text-gray-800'}">${method}</span>`;
+            }
+
+            function renderEmulators(platform) {
+                if (!emulatorsData[platform]) return;
+                currentPlatform = platform;
+                
+                initialMessage.style.display = 'none';
+                emulatorGrid.innerHTML = '';
+                emulatorsData[platform].forEach(emu => {
+                    const card = document.createElement('div');
+                    card.className = 'card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col';
+                    card.innerHTML = `
+                        <div class="p-6 flex-grow">
+                            <h3 class="text-xl font-bold text-slate-900">${emu.name}</h3>
+                            <p class="text-indigo-600 font-semibold text-sm mb-2">${emu.tagline}</p>
+                            <p class="text-slate-600 text-sm mb-4">${emu.description}</p>
+                            <div class="mb-4">
+                                <strong class="text-sm text-slate-800 block mb-2">最適合：</strong>
+                                <p class="text-sm text-slate-600">${emu.bestFor}</p>
+                            </div>
+                            <div class="mb-4">
+                               <strong class="text-sm text-slate-800 block mb-2">主要特色：</strong>
+                               <ul class="space-y-1">
+                                 ${emu.features.map(f => `<li class="flex items-center text-sm text-slate-600"><span class="text-green-500 mr-2">✓</span>${f}</li>`).join('')}
+                               </ul>
+                            </div>
+                            <div>
+                                <strong class="text-sm text-slate-800 block mb-2">安裝方式：</strong>
+                                ${emu.installMethods.map(getInstallMethodTag).join('')}
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 border-t border-slate-200">
+                             <button data-emu-id="${emu.id}" class="toggle-details-btn text-indigo-600 font-semibold w-full text-center">顯示安裝指令</button>
+                        </div>
+                        <div id="details-${emu.id}" class="details-section bg-slate-900 text-white">
+                            <pre class="p-4 text-sm overflow-x-auto"><code>${emu.installCmd}</code></pre>
+                        </div>
+                    `;
+                    emulatorGrid.appendChild(card);
+                });
+                
+                chartSection.style.display = 'block';
+                updateChart(platform);
+                
+                document.querySelectorAll('.toggle-details-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const emuId = btn.dataset.emuId;
+                        const details = document.getElementById(`details-${emuId}`);
+                        details.classList.toggle('open');
+                        btn.textContent = details.classList.contains('open') ? '隱藏安裝指令' : '顯示安裝指令';
+                    });
+                });
+            }
+
+            function updateChart(platform) {
+                const platformData = emulatorsData[platform];
+                const chartLabels = platformData.map(e => e.name);
+                const accuracyData = platformData.map(e => e.ratings.accuracy);
+                const easeOfUseData = platformData.map(e => e.ratings.easeOfUse);
+                const featuresData = platformData.map(e => e.ratings.features);
+
+                const data = {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: '模擬精度',
+                            data: accuracyData,
+                            backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        },
+                        {
+                            label: '易用性',
+                            data: easeOfUseData,
+                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        },
+                        {
+                            label: '功能豐富度',
+                            data: featuresData,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        }
+                    ]
+                };
+
+                if (chart) {
+                    chart.data = data;
+                    chart.update();
+                } else {
+                    const ctx = document.getElementById('emulatorChart').getContext('2d');
+                    chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 10,
+                                    grid: {
+                                        color: '#e2e8f0' // slate-200
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                },
+                            },
+                        }
+                    });
+                }
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const platform = button.dataset.platform;
+                    renderEmulators(platform);
+                });
+            });
+
+            retroarchToggle.addEventListener('click', () => {
+                retroarchDetails.classList.toggle('open');
+                retroarchToggle.textContent = retroarchDetails.classList.contains('open') ? '隱藏安裝指令' : '顯示安裝指令';
+            });
+            
+            // Set initial state
+            navButtons[0].click();
+        });
+    </script>
+</body>
+</html>
