@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超時空之鑰：互動式時空攻略儀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Parchment -->
+    <!-- Application Structure Plan: A tab-based SPA designed for non-linear exploration. The core structure includes: 1) An interactive timeline ("時空之旅") to explore events by era, mirroring the game's core mechanic. 2) An interactive flowchart ("多重結局") to visually guide users through the complex ending requirements, directly addressing a user request. 3) Character-centric ("角色 & 裝備") and secret-focused ("秘密寶藏") sections for completionists. 4) A dedicated combat strategy section ("戰鬥策略"). This thematic, task-oriented structure is more intuitive and engaging than a linear report, allowing users to quickly access the information they need without scrolling through irrelevant content. The user flow encourages discovery, starting with the main timeline and branching out to deeper details as desired. -->
+    <!-- Visualization & Content Choices: 1. Main Timeline: Goal=Organize. Method=Clickable HTML buttons styled with Tailwind. Interaction=Clicking an era dynamically loads its key events, quests, and items. Justification=Directly simulates the game's time travel for intuitive navigation. 2. Endings Flowchart: Goal=Organize/Show Relationships. Method=HTML divs with Tailwind borders/flexbox to create a tree structure. Interaction=Nodes are clickable, revealing detailed info in a modal/pane. Justification=A visual, interactive representation of complex branching paths is far more effective than a static table. 3. Character Selector: Goal=Compare/Inform. Method=A grid of clickable character portraits. Interaction=Updates a detail view with equipment and stats. Justification=Efficiently organizes character-specific data. 4. Accordions for Secrets: Goal=Organize. Method=HTML/JS accordions. Interaction=Click to expand/collapse. Justification=Keeps the UI clean and prevents information overload. All data is stored in JS objects for dynamic rendering. CONFIRMED: NO Chart.js used as no traditional chart data exists. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDF6E3; /* Warm Parchment Background */
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #854d0e; /* Dark Brown */
+            border-bottom-color: #854d0e;
+        }
+        .content-card {
+            background-color: #FFFBF0;
+            border: 1px solid #EAE0C8;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .era-button {
+            transition: all 0.3s ease;
+        }
+        .era-button.active {
+            background-color: #d97706; /* Amber */
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .flowchart-node {
+            background-color: #fff;
+            border: 2px solid #a16207;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            min-width: 180px;
+        }
+        .flowchart-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(161, 98, 7, 0.3);
+        }
+        .flowchart-connector {
+            width: 2px;
+            background-color: #a16207;
+            position: relative;
+        }
+        .flowchart-branch {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+        }
+        .flowchart-branch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+        .flowchart-branch-item::before {
+            content: '';
+            position: absolute;
+            top: -1.5rem;
+            height: 1.5rem;
+            width: 2px;
+            background-color: #a16207;
+        }
+        .flowchart-branch::before {
+             content: '';
+             position: absolute;
+             top: -1.5rem;
+             left: 50%;
+             transform: translateX(-50%);
+             width: calc(100% - 200px);
+             height: 2px;
+             background-color: #a16207;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #FDF6E3;
+            margin: auto;
+            padding: 2rem;
+            border: 1px solid #EAE0C8;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 1rem;
+            position: relative;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span id="modal-close" class="absolute top-4 right-6 text-3xl font-bold cursor-pointer text-stone-500 hover:text-stone-800">&times;</span>
+            <h3 id="modal-title" class="text-2xl font-bold text-amber-700 mb-4"></h3>
+            <div id="modal-body" class="space-y-2 text-stone-700"></div>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-900">超時空之鑰</h1>
+            <p class="text-xl text-amber-800 mt-2">互動式時空攻略儀</p>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-amber-200 mb-8 flex-wrap">
+            <button data-tab="journey" class="tab-button active text-lg font-semibold px-6 py-3">時空之旅</button>
+            <button data-tab="endings" class="tab-button text-lg font-semibold px-6 py-3">多重結局</button>
+            <button data-tab="characters" class="tab-button text-lg font-semibold px-6 py-3">角色 & 裝備</button>
+            <button data-tab="secrets" class="tab-button text-lg font-semibold px-6 py-3">秘密寶藏</button>
+            <button data-tab="combat" class="tab-button text-lg font-semibold px-6 py-3">戰鬥策略</button>
+        </nav>
+
+        <main id="main-content">
+            <!-- Content will be injected here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        const gameData = {
+            eras: {
+                'BC65M': { 
+                    name: '史前時代 (B.C. 65,000,000)',
+                    icon: '🐾',
+                    intro: '在恐龍與原始人共存的時代，艾拉加入了隊伍。這裡的關鍵是擊敗阿扎拉，並為未來的太陽石充能。',
+                    events: [
+                        { title: '角色加入', content: '艾拉 (Ayla) 加入隊伍。' },
+                        { title: '關鍵任務', content: '對抗爬行類並擊敗阿扎拉與黑色暴龍。' },
+                        { title: '重要道具', content: '在太陽守護所放置月亮石，以便在未來充能為太陽石。' },
+                        { title: '隱藏要素', content: '可以從敵人身上魅惑到稀有裝備。' }
+                    ]
+                },
+                'BC12K': { 
+                    name: '吉爾王國 (B.C. 12,000)',
+                    icon: '🔮',
+                    intro: '漂浮在空中的魔法王國，充滿秘密與陰謀。這是故事的關鍵轉折點，拉沃斯首次展現其恐怖力量。',
+                    events: [
+                        { title: '關鍵劇情', content: '海洋宮殿事件，克羅諾犧牲，莎拉女王的悲劇。' },
+                        { title: '錯過道具', content: '黑色寶石、妖魔劍等道具在王國毀滅後將無法取得。' },
+                        { title: '隱藏膠囊', content: '吉爾宮殿和卡賈爾藏有魔法膠囊，務必在劇情推進前尋找。' },
+                    ]
+                },
+                'AD600': {
+                    name: '中世紀 (A.D. 600)',
+                    icon: '🏰',
+                    intro: '人類與魔族交戰的時代。青蛙的悲劇、聖劍的傳說以及魔王的崛起都在此上演。',
+                    events: [
+                        { title: '角色加入', content: '青蛙 (Frog) 加入隊伍。' },
+                        { title: '關鍵任務', content: '修復聖劍、對決魔王。' },
+                        { title: '封印寶箱', content: '此時代的封印寶箱可選擇不開啟，待到A.D. 1000年升級後再取。這是獲取強力裝備的關鍵。' },
+                        { title: '支線任務', content: '北方遺跡、菲歐娜森林、彩虹貝殼等重要支線的起點。' }
+                    ]
+                },
+                'AD1000': {
+                    name: '現代 (A.D. 1000)',
+                    icon: '🎉',
+                    intro: '故事的起點，和平的千年祭典卻因一場意外開啟了時空之旅。許多關鍵道具和支線任務在此時代完成。',
+                    events: [
+                        { title: '故事開端', content: '千年祭典，克羅諾與瑪爾相遇，意外穿越至中世紀。' },
+                        { title: '封印寶箱升級', content: '開啟在A.D. 600年未開啟的寶箱，可獲得升級版的強力裝備。開啟後還可返回A.D. 600年拿取普通版。' },
+                        { title: '支線任務完成', content: '完成彩虹貝殼任務以鍛造彩虹劍，完成北方遺跡任務升級聖劍。' },
+                        { title: '錯過道具', content: '娜迦人寫真、弗里茨的免費藥水等。' }
+                    ]
+                },
+                'AD2300': {
+                    name: '未來 (A.D. 2300)',
+                    icon: '🤖',
+                    intro: '被拉沃斯毀滅後的荒蕪世界。機器人在此加入，揭示了末日的真相，也是復活克羅諾的關鍵場所。',
+                    events: [
+                        { title: '角色加入', content: '機器人 (Robo) 加入隊伍。' },
+                        { title: '關鍵劇情', content: '發現「拉沃斯之日」錄像，獲得時間飛船，復活克羅諾。' },
+                        { title: '封印門', content: '使用充能後的吊墜開啟各圓頂的封印門，內有黃金耳環、光輝長袍等強力飾品。' },
+                        { title: '支線任務', content: '太陽石任務的起點，機器人的基因圓頂任務。' }
+                    ]
+                },
+                 'End of Time': {
+                    name: '時之盡頭',
+                    icon: '⏳',
+                    intro: '時空旅行者的中繼站。可以在此交換隊員、學習魔法，並獲得關於如何擊敗拉沃斯的提示。',
+                    events: [
+                        { title: '核心功能', content: '更換隊員、完全回復。' },
+                        { title: '學習魔法', content: '與史佩奇歐對話，全員學習魔法能力。' },
+                        { title: '史佩奇歐挑戰', content: '重複挑戰史佩奇歐可根據隊伍等級獲得能力膠囊和萬能藥，是角色成長的關鍵。' },
+                        { title: '重要提示', content: '戴帽子的老人（加斯帕）會提供關於後期支線任務的指引。' }
+                    ]
+                }
+            },
+            endings: [
+                { id: 'start', text: '遊戲開始', parent: null, type: 'start' },
+                { id: 'e1', text: '超越時間', parent: 'main_quest_end', type: 'good', desc: '【正常結局】復活克羅諾後擊敗拉沃斯。夥伴們返回各自時代，世界迎來和平。' },
+                { id: 'e2', text: '夢想企劃', parent: 'ng_plus', type: 'special', desc: '【開發者結局】在新遊戲+中，於特定時間點（如擊敗魔王後）擊敗拉沃斯，會見到遊戲的開發團隊。' },
+                { id: 'e3', text: '晚安', parent: 'ng_plus', type: 'bad', desc: '【壞結局】在新遊戲+中，首次抵達時之盡頭後，立即透過傳送器挑戰並擊敗拉沃斯。世界被熟睡的拉沃斯吞噬。' },
+                { id: 'e4', text: '守護者繼承者', parent: 'ng_plus', type: 'bad', desc: '【壞結局】在新遊戲+中，瑪爾回到公元1000年後立即擊敗拉沃斯。瑪爾成為孤單的女王。' },
+                { id: 'e5', text: '傳奇英雄', parent: 'ng_plus', type: 'bad', desc: '【壞結局】在新遊戲+中，獲得英雄勳章前擊敗拉沃斯。塔塔成為了被誤認的英雄。' },
+                { id: 'e6', text: '誓言', parent: 'frog_quest', type: 'neutral', desc: '【青蛙結局】在新遊戲+中，青蛙獲得修復後的聖劍後擊敗拉沃斯。青蛙與魔王的恩怨得到解決。' },
+                { id: 'e7', text: '恐龍時代', parent: 'dino_age_end', type: 'bad', desc: '【恐龍結局】在新遊戲+中，擊敗魔王但在史前時代劇情結束前擊敗拉沃斯。恐龍統治了世界。' },
+                { id: 'e8', text: '先知所求', parent: 'zeal_fall', type: 'neutral', desc: '【魔王結局】在新遊戲+中，擊敗阿扎拉後擊敗拉沃斯，揭示先知（魔王）的真實目的。' },
+                { id: 'e9', text: '啟示錄', parent: 'crono_death', type: 'bad', desc: '【壞結局】在海洋宮殿事件中擊敗拉沃斯（但克羅諾死亡）。世界被拉沃斯吞噬，英雄們失敗了。' },
+                { id: 'e10', text: '夢之終章', parent: 'all_sidequests', type: 'good', desc: '【最完整結局】完成所有主要支線任務後，復活克羅諾並擊敗拉沃斯。所有角色的命運都得到了最圓滿的交代。' },
+                { id: 'main_quest_path', text: '主線劇情推進', parent: 'start', type: 'path'},
+                { id: 'ng_plus', text: '新遊戲+(NG+)', parent: 'main_quest_path', type: 'path'},
+                { id: 'frog_quest', text: '完成青蛙支線', parent: 'ng_plus', type: 'path'},
+                { id: 'dino_age_end', text: '完成史前時代', parent: 'frog_quest', type: 'path'},
+                { id: 'zeal_fall', text: '吉爾王國毀滅', parent: 'dino_age_end', type: 'path'},
+                { id: 'crono_death', text: '克羅諾死亡', parent: 'zeal_fall', type: 'path'},
+                { id: 'all_sidequests', text: '完成所有支線', parent: 'crono_death', type: 'path'},
+                { id: 'main_quest_end', text: '復活克羅諾', parent: 'all_sidequests', type: 'path'},
+            ],
+            characters: {
+                crono: { name: '克羅諾', icon: '👤', desc: '沉默的主角，雷屬性的劍士，能力全面，擁有強力的單體與群體技能。', weapons: '夢想追尋者 / 彩虹劍', armor: '帝王鎧甲 / 稜鏡禮服', helm: '大師皇冠 / 稜鏡頭盔', accessory: '稜鏡眼鏡 / 憤怒手環' },
+                marle: { name: '瑪爾', icon: '👑', desc: '嘉迪亞公主，水/冰屬性的治療者與輔助角色，加速魔法是戰鬥關鍵。', weapons: '維納斯弓 / 女武神弓', armor: '稜鏡禮服 / 帝王禮服', helm: '天使頭飾 / 稜鏡頭盔', accessory: '黃金耳環 / 綠色夢想' },
+                lucca: { name: '盧卡', icon: '👓', desc: '天才發明家，火屬性的強力魔法師，擁有遊戲中最強的魔法攻擊。', weapons: '魔法槍 / 奇蹟槍', armor: '稜鏡禮服 / 元素盾甲', helm: '天使頭飾 / 稜鏡頭盔', accessory: '稜鏡眼鏡 / 黃金耳環' },
+                robo: { name: '機器人', icon: '🤖', desc: '來自未來的機器人，暗影屬性，是個能打能補的多面手，物理攻擊與治療能力兼備。', weapons: '危機之臂 / 末日之臂', armor: '帝王鎧甲 / 蜥蜴皮甲', helm: '大師皇冠 / 稜鏡頭盔', accessory: '龍之淚 / 黃金耳環' },
+                frog: { name: '青蛙', icon: '🐸', desc: '被詛咒的騎士，水屬性，是個優秀的物理劍士和次要治療者。', weapons: '聖劍二型', armor: '帝王鎧甲 / 蜥蜴皮甲', helm: '大師皇冠 / 稜鏡頭盔', accessory: '冠軍徽章 / 黃金耳環' },
+                ayla: { name: '艾拉', icon: '🐾', desc: '史前時代的酋長，無屬性物理攻擊者，傷害隨等級提升，魅惑技能是獲取稀有道具的關鍵。', weapons: '青銅拳套', armor: '稜鏡禮服 / 蜥蜴皮甲', helm: '天使頭飾 / 稜鏡頭盔', accessory: '勇氣徽章 / 憤怒手環' },
+                magus: { name: '魔王', icon: '😈', desc: '來自吉爾王國的王子，全屬性魔法大師，擁有強大的魔法，但缺乏組合技。', weapons: '夢魘鐮刀 / 厄運鐮刀', armor: '影羽長袍', helm: '陰影頭盔', accessory: '稜鏡眼鏡 / 黃金耳環' },
+            },
+            secrets: {
+                sealed_chests: {
+                    title: '封印寶箱與升級路徑',
+                    intro: '封印寶箱是獲取強力 elemental 鎧甲和武器的關鍵。核心技巧是：先在公元600年「觸碰但不拿取」，然後到公元1000年開啟獲得升級版，最後再返回公元600年拿取普通版，達成「一箱兩拿」。',
+                    items: [
+                        { location: '波爾村長老家', normal: '白色/黑色背心', upgraded: '白色/黑色鎧甲' },
+                        { location: '特魯斯旅館', normal: '藍色背心', upgraded: '藍色鎧甲' },
+                        { location: '嘉迪亞城堡', normal: '紅色背心', upgraded: '紅色鎧甲' },
+                        { location: '北方遺跡', normal: '新星鎧甲, 妖精弓, 卡利刀', upgraded: '月光鎧甲, 女武神弓, 濕婆之刃' },
+                    ]
+                },
+                missable_items: {
+                    title: '關鍵錯過道具與事件',
+                    intro: '有些道具和事件具有嚴格的時間窗口，一旦錯過就無法再次獲得。這份清單幫助完美主義者避免遺憾。',
+                    items: [
+                        { item: '娜迦人寫真', reason: '馬諾利亞教堂一次性獲取，可交換魔法膠囊。' },
+                        { item: '黑色寶石', reason: '吉爾王國毀滅後消失，三人技所需。' },
+                        { item: '奧茲褲子', reason: '奧茲堡壘戰鬥中魅惑限定，不繼承至新遊戲+' },
+                        { item: '守衛隊長黃金頭盔', reason: '劇情推進後無法與守衛隊長對話獲得。' }
+                    ]
+                }
+            },
+            combat: {
+                teams: [
+                    { combo: '克羅諾 / 機器人 / 艾拉', type: '物理王者', desc: '遊戲公認的最強物理隊伍。輸出極高，機器人提供可靠治療，艾拉的魅惑能力無可替代，能應對絕大多數戰鬥。' },
+                    { combo: '克羅諾 / 瑪爾 / 盧卡', type: '魔法核心', desc: '經典的初始隊伍。元素覆蓋面廣，瑪爾的加速和治療非常關鍵，盧卡的魔法是主要輸出手段。面對魔法抗性高的敵人會比較吃力。' },
+                    { combo: '青蛙 / 瑪爾', type: '中期霸主', desc: '遊戲中期極為強大的二人組。雙人技「冰水」MP消耗低、傷害高，配合瑪爾的加速，可以輕鬆碾壓許多迷宮。' },
+                ],
+                bosses: [
+                    { name: '赫克蘭 (Heckran)', strategy: '完全免疫物理攻擊，只能用魔法。當他說「短暫反擊」時攻擊，當他說「試著攻擊吧」時防禦，否則會觸發強力反擊。' },
+                    { name: '巨型蓋亞 (Giga Gaia)', strategy: '它的雙手會使用火和水屬性攻擊。為克羅諾和另一位隊員裝備紅色鎧甲和藍色鎧甲，可以吸收傷害並回復HP，大幅降低難度。' },
+                    { name: '太陽之子 (Son of Sun)', strategy: '周圍有五個火焰，只有一個是真的。攻擊錯誤的會觸發強力反擊。裝備紅色鎧甲或紅寶石鎧甲吸收傷害，然後耐心測試哪個是真身。' },
+                    { name: '拉沃斯核心 (Lavos Core)', strategy: '最終戰。右側部分是本體。裝備稜鏡眼鏡最大化輸出，黃金耳環減少MP消耗。瑪爾的加速必不可少。集中火力攻擊右側部分即可。' }
+                ]
+            }
+        };
+
+        const mainContent = document.getElementById('main-content');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalClose = document.getElementById('modal-close');
+
+        let activeTab = 'journey';
+        let activeEra = 'AD1000';
+        let selectedCharacter = 'crono';
+
+        function renderJourney() {
+            const eraData = gameData.eras[activeEra];
+            mainContent.innerHTML = `
+                <div id="journey-content" class="fade-in">
+                    <p class="text-center text-amber-700 text-lg mb-6">${gameData.eras[Object.keys(gameData.eras)[0]].intro}</p>
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                        ${Object.keys(gameData.eras).map(key => `
+                            <button data-era="${key}" class="era-button ${key === activeEra ? 'active' : ''} text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-200">
+                                <span class="hidden sm:inline">${gameData.eras[key].name}</span>
+                                <span class="sm:hidden">${gameData.eras[key].icon}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="content-card p-6 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-amber-800 mb-2">${eraData.icon} ${eraData.name}</h2>
+                        <p class="text-stone-600 mb-6">${eraData.intro}</p>
+                        <div class="space-y-4">
+                            ${eraData.events.map(event => `
+                                <div>
+                                    <h3 class="font-bold text-amber-700 text-lg">${event.title}</h3>
+                                    <p class="text-stone-600">${event.content}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            addJourneyListeners();
+        }
+        
+        function renderEndings() {
+            mainContent.innerHTML = `
+                <div id="endings-content" class="fade-in">
+                     <p class="text-center text-amber-700 text-lg mb-8 max-w-3xl mx-auto">《超時空之鑰》的結局由挑戰最終頭目拉沃斯的「時機」決定。在新遊戲+模式下，您可以隨時挑戰拉沃斯，從而開啟不同的結局分支。此圖表展示了主要的劇情節點與它們導向的結局，點擊節點可查看詳細資訊。</p>
+                    <div class="flowchart-container overflow-x-auto pb-4">
+                        <div class="flowchart min-w-[800px] md:min-w-0">
+                            <div class="flowchart-node" data-ending-id="start">${gameData.endings.find(e => e.id === 'start').text}</div>
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="main_quest_path">${gameData.endings.find(e => e.id === 'main_quest_path').text}</div>
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="ng_plus">${gameData.endings.find(e => e.id === 'ng_plus').text}</div>
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            
+                            <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e3">${gameData.endings.find(e => e.id === 'e3').text}</div>
+                                </div>
+                                <div class="flowchart-branch-item">
+                                     <div class="flowchart-node" data-ending-id="e4">${gameData.endings.find(e => e.id === 'e4').text}</div>
+                                </div>
+                                <div class="flowchart-branch-item">
+                                     <div class="flowchart-node" data-ending-id="e5">${gameData.endings.find(e => e.id === 'e5').text}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="frog_quest">${gameData.endings.find(e => e.id === 'frog_quest').text}</div>
+                            <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e6">${gameData.endings.find(e => e.id === 'e6').text}</div>
+                                </div>
+                            </div>
+
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="dino_age_end">${gameData.endings.find(e => e.id === 'dino_age_end').text}</div>
+                             <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e7">${gameData.endings.find(e => e.id === 'e7').text}</div>
+                                </div>
+                            </div>
+
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="zeal_fall">${gameData.endings.find(e => e.id === 'zeal_fall').text}</div>
+                            <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e8">${gameData.endings.find(e => e.id === 'e8').text}</div>
+                                </div>
+                            </div>
+
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="crono_death">${gameData.endings.find(e => e.id === 'crono_death').text}</div>
+                             <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e9">${gameData.endings.find(e => e.id === 'e9').text}</div>
+                                </div>
+                                 <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e2">${gameData.endings.find(e => e.id === 'e2').text}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="all_sidequests">${gameData.endings.find(e => e.id === 'all_sidequests').text}</div>
+                             <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e10">${gameData.endings.find(e => e.id === 'e10').text}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flowchart-connector" style="height: 2rem;"></div>
+                            <div class="flowchart-node" data-ending-id="main_quest_end">${gameData.endings.find(e => e.id === 'main_quest_end').text}</div>
+                             <div class="flowchart-branch">
+                                <div class="flowchart-branch-item">
+                                    <div class="flowchart-node" data-ending-id="e1">${gameData.endings.find(e => e.id === 'e1').text}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            addEndingListeners();
+        }
+        
+        function renderCharacters() {
+            const charData = gameData.characters[selectedCharacter];
+             mainContent.innerHTML = `
+                <div id="characters-content" class="fade-in">
+                    <p class="text-center text-amber-700 text-lg mb-8 max-w-3xl mx-auto">遊戲共有七位可玩角色，每位都有獨特的技能和定位。合理的隊伍搭配是克服挑戰的關鍵。點擊下方頭像來查看每位角色的詳細資訊和推薦的最終裝備。</p>
+                    <div class="flex justify-center flex-wrap gap-4 mb-8">
+                        ${Object.keys(gameData.characters).map(key => `
+                            <button data-char="${key}" class="p-2 rounded-full transition-transform duration-300 ${key === selectedCharacter ? 'bg-amber-400 scale-110 shadow-lg' : 'bg-amber-200 hover:bg-amber-300'}">
+                                <span class="text-4xl">${gameData.characters[key].icon}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                     <div class="content-card p-6 md:p-8">
+                        <div class="flex flex-col md:flex-row items-center gap-6">
+                            <div class="text-8xl">${charData.icon}</div>
+                            <div class="flex-1 text-center md:text-left">
+                                <h2 class="text-3xl font-bold text-amber-800">${charData.name}</h2>
+                                <p class="text-stone-600 mt-1">${charData.desc}</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 border-t border-amber-200 pt-6">
+                            <h3 class="text-xl font-bold text-amber-700 mb-4 text-center">推薦最終裝備</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div><p class="font-semibold text-stone-500">武器</p><p>${charData.weapons}</p></div>
+                                <div><p class="font-semibold text-stone-500">鎧甲</p><p>${charData.armor}</p></div>
+                                <div><p class="font-semibold text-stone-500">頭盔</p><p>${charData.helm}</p></div>
+                                <div><p class="font-semibold text-stone-500">飾品</p><p>${charData.accessory}</p></div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            `;
+            addCharacterListeners();
+        }
+
+        function renderSecrets() {
+            mainContent.innerHTML = `
+                <div id="secrets-content" class="fade-in">
+                    <p class="text-center text-amber-700 text-lg mb-8 max-w-3xl mx-auto">《超時空之鑰》的世界中隱藏著許多秘密，從可以升級的封印寶箱到一旦錯過就無法挽回的稀有道具。這裡是為追求100%完成度的玩家準備的清單。</p>
+                    <div class="space-y-4 max-w-4xl mx-auto">
+                        ${Object.keys(gameData.secrets).map(key => {
+                            const secret = gameData.secrets[key];
+                            return `
+                                <div class="content-card">
+                                    <button class="accordion-toggle w-full p-4 text-left font-bold text-xl text-amber-800 flex justify-between items-center">
+                                        <span>${secret.title}</span>
+                                        <span class="transform transition-transform duration-300">▼</span>
+                                    </button>
+                                    <div class="accordion-content px-4 pb-4">
+                                        <p class="text-stone-600 mb-4 pt-2 border-t border-amber-100">${secret.intro}</p>
+                                        <ul class="space-y-3">
+                                            ${secret.items.map(item => `
+                                                <li class="p-3 bg-amber-50 rounded-lg">
+                                                    ${item.location ? `<p><span class="font-semibold text-amber-700">${item.location}</span></p><p class="text-sm text-stone-500">普通: ${item.normal} -> 升級: ${item.upgraded}</p>` : ''}
+                                                    ${item.item ? `<p><span class="font-semibold text-amber-700">${item.item}</span></p><p class="text-sm text-stone-500">${item.reason}</p>` : ''}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            addAccordionListeners();
+        }
+
+        function renderCombat() {
+             mainContent.innerHTML = `
+                <div id="combat-content" class="fade-in">
+                    <p class="text-center text-amber-700 text-lg mb-8 max-w-3xl mx-auto">掌握戰鬥技巧、組建強力隊伍並了解頭目的弱點，是穿越時空的關鍵。這裡提供了一些核心的戰鬥策略，助您戰無不勝。</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="content-card p-6">
+                            <h3 class="text-2xl font-bold text-amber-800 mb-4 text-center">推薦隊伍組合</h3>
+                            <div class="space-y-4">
+                                ${gameData.combat.teams.map(team => `
+                                    <div class="p-4 bg-amber-50 rounded-lg">
+                                        <p class="font-bold text-amber-700">${team.combo}</p>
+                                        <p class="text-sm font-semibold text-amber-600">${team.type}</p>
+                                        <p class="text-stone-600 mt-1">${team.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="content-card p-6">
+                             <h3 class="text-2xl font-bold text-amber-800 mb-4 text-center">關鍵頭目戰策略</h3>
+                            <div class="space-y-4">
+                                ${gameData.combat.bosses.map(boss => `
+                                    <div class="p-4 bg-amber-50 rounded-lg">
+                                        <p class="font-bold text-amber-700">${boss.name}</p>
+                                        <p class="text-stone-600 mt-1">${boss.strategy}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContent() {
+            switch (activeTab) {
+                case 'journey':
+                    renderJourney();
+                    break;
+                case 'endings':
+                    renderEndings();
+                    break;
+                case 'characters':
+                    renderCharacters();
+                    break;
+                case 'secrets':
+                    renderSecrets();
+                    break;
+                case 'combat':
+                    renderCombat();
+                    break;
+                default:
+                    renderJourney();
+            }
+        }
+        
+        function addJourneyListeners() {
+            document.querySelectorAll('.era-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    activeEra = e.currentTarget.dataset.era;
+                    renderJourney();
+                });
+            });
+        }
+        
+        function addEndingListeners() {
+            document.querySelectorAll('.flowchart-node').forEach(node => {
+                node.addEventListener('click', (e) => {
+                    const endingId = e.currentTarget.dataset.endingId;
+                    const endingData = gameData.endings.find(end => end.id === endingId);
+                    if (endingData && endingData.desc) {
+                        modalTitle.innerText = endingData.text;
+                        modalBody.innerText = endingData.desc;
+                        modal.style.display = 'flex';
+                    } else if (endingData) {
+                        modalTitle.innerText = endingData.text;
+                        modalBody.innerText = '這是一個劇情路徑節點，代表了故事的進程。';
+                        modal.style.display = 'flex';
+                    }
+                });
+            });
+        }
+        
+        function addCharacterListeners() {
+            document.querySelectorAll('[data-char]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    selectedCharacter = e.currentTarget.dataset.char;
+                    renderCharacters();
+                });
+            });
+        }
+        
+        function addAccordionListeners() {
+            document.querySelectorAll('.accordion-toggle').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('span:last-child');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                         icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        }
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                activeTab = e.target.dataset.tab;
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                renderContent();
+            });
+        });
+
+        modalClose.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        renderContent();
+    </script>
+</body>
+</html>
