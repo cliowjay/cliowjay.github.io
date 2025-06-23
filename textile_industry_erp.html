@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紡織業ERP系統分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone, Slate, Muted Blue-Gray) -->
+    <!-- Application Structure Plan: The SPA is designed as a strategic decision-making tool for a business leader, not a linear report. It follows a logical flow: 1. A high-level introduction to frame the core challenge (Specialists vs. Giants). 2. An interactive Market Landscape to explore key players. 3. A "Decision Factors" hub that breaks down complex topics (Architecture, Integration, Features) into digestible, interactive components. 4. A powerful TCO Calculator to model financial impact, which is the app's centerpiece. 5. A final, scannable Strategic Framework. This task-oriented, non-linear structure empowers users to explore based on their priorities, making the dense report content more accessible and actionable than a simple document. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Market Players -> Goal: Compare -> Viz: Interactive Quadrant-style card grid -> Interaction: Click cards to show details -> Justification: More engaging than a static list, allows quick comparison. Method: HTML/Tailwind.
+        - Report Info: TCO Table -> Goal: Personalize & Compare -> Viz: TCO Calculator with Bar Chart -> Interaction: User inputs company size/users to see dynamic cost projections -> Justification: Transforms static data into a powerful, personalized financial modeling tool. Library: Chart.js.
+        - Report Info: System Integration -> Goal: Visualize Connections -> Viz: HTML/CSS Diagram -> Interaction: Hover effects on connection points -> Justification: Visually explains complex system relationships more effectively than text alone. Method: HTML/Tailwind.
+        - Report Info: Vendor Comparison Tables -> Goal: Organize & Compare -> Viz: Tabbed interface -> Interaction: Click tabs to switch between architecture, security, etc. -> Justification: Organizes a vast amount of comparative data into a compact, user-controlled view. Method: HTML/JS.
+        - Report Info: Strategic Framework -> Goal: Inform & Guide -> Viz: Numbered step-by-step cards -> Interaction: Simple, clear layout -> Justification: Makes the final recommendations easy to scan and remember. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #6b7280;
+        }
+        .vendor-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .vendor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-900">紡織業ERP決策儀表板</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#market-landscape" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">市場格局</a>
+                        <a href="#decision-factors" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">關鍵決策因素</a>
+                        <a href="#tco-calculator" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">TCO計算機</a>
+                        <a href="#strategy-framework" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">策略框架</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        <!-- Hero Section -->
+        <section id="hero" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">做出正確的ERP策略選擇</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                選擇ERP系統是一項重大的策略投資。當前市場呈現兩極化：是選擇深度契合行業流程的「行業專家」，還是擁抱功能全面、可擴展性強的「企業巨頭」？本儀表板旨在將複雜的分析報告轉化為互動工具，助您做出明智決策。
+            </p>
+        </section>
+
+        <!-- Market Landscape Section -->
+        <section id="market-landscape" class="mb-20">
+            <h3 class="text-2xl font-bold text-center text-slate-900 mb-2">市場格局：行業專家 vs. 企業巨頭</h3>
+            <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">點擊下方的供應商，查看其市場定位、核心優勢及目標客戶。這將幫助您快速了解主要的市場參與者。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Industry Specialists -->
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                    <h4 class="text-xl font-bold text-slate-900 mb-4 flex items-center"><span class="text-2xl mr-2">🎯</span>行業專家型供應商</h4>
+                    <p class="text-slate-600 mb-6">核心優勢在於對紡織業獨特流程的深刻理解，提供「開箱即用」的深度功能，能快速部署並減少客製化需求。</p>
+                    <div class="space-y-4">
+                        <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-blue-50" data-vendor="datatex">
+                            <h5 class="font-bold text-lg text-slate-800">Datatex</h5>
+                            <p class="text-sm text-slate-500">全球紡織ERP領導者，專注於複雜製程管理。</p>
+                        </div>
+                        <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-blue-50" data-vendor="aptean">
+                            <h5 class="font-bold text-lg text-slate-800">Aptean</h5>
+                            <p class="text-sm text-slate-500">提供針對染整等基於配方製程的專業解決方案。</p>
+                        </div>
+                         <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-blue-50" data-vendor="cgs">
+                            <h5 class="font-bold text-lg text-slate-800">CGS BlueCherry</h5>
+                            <p class="text-sm text-slate-500">時尚與成衣行業的整合式SaaS套件。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Enterprise Giants -->
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                    <h4 class="text-xl font-bold text-slate-900 mb-4 flex items-center"><span class="text-2xl mr-2">🏢</span>企業巨頭型供應商</h4>
+                    <p class="text-slate-600 mb-6">核心優勢在於強大的平台能力、可擴展性及廣泛的生態系統，易於與財務、人資等其他企業應用無縫整合。</p>
+                    <div class="space-y-4">
+                       <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-teal-50" data-vendor="sap">
+                            <h5 class="font-bold text-lg text-slate-800">SAP S/4HANA</h5>
+                            <p class="text-sm text-slate-500">基於HANA記憶體內運算平台，提供即時分析。</p>
+                        </div>
+                        <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-teal-50" data-vendor="oracle">
+                            <h5 class="font-bold text-lg text-slate-800">Oracle NetSuite</h5>
+                            <p class="text-sm text-slate-500">領先的雲端原生ERP，受中小型企業青睞。</p>
+                        </div>
+                        <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-teal-50" data-vendor="infor">
+                            <h5 class="font-bold text-lg text-slate-800">Infor CloudSuite</h5>
+                            <p class="text-sm text-slate-500">專為時尚行業設計的多租戶雲端ERP。</p>
+                        </div>
+                        <div class="vendor-card p-4 border rounded-lg cursor-pointer bg-stone-50 hover:bg-teal-50" data-vendor="microsoft">
+                            <h5 class="font-bold text-lg text-slate-800">Microsoft Dynamics 365</h5>
+                            <p class="text-sm text-slate-500">整合ERP與CRM，與Power Platform深度結合。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Decision Factors Section -->
+        <section id="decision-factors" class="mb-20">
+            <h3 class="text-2xl font-bold text-center text-slate-900 mb-2">關鍵決策因素</h3>
+             <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">ERP的選擇不僅是功能比較，更是對技術架構、整合能力和行業契合度的全盤考量。使用下方的標籤頁瀏覽各項關鍵因素的詳細比較。</p>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="flex -mb-px" id="tabs">
+                        <button data-tab="architecture" class="tab-btn tab-active text-center w-1/3 py-4 px-1 border-b-2 font-medium text-sm">架構與部署</button>
+                        <button data-tab="integration" class="tab-btn tab-inactive text-center w-1/3 py-4 px-1 border-b-2 font-medium text-sm">整合與開放性</button>
+                        <button data-tab="features" class="tab-btn tab-inactive text-center w-1/3 py-4 px-1 border-b-2 font-medium text-sm">核心紡織功能</button>
+                    </nav>
+                </div>
+                
+                <div id="tab-content">
+                    <!-- Architecture Tab -->
+                    <div id="architecture-content" class="tab-pane">
+                        <h4 class="font-bold text-lg text-slate-800 mb-2">部署模型決定了您的控制權與成本結構</h4>
+                        <p class="text-slate-600 mb-6">從完全控制的本地部署到靈活的雲端SaaS，不同的模型適合不同的IT策略。雲端SaaS是主流，提供低前期投入和自動升級的優勢。</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                            <div class="border p-4 rounded-lg">
+                                <div class="font-bold">多租戶SaaS</div>
+                                <div class="text-sm text-slate-500">Infor, NetSuite</div>
+                            </div>
+                            <div class="border p-4 rounded-lg">
+                                <div class="font-bold">私有雲</div>
+                                <div class="text-sm text-slate-500">SAP S/4HANA</div>
+                            </div>
+                            <div class="border p-4 rounded-lg">
+                                <div class="font-bold">本地部署</div>
+                                <div class="text-sm text-slate-500">Datatex, Aptean</div>
+                            </div>
+                            <div class="border p-4 rounded-lg">
+                                <div class="font-bold">混合雲</div>
+                                <div class="text-sm text-slate-500">Microsoft, SAP</div>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-lg text-slate-800 mt-8 mb-2">底層技術平台是未來創新的基石</h4>
+                        <p class="text-slate-600 mb-4">現代ERP是建立在PaaS層之上的生態系統，提供低程式碼開發、AI和分析能力，決定了系統的擴展潛力。</p>
+                         <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><span class="font-bold">SAP BTP & HANA:</span> 提供無與倫比的即時數據處理能力。</li>
+                            <li><span class="font-bold">Microsoft Power Platform:</span> 賦予企業極大的低程式碼客製化和自動化能力。</li>
+                            <li><span class="font-bold">Infor OS:</span> 統一的雲端技術平台，內建iPaaS與AI服務。</li>
+                            <li><span class="font-bold">NetSuite SuiteCloud:</span> 提供靈活的腳本語言和Web服務進行擴展。</li>
+                        </ul>
+                    </div>
+                    <!-- Integration Tab -->
+                    <div id="integration-content" class="tab-pane hidden">
+                        <h4 class="font-bold text-lg text-slate-800 mb-2">API是現代ERP的「開放」標準</h4>
+                        <p class="text-slate-600 mb-6">系統是否開放，取決於其API的品質、安全性和生態系統的活躍度。強大的API是實現與MES、CRM、IoT等系統無縫整合的關鍵。</p>
+                         <div class="bg-slate-50 p-6 rounded-lg">
+                            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                                <div class="text-center font-bold bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full">MES/IoT</div>
+                                <div class="text-2xl text-slate-400">↔</div>
+                                <div class="text-center p-4 rounded-lg bg-blue-500 text-white shadow-lg">
+                                    <div class="font-extrabold text-xl">ERP 核心</div>
+                                    <div class="text-xs mt-1">透過 OAuth 2.0 安全 API</div>
+                                </div>
+                                <div class="text-2xl text-slate-400">↔</div>
+                                <div class="text-center font-bold bg-green-200 text-green-800 px-3 py-1 rounded-full">CRM/PLM</div>
+                            </div>
+                            <p class="text-center mt-4 text-sm text-slate-500">ERP作為數位核心，透過標準化、安全的API與各類專業系統交換數據，打造靈活的「可組合式」企業架構。</p>
+                        </div>
+                        <h4 class="font-bold text-lg text-slate-800 mt-8 mb-2">安全整合的關鍵支柱</h4>
+                         <ul class="list-disc list-inside space-y-2 text-slate-700">
+                             <li><span class="font-bold">認證與授權:</span> <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">OAuth 2.0</span> 是行業安全標準，確保令牌式安全存取。</li>
+                             <li><span class="font-bold">角色型存取控制 (RBAC):</span> 遵循「最小權限原則」，為每個整合點設定精細權限。</li>
+                             <li><span class="font-bold">資料加密:</span> 所有通訊均採用<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">TLS 1.2+</span> 加密，保護傳輸中和靜態數據。</li>
+                        </ul>
+                    </div>
+                    <!-- Features Tab -->
+                    <div id="features-content" class="tab-pane hidden">
+                        <h4 class="font-bold text-lg text-slate-800 mb-2">行業契合度：系統能否處理紡織業的獨特挑戰？</h4>
+                        <p class="text-slate-600 mb-6">企業級平台功能全面，但行業專家在處理極端複雜的紡織製程上往往更具深度。</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">核心功能</th>
+                                        <th scope="col" class="px-6 py-3">行業專家 (Datatex, Aptean)</th>
+                                        <th scope="col" class="px-6 py-3">企業巨頭 (SAP, Oracle, etc.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-white border-b">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">批次/染缸批號追溯</th>
+                                        <td class="px-6 py-4 text-green-600 font-bold">★★★★★ (核心優勢)</td>
+                                        <td class="px-6 py-4 text-yellow-600 font-bold">★★★★☆ (可配置)</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">染整配方管理</th>
+                                        <td class="px-6 py-4 text-green-600 font-bold">★★★★★ (核心優勢)</td>
+                                        <td class="px-6 py-4 text-orange-500 font-bold">★★★☆☆ (通常需客製)</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">複雜BOM與工藝路線</th>
+                                        <td class="px-6 py-4 text-green-600 font-bold">★★★★★ (核心優勢)</td>
+                                        <td class="px-6 py-4 text-yellow-600 font-bold">★★★★☆ (功能強大)</td>
+                                    </tr>
+                                    <tr class="bg-white">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">款式-顏色-尺寸矩陣</th>
+                                        <td class="px-6 py-4 text-yellow-600 font-bold">★★★★☆ (具備)</td>
+                                        <td class="px-6 py-4 text-green-600 font-bold">★★★★★ (核心優勢)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="mt-4 text-sm text-slate-500">
+                            <strong>決策點：</strong>如果您的核心競爭力在於複雜的製造工藝（如機能性布料），行業專家可能更適合。如果您的重心在於全球零售和供應鏈管理，企業巨頭平台更具優勢。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TCO Calculator Section -->
+        <section id="tco-calculator" class="mb-20 bg-white p-6 sm:p-8 rounded-xl shadow-lg border-t-4 border-green-500">
+            <h3 class="text-2xl font-bold text-center text-slate-900 mb-2">總擁有成本 (TCO) 互動計算機</h3>
+            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">ERP的成本遠不止軟體授權費。使用此工具，根據您的企業規模，預測五年內的總擁有成本，並比較本地部署（CapEx為主）與雲端SaaS（OpEx為主）兩種模式的財務影響。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <!-- Inputs -->
+                <div class="space-y-6">
+                    <div>
+                        <label for="user-count" class="block text-sm font-medium text-slate-700">使用者數量: <span id="user-count-label" class="font-bold text-blue-600">100</span></label>
+                        <input id="user-count" type="range" min="10" max="1000" value="100" step="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="company-revenue" class="block text-sm font-medium text-slate-700">公司年收入 (美元)</label>
+                        <select id="company-revenue" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="10000000">$10M (中小型)</option>
+                            <option value="100000000" selected>$100M (中型)</option>
+                            <option value="500000000">$500M (大型)</option>
+                        </select>
+                    </div>
+                     <div class="text-xs text-slate-500 bg-slate-100 p-3 rounded-lg">
+                        <p><strong>計算邏輯說明：</strong>本預測基於行業基準。總導入成本約佔年收入的2-6%。SaaS費用基於使用者，而本地部署有高昂的初期硬體和授權費，但後續訂閱費為零。</p>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <canvas id="tcoChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                <div class="bg-stone-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-slate-800">本地部署模型</h4>
+                    <p class="text-4xl font-extrabold text-slate-900 my-2" id="onprem-tco">$2,710,000</p>
+                    <p class="text-sm text-slate-500">五年總擁有成本 (高CapEx)</p>
+                </div>
+                 <div class="bg-stone-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-slate-800">雲端SaaS模型</h4>
+                    <p class="text-4xl font-extrabold text-slate-900 my-2" id="saas-tco">$2,290,000</p>
+                    <p class="text-sm text-slate-500">五年總擁有成本 (高OpEx)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Strategy Framework Section -->
+        <section id="strategy-framework">
+             <h3 class="text-2xl font-bold text-center text-slate-900 mb-2">構建面向未來的ERP策略</h3>
+            <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">成功的ERP導入是一項策略工程。請遵循以下決策框架，確保您的選擇不僅能解決當前挑戰，更能賦予企業未來成長的動能。</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">1</div>
+                        <h4 class="ml-4 font-bold text-slate-900">流程審計</h4>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-600">在接觸供應商前，先分析自身核心業務流程與競爭優勢，確定ERP的核心功能需求。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">2</div>
+                        <h4 class="ml-4 font-bold text-slate-900">定義IT治理</h4>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-600">決定IT部門的角色：是技術的管理者（適合本地部署）還是服務的消費者（適合雲端SaaS）？</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">3</div>
+                        <h4 class="ml-4 font-bold text-slate-900">進行TCO分析</h4>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-600">使用本頁的計算機等工具，進行5-10年的詳細財務模型分析，確保成本模型與公司財務策略相符。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">4</div>
+                        <h4 class="ml-4 font-bold text-slate-900">重視「人」的因素</h4>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-600">為變革管理、員工培訓和數據遷移編列充足預算，這通常是專案成功與否的關鍵。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>&copy; 2025 互動式紡織業ERP系統分析儀</p>
+            <p class="text-slate-400 mt-1">資料來源於「全球紡織製造業ERP系統：全面技術與財務分析報告」。本工具僅供決策參考。</p>
+        </div>
+    </footer>
+    
+    <!-- Modal -->
+    <div id="vendor-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
+            <button id="close-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <div id="modal-content" class="p-6">
+                <!-- Content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const vendorData = {
+                datatex: {
+                    title: 'Datatex',
+                    type: '行業專家',
+                    description: '被公認為全球紡織與成衣行業的ERP領導者，擁有超過30年經驗。其NOW ERP基於Java-J2EE架構，專為處理紡織業的特殊複雜性（如染缸批號管理、重工流程、全程可追溯性）而設計。',
+                    strength: '深度行業功能，尤其擅長複雜製程管理。'
+                },
+                aptean: {
+                    title: 'Aptean',
+                    type: '行業專家',
+                    description: '提供一系列專為成衣業打造的ERP，其Process Manufacturing ERP特別適用於染整等基於配方的製程。強調深厚的行業知識和雲端交付模式。',
+                    strength: '在配方、批次追溯等流程製造領域具備核心優勢。'
+                },
+                cgs: {
+                    title: 'CGS BlueCherry',
+                    type: '行業專家',
+                    description: '一個在時尚、成衣及鞋履行業廣泛部署的整合式SaaS套件，包含ERP、PLM和車間控制（SFC）。提供從概念到消費者的全鏈路可視性。',
+                    strength: '整合的供應鏈套件，提供端到端解決方案。'
+                },
+                sap: {
+                    title: 'SAP S/4HANA for Fashion',
+                    type: '企業巨頭',
+                    description: '基於其旗艦級HANA記憶體內運算平台，旨在打通從設計到零售的全價值鏈。充分利用AI、即時分析和全通路營運能力。',
+                    strength: '強大的即時分析能力和全面的企業級功能。'
+                },
+                oracle: {
+                    title: 'Oracle NetSuite',
+                    type: '企業巨頭',
+                    description: '領先的雲端原生ERP解決方案，為成衣與紡織業提供統一的財務、庫存、CRM和電子商務平台。其架構特別受中小型及成長型企業青睞。',
+                    strength: '雲端原生、統一平台，易於擴展。'
+                },
+                infor: {
+                    title: 'Infor CloudSuite Fashion',
+                    type: '企業巨頭',
+                    description: '專為時尚行業設計的多租戶、雲端原生ERP，建構於AWS和Infor OS技術平台之上。強調可組合式架構和行業專用功能。',
+                    strength: '現代化的多租戶SaaS架構和強大的PaaS平台。'
+                },
+                microsoft: {
+                    title: 'Microsoft Dynamics 365',
+                    type: '企業巨頭',
+                    description: '全面的雲端商業應用平台，整合ERP和CRM功能。利用Azure雲端和Power Platform的強大能力，提供高度可客製化的解決方案。',
+                    strength: '與Power Platform深度整合，提供卓越的靈活性和擴展性。'
+                }
+            };
+
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            const modal = document.getElementById('vendor-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const modalContent = document.getElementById('modal-content');
+
+            vendorCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const vendorId = card.dataset.vendor;
+                    const data = vendorData[vendorId];
+                    if (data) {
+                        modalContent.innerHTML = `
+                            <h3 class="text-2xl font-bold mb-2 text-slate-900">${data.title}</h3>
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${data.type}</span>
+                            <p class="my-4 text-slate-600">${data.description}</p>
+                            <div class="bg-slate-100 p-3 rounded-lg">
+                                <p class="text-sm font-semibold text-slate-800">核心優勢:</p>
+                                <p class="text-sm text-slate-600">${data.strength}</p>
+                            </div>
+                        `;
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    }
+                });
+            });
+            
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Tabs
+            const tabs = document.getElementById('tabs');
+            const tabContent = document.getElementById('tab-content');
+
+            tabs.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-btn')) {
+                    const tabId = e.target.dataset.tab;
+                    
+                    tabs.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    });
+                    
+                    e.target.classList.add('tab-active');
+                    e.target.classList.remove('tab-inactive');
+                    
+                    tabContent.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.add('hidden');
+                    });
+                    
+                    document.getElementById(`${tabId}-content`).classList.remove('hidden');
+                }
+            });
+            
+            // TCO Calculator
+            const userCountInput = document.getElementById('user-count');
+            const userCountLabel = document.getElementById('user-count-label');
+            const revenueSelect = document.getElementById('company-revenue');
+            const onpremTcoLabel = document.getElementById('onprem-tco');
+            const saasTcoLabel = document.getElementById('saas-tco');
+
+            let tcoChart;
+
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+            }
+
+            function calculateAndRenderTCO() {
+                const users = parseInt(userCountInput.value);
+                const revenue = parseInt(revenueSelect.value);
+
+                userCountLabel.textContent = users;
+                
+                // Simplified logic based on report's benchmarks
+                // On-premise calculation (CapEx heavy)
+                const onpremLicense = (revenue * 0.02) + (users * 2000); // Base on rev + per user
+                const onpremImplementation = onpremLicense * 1.2;
+                const onpremHardware = onpremLicense * 0.3;
+                const onpremYear1 = onpremLicense + onpremImplementation + onpremHardware;
+                const onpremMaintenance = onpremLicense * 0.22 * 4; // 4 years of maintenance
+                const onpremPersonnel = users * 500 * 5; // 5 years personnel cost
+                const onpremTco = onpremYear1 + onpremMaintenance + onpremPersonnel;
+
+                // SaaS calculation (OpEx heavy)
+                const saasSubscriptionPerUser = 1500 + (revenue / 1000000); // Base fee + scale with revenue
+                const saasYear1Subscription = users * saasSubscriptionPerUser;
+                const saasImplementation = saasYear1Subscription * 0.8;
+                const saasYear1 = saasYear1Subscription + saasImplementation;
+                const saasOngoingSubscription = saasYear1Subscription * 4;
+                const saasPersonnel = users * 200 * 5;
+                const saasTco = saasYear1 + saasOngoingSubscription + saasPersonnel;
+
+                onpremTcoLabel.textContent = formatCurrency(onpremTco);
+                saasTcoLabel.textContent = formatCurrency(saasTco);
+                
+                updateChart(onpremTco, saasTco);
+            }
+
+            function updateChart(onprem, saas) {
+                if(tcoChart) {
+                    tcoChart.data.datasets[0].data = [onprem, saas];
+                    tcoChart.update();
+                }
+            }
+
+            function initChart() {
+                const ctx = document.getElementById('tcoChart').getContext('2d');
+                tcoChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['本地部署 (On-Premise)', '雲端SaaS (Cloud SaaS)'],
+                        datasets: [{
+                            label: '五年總擁有成本 (TCO)',
+                            data: [0, 0],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(20, 184, 166, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(20, 184, 166, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + (value / 1000000) + 'M';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.x !== null) {
+                                            label += formatCurrency(context.parsed.x);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initChart();
+            calculateAndRenderTCO();
+
+            userCountInput.addEventListener('input', calculateAndRenderTCO);
+            revenueSelect.addEventListener('change', calculateAndRenderTCO);
+        });
+    </script>
+</body>
+</html>
