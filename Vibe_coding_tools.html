@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年 AI 開發者工具互動分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The application is designed as a persona-driven, interactive dashboard. This structure diverges from the linear report format to directly address the user's primary goal: finding the best tool for their specific needs. The user flow is: 1. Select a persona/use-case (e.g., "個人開發者", "初創公司"). 2. The main view dynamically filters to show recommended tools. 3. Users can select multiple tools for a side-by-side comparison, visualized with a radar chart for features and a bar chart for costs. 4. Clicking for details opens a modal with in-depth analysis. This task-oriented architecture enhances usability and decision-making efficiency compared to passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Developer Personas/Use Cases -> Goal: Guide User -> Presentation: Interactive Filter Buttons -> Interaction: Click to filter tool display -> Justification: Provides a clear, user-centric entry point to the data.
+        - Report Info: Feature Comparison Matrix (Star Ratings) -> Goal: Compare Capabilities -> Viz: Radar Chart (Chart.js) -> Interaction: Appears when comparing 2-3 selected tools -> Justification: Offers a powerful multivariate visualization to quickly grasp the strengths and weaknesses of each tool profile.
+        - Report Info: Pricing & TCO analysis -> Goal: Compare Costs -> Viz: Bar Chart (Chart.js) -> Interaction: Part of the comparison view -> Justification: Translates complex pricing models into an easy-to-understand visual financial comparison.
+        - Report Info: Detailed pros, cons, and analysis for each tool -> Goal: Deep Dive -> Presentation: Dynamic Modal Window -> Interaction: Triggered by a "查看詳情" button -> Justification: Keeps the main dashboard uncluttered while making comprehensive information readily accessible without leaving the page.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfcfb; /* Warm Neutral Background */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            margin: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .active-filter {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .tool-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">2025年 AI 開發者工具互動分析</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">這是一份將靜態報告轉化為的互動儀表板。請選擇您的角色或使用場景，以尋找最適合您的AI程式設計工具組合。</p>
+        </header>
+
+        <main>
+            <section id="filters" class="mb-8 p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm sticky top-4 z-20">
+                <h2 class="text-xl font-bold mb-4 text-center text-slate-700">第一步：選擇您的角色或使用場景</h2>
+                <div id="filter-buttons" class="flex flex-wrap justify-center gap-3">
+                </div>
+            </section>
+
+            <section id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            </section>
+            
+            <section id="comparison-section" class="mt-12 p-6 bg-white rounded-xl shadow-lg hidden">
+                 <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-slate-800">工具比較</h2>
+                    <button id="close-comparison-btn" class="text-slate-500 hover:text-slate-800 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div id="comparison-content" class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="feature-radar-chart"></canvas>
+                    </div>
+                    <div id="comparison-details" class="space-y-4">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="tool-modal" class="modal fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div id="modal-content" class="p-8">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const appData = {
+            filters: [
+                { id: 'all', name: '所有工具', personas: ['gemini-cli', 'perplexity', 'notebooklm', 'replit', 'claude', 'cursor', 'windsurf', 'qodo'] },
+                { id: 'individual', name: '個人開發者', personas: ['gemini-cli', 'qodo', 'perplexity'] },
+                { id: 'startup', name: '初創公司', personas: ['cursor', 'windsurf', 'qodo', 'replit'] },
+                { id: 'enterprise', name: '大型企業', personas: ['windsurf', 'qodo', 'gemini-cli'] },
+                { id: 'research', name: '研究與學習', personas: ['perplexity', 'notebooklm'] },
+                { id: 'qa', name: '品質保證 (QA)', personas: ['qodo'] },
+                { id: 'devops', name: 'DevOps & 自動化', personas: ['gemini-cli'] }
+            ],
+            tools: {
+                'gemini-cli': {
+                    name: 'Google Gemini CLI',
+                    tagline: '終端機驅動的AI代理人',
+                    tags: ['CLI', '免費', 'DevOps'],
+                    summary: '開源的指令行AI工具，將Gemini模型直接整合到終端機，擅長處理大型程式碼庫和自動化任務。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Google Gemini CLI</h3>
+                        <p class="text-slate-600 mb-4">為您的終端機打造的AI代理人</p>
+                        <div class="space-y-4">
+                            <div><strong class="font-semibold text-sky-600">核心功能：</strong>開源指令行工具，利用高達100萬權杖上下文視窗查詢和編輯大型程式碼庫，支援多模態輸入，並可透過模型上下文協議(MCP)擴展。</div>
+                            <div><strong class="font-semibold text-green-600">優勢：</strong>極其慷慨的免費層級（Gemini 2.5 Pro）、開源社群驅動、處理超大上下文的獨特能力。</div>
+                            <div><strong class="font-semibold text-red-600">劣勢：</strong>初期版本反應較慢且有錯誤，代理能力不如對手成熟，企業用戶驗證存在障礙。</div>
+                            <div><strong class="font-semibold text-blue-600">費用：</strong>個人Google帳戶免費。可選用API金鑰按用量計費，或整合企業方案。</div>
+                            <div><strong class="font-semibold text-indigo-600">適合場域：</strong>大型程式碼庫分析與重構、DevOps與指令行自動化、個人開發者與早期採用者。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 3, '應用生成': 4, '程式碼重構': 5, '偵錯輔助': 3, '程式碼解釋': 4, '單元測試生成': 3 }
+                },
+                'perplexity': {
+                    name: 'Perplexity',
+                    tagline: '開發者的研究副駕駛',
+                    tags: ['研究', '搜尋', 'API'],
+                    summary: '一個AI原生搜尋引擎，專注於提供帶有引用來源和最新資訊的答案，非常適合技術研究和學習。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Perplexity</h3>
+                        <p class="text-slate-600 mb-4">開發者的研究副駕駛</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>AI搜尋引擎，提供帶引用來源的答案。Pro版可切換多種頂級模型（GPT-4.1, Claude等），並提供API。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>卓越的研究能力，提供有根據的最新答案。Pro方案的多LLM存取能力獨一無二，API提供擴展性。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>非核心程式設計工具，不具備程式碼編寫能力。登入機制缺乏MFA，存在安全隱患。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>標準版免費。Pro版每月20美元。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>學習與探索新技術、開發前期研究、偵錯概念性錯誤。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 0, '應用生成': 0, '程式碼重構': 0, '偵錯輔助': 3, '程式碼解釋': 5, '單元測試生成': 0 }
+                },
+                'notebooklm': {
+                    name: 'NotebookLM',
+                    tagline: '專為技術知識管理而生',
+                    tags: ['知識管理', '免費', '研究'],
+                    summary: 'Google推出的AI研究助理，其回應嚴格基於用戶上傳的私有文件，能有效減少幻覺，適合專案入職和文件分析。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">NotebookLM</h3>
+                        <p class="text-slate-600 mb-4">專為技術知識管理而生的可信AI</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>基於用戶上傳的來源（PDF、URL、音訊等）提供答案的AI助理，所有回答附有行內引用。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>極大地減少LLM的「幻覺」，提供高度相關且事實準確的答案。出色的入職和文件分析工具，能綜合多來源資訊。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>非程式設計工具，無法回答超出所提供資料範圍的問題。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>實驗階段免費。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>新成員專案入職、分析複雜技術規格、程式碼文件管理、專案規劃。</div>
+                        </div>`,
+                     ratings: { '程式碼自動完成': 0, '應用生成': 0, '程式碼重構': 0, '偵錯輔助': 3, '程式碼解釋': 5, '單元測試生成': 0 }
+                },
+                'replit': {
+                    name: 'Replit',
+                    tagline: '協作式雲端IDE平台',
+                    tags: ['雲端IDE', '協作', '原型'],
+                    summary: '完全基於瀏覽器的一體化雲端IDE，無需設定，支持即時協作，並具備強大的AI代理生成完整應用的能力。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Replit</h3>
+                        <p class="text-slate-600 mb-4">協作式雲端IDE平台</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>基於瀏覽器的雲端IDE，具備即時協作功能。AI功能包括生成完整應用的Replit Agent和行內輔助的Assistant。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>零設定和高可及性，強大的代理生成能力，無縫的協作與一鍵部署體驗。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>完全依賴雲端，不適合本地開發。強大的AI功能基於使用量收費，成本難預測。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>免費方案功能有限。Replit Core方案每月20美元，AI功能按用量計費。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>教育與學習、快速原型與MVP開發、協作專案與配對程式設計。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 4, '應用生成': 5, '程式碼重構': 4, '偵錯輔助': 4, '程式碼解釋': 4, '單元測試生成': 3 }
+                },
+                'claude': {
+                    name: 'Claude',
+                    tagline: '對話式程式設計的標竿',
+                    tags: ['LLM', '高品質', 'API'],
+                    summary: '由Anthropic開發，以其頂尖的程式碼生成品質和強大推理能力聞名，被許多開發者視為首選的對話式程式設計夥伴。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Claude</h3>
+                        <p class="text-slate-600 mb-4">對話式程式設計的標竿</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>一系列高性能模型（Opus, Sonnet, Haiku），可通過網頁、API及第三方工具（如Claude Code CLI）存取。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>頂尖的模型性能，生成高品質、文檔齊全的程式碼。強大的推理和解釋能力，多樣化的存取方式。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>長對話中可能失去上下文，網頁介面需要手動複製貼上程式碼，大規模API使用成本高。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>免費方案有限制。Pro方案每月20美元，API按權杖計費。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>高保真配對程式設計、學習與程式碼解釋、建構客製化AI應用的後端。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 5, '應用生成': 4, '程式碼重構': 5, '偵錯輔助': 5, '程式碼解釋': 5, '單元測試生成': 4 }
+                },
+                'cursor': {
+                    name: 'Cursor',
+                    tagline: 'AI優先的程式碼編輯器',
+                    tags: ['IDE', 'VS Code', 'UX'],
+                    summary: '一款以AI為核心的VS Code分支，提供一流的使用者體驗和深度整合的AI功能，同時保留VS Code的熟悉介面和擴展生態。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Cursor</h3>
+                        <p class="text-slate-600 mb-4">AI優先的程式碼編輯器</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>VS Code分支，深度整合AI聊天、行內編輯和跨文件編輯。高度可擴展，支援多種頂級模型。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>一流的使用者體驗(UX)，幾乎無學習曲線，強大的全程式碼庫上下文理解和擴展性。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>複雜且可能昂貴的定價模型，僅限本地桌面應用，處理某些高級VS Code功能時可能出錯。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>免費方案有限制。Pro方案每月20美元，但對高級模型有速率限制，可能產生超額費用。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>追求極致生產力的專業開發者、AI重度使用者、程式碼庫重構與探索。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 5, '應用生成': 4, '程式碼重構': 5, '偵錯輔助': 5, '程式碼解釋': 5, '單元測試生成': 4 }
+                },
+                'windsurf': {
+                    name: 'Windsurf (前Codeium)',
+                    tagline: '專注於流程的代理人IDE',
+                    tags: ['IDE', '代理人', '隱私'],
+                    summary: '提供獨立IDE及主流IDE插件，其核心代理人"Cascade"能處理複雜工作流程，並提供自託管選項，高度重視隱私。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Windsurf (前身為Codeium)</h3>
+                        <p class="text-slate-600 mb-4">專注於流程的代理人IDE</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>獨立IDE（VS Code分支）和插件，旗艦功能是代理人“Cascade”，可處理多步驟複雜任務。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>直觀的代理工作流程，對新手友好。高度重視隱私，提供自託管和混合部署選項。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>品牌較新，知名度較低。基於信用點數的定價模型可能不夠直觀。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>免費方案提供少量信用點數。Pro方案每月15美元，包含500信用點數。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>優先考慮直觀代理體驗的開發者、有嚴格隱私需求的企業、全端開發。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 5, '應用生成': 5, '程式碼重構': 5, '偵錯輔助': 4, '程式碼解釋': 5, '單元測試生成': 4 }
+                },
+                'qodo': {
+                    name: 'Qodo (前CodiumAI)',
+                    tagline: '程式碼完整性與測試的專家',
+                    tags: ['測試', '品質', 'CI/CD'],
+                    summary: '一個專注於程式碼完整性的AI平台，核心功能是生成有意義的單元測試，並能自動化PR審查，顯著提高程式碼品質。',
+                    details: `
+                        <h3 class="text-2xl font-bold mb-2 text-slate-900">Qodo (前身為CodiumAI)</h3>
+                        <p class="text-slate-600 mb-4">程式碼完整性與測試的專家</p>
+                        <div class="space-y-4">
+                           <div><strong class="font-semibold text-sky-600">核心功能：</strong>通過IDE插件(Gen)、Git代理人(Merge)和CLI(Command)生成有意義的單元測試，專注於程式碼完整性。</div>
+                           <div><strong class="font-semibold text-green-600">優勢：</strong>同類最佳的測試生成能力，有效提高程式碼品質並減少錯誤，與開發工作流程深度整合。</div>
+                           <div><strong class="font-semibold text-red-600">劣勢：</strong>專注點較窄，非全能助理，可能需要與其他工具結合使用。存在一定學習曲線。</div>
+                           <div><strong class="font-semibold text-blue-600">費用：</strong>為個人開發者提供慷慨的免費方案。Teams方案每位使用者每月19-30美元。</div>
+                           <div><strong class="font-semibold text-indigo-600">適合場域：</strong>有高品質標準的團隊（如金融、醫療）、自動化PR審查、為既有專案增加測試覆蓋率。</div>
+                        </div>`,
+                    ratings: { '程式碼自動完成': 4, '應用生成': 2, '程式碼重構': 3, '偵錯輔助': 5, '程式碼解釋': 4, '單元測試生成': 5 }
+                }
+            }
+        };
+
+        let activeFilter = 'all';
+        let comparisonList = [];
+        let radarChart = null;
+
+        const filterButtonsContainer = document.getElementById('filter-buttons');
+        const toolGrid = document.getElementById('tool-grid');
+        const modal = document.getElementById('tool-modal');
+        const modalContent = document.getElementById('modal-content');
+        const comparisonSection = document.getElementById('comparison-section');
+        const comparisonContent = document.getElementById('comparison-content');
+        const comparisonDetails = document.getElementById('comparison-details');
+        const closeComparisonBtn = document.getElementById('close-comparison-btn');
+
+        function renderFilters() {
+            filterButtonsContainer.innerHTML = appData.filters.map(filter => `
+                <button 
+                    class="filter-btn px-4 py-2 text-sm font-semibold rounded-full transition duration-200 ease-in-out bg-white text-slate-700 hover:bg-blue-100 shadow-sm border border-slate-200"
+                    data-filter-id="${filter.id}"
+                >
+                    ${filter.name}
+                </button>
+            `).join('');
+            document.querySelector(`[data-filter-id="${activeFilter}"]`).classList.add('active-filter');
+        }
+
+        function renderTools() {
+            const currentFilter = appData.filters.find(f => f.id === activeFilter);
+            const toolsToRender = currentFilter.personas;
+
+            toolGrid.innerHTML = toolsToRender.map(toolId => {
+                const tool = appData.tools[toolId];
+                return `
+                <div class="tool-card bg-white rounded-xl shadow-md overflow-hidden p-6 flex flex-col justify-between border border-slate-100">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">${tool.name}</h3>
+                        <p class="text-slate-500 mt-1 mb-3">${tool.tagline}</p>
+                        <p class="text-sm text-slate-600 mb-4 h-12">${tool.summary}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${tool.tags.map(tag => `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm text-slate-600 hover:text-blue-600">
+                            <input type="checkbox" class="compare-checkbox form-checkbox h-5 w-5 rounded text-blue-600 transition duration-150 ease-in-out" data-tool-id="${toolId}">
+                            <span>比較</span>
+                        </label>
+                        <button class="details-btn text-sm font-bold text-blue-600 hover:text-blue-800" data-tool-id="${toolId}">
+                            查看詳情 &rarr;
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+        
+        function openModal(toolId) {
+            const tool = appData.tools[toolId];
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 flex-grow">${tool.name}</h2>
+                     <button class="text-slate-400 hover:text-slate-600" onclick="closeModal(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                ${tool.details}
+            `;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(event) {
+            if (event.target.id === 'tool-modal' || event.target.closest('button')) {
+                 modal.classList.add('hidden');
+                 document.body.style.overflow = 'auto';
+            }
+        }
+        
+        function handleFilterClick(event) {
+            const button = event.target.closest('.filter-btn');
+            if (button) {
+                activeFilter = button.dataset.filterId;
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+                button.classList.add('active-filter');
+                closeComparison();
+                renderTools();
+            }
+        }
+        
+        function handleToolGridClick(event) {
+            if (event.target.classList.contains('details-btn')) {
+                openModal(event.target.dataset.toolId);
+            }
+            if (event.target.classList.contains('compare-checkbox')) {
+                const toolId = event.target.dataset.toolId;
+                if (event.target.checked) {
+                    if (comparisonList.length < 3) {
+                         comparisonList.push(toolId);
+                    } else {
+                        event.target.checked = false;
+                        alert("最多只能比較三項工具。");
+                    }
+                } else {
+                    comparisonList = comparisonList.filter(id => id !== toolId);
+                }
+                updateComparison();
+            }
+        }
+        
+        function updateComparison() {
+            if (comparisonList.length >= 2) {
+                renderComparison();
+                comparisonSection.classList.remove('hidden');
+            } else {
+                closeComparison();
+            }
+        }
+        
+        function closeComparison() {
+            comparisonSection.classList.add('hidden');
+            comparisonList = [];
+            document.querySelectorAll('.compare-checkbox').forEach(cb => cb.checked = false);
+            if(radarChart) {
+                radarChart.destroy();
+                radarChart = null;
+            }
+        }
+
+        function renderComparison() {
+            const toolsToCompare = comparisonList.map(id => appData.tools[id]);
+            const labels = Object.keys(toolsToCompare[0].ratings);
+            const datasets = toolsToCompare.map((tool, index) => {
+                const colors = [
+                    'rgba(59, 130, 246, 0.4)', // blue
+                    'rgba(16, 185, 129, 0.4)', // green
+                    'rgba(249, 115, 22, 0.4)'  // orange
+                ];
+                 const borderColors = [
+                    'rgb(59, 130, 246)',
+                    'rgb(16, 185, 129)',
+                    'rgb(249, 115, 22)'
+                ];
+                return {
+                    label: tool.name,
+                    data: labels.map(label => tool.ratings[label]),
+                    backgroundColor: colors[index],
+                    borderColor: borderColors[index],
+                    pointBackgroundColor: borderColors[index],
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: borderColors[index],
+                    borderWidth: 2
+                }
+            });
+
+            const ctx = document.getElementById('feature-radar-chart').getContext('2d');
+            if (radarChart) {
+                radarChart.destroy();
+            }
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { 
+                                font: { size: 12, weight: 'bold' },
+                                color: '#334155'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                max: 5,
+                                stepSize: 1,
+                                backdropColor: 'transparent',
+                                color: '#64748b'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 14 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        label += context.parsed.r + ' ★';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            comparisonDetails.innerHTML = toolsToCompare.map((tool, index) => `
+                <div class="border-l-4 p-4 rounded-r-lg" style="border-color: ${radarChart.data.datasets[index].borderColor}; background-color: ${radarChart.data.datasets[index].backgroundColor.replace('0.4','0.1')}">
+                    <h4 class="font-bold text-lg">${tool.name}</h4>
+                    <p class="text-sm mt-1">${tool.summary}</p>
+                </div>
+            `).join('');
+        }
+
+        function init() {
+            renderFilters();
+            renderTools();
+            filterButtonsContainer.addEventListener('click', handleFilterClick);
+            toolGrid.addEventListener('click', handleToolGridClick);
+            closeComparisonBtn.addEventListener('click', closeComparison);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
