@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式零停機部署解決方案</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is designed with a clear, task-oriented flow. It starts by defining the user's current problem, then presents solutions in a tabbed interface. This structure allows the user to easily compare 'Blue-Green Deployment' and 'Rolling Update' side-by-side. Each tab contains a conceptual explanation with diagrams, pros/cons, and ready-to-use code, facilitating direct implementation. The final "Recommendations" section uses a summary chart and table to help the user make an informed decision based on their specific needs (cost, complexity, risk). This structure was chosen for its clarity and direct path from problem to actionable solution. -->
+    <!-- Visualization & Content Choices: 
+        - Problem Visualization (HTML/CSS): Report Info -> Current downtime issue -> Goal: Visualize the service interruption -> Viz: Simple animated diagram showing a server going down before the new one comes up -> Justification: Immediately clarifies the core problem for the user.
+        - Solution Flow Diagrams (HTML/CSS/JS): Report Info -> Deployment strategies (Blue-Green, Rolling) -> Goal: Explain complex flows intuitively -> Viz: Animated diagrams showing traffic switching (Blue-Green) and gradual instance replacement (Rolling) -> Justification: Makes abstract deployment concepts tangible and easy to grasp without complex text.
+        - Strategy Comparison Chart (Chart.js Radar): Report Info -> Need to compare solutions -> Goal: Provide a quick, multi-dimensional comparison -> Viz: Radar chart comparing solutions on axes like Cost, Complexity, and Rollback Speed -> Justification: Offers a high-density visual summary that is much faster to parse than a text-based comparison.
+        - Interactive Tabs (JS): Report Info -> Multiple solutions to present -> Goal: Organize content cleanly -> Viz: Clickable tabs -> Justification: Standard UI pattern for non-linear exploration and comparison of distinct options.
+        All visualizations are built to be interactive and informative, directly supporting the application's goal of enabling the user to understand and implement a zero-downtime solution. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F6;
+            color: #333;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .tab-btn.active {
+            color: #2563EB;
+            border-bottom-color: #2563EB;
+        }
+        .content-panel {
+            display: none;
+        }
+        .content-panel.active {
+            display: block;
+        }
+        .pro-con-list {
+            padding-left: 1.5rem;
+        }
+        .pro-con-list li::before {
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            top: 0.1em; /* Adjusted for better vertical alignment */
+        }
+        .pro-list li::before {
+            content: '✓';
+            color: #16A34A;
+        }
+        .con-list li::before {
+            content: '✗';
+            color: #DC2626;
+        }
+        pre {
+            background-color: #1E293B;
+            color: #F8FAFC;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #475569;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #64748B;
+        }
+        .diagram-box {
+            border: 2px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.5s ease;
+            min-height: 80px;
+        }
+        .server-blue { background-color: #BFDBFE; border-color: #3B82F6; }
+        .server-green { background-color: #A7F3D0; border-color: #10B981; }
+        .server-old { background-color: #FECACA; border-color: #EF4444; }
+        .server-new { background-color: #A7F3D0; border-color: #10B981; }
+        .traffic-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            transition: transform 0.5s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">實現零停機部署 (Zero-Downtime Deployment)</h1>
+            <p class="text-lg text-gray-600">分析您目前的 CI/CD 流程並提供可行的互動解決方案</p>
+        </header>
+
+        <section id="problem" class="mb-12 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">📍 當前問題分析</h2>
+            <p class="mb-4 text-gray-700">您目前的部署流程是 <code class="bg-gray-200 text-red-600 font-mono p-1 rounded">docker compose down</code> 後再 <code class="bg-gray-200 text-green-700 font-mono p-1 rounded">docker compose up --build</code>。這導致在關閉舊服務到啟動新服務之間，存在一個明顯的服務中斷期，嚴重影響使用者體驗。下圖模擬了這個過程：</p>
+            <div class="flex items-center justify-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="text-center">
+                    <div id="downtime-server" class="diagram-box server-blue w-32">服務運行中</div>
+                    <div class="mt-2 text-sm font-semibold">v1.0</div>
+                </div>
+                <div id="downtime-arrow" class="traffic-arrow text-gray-400 text-3xl font-mono relative">---></div>
+                <div class="text-center">
+                    <div class="diagram-box bg-gray-200 border-gray-400 w-32 flex items-center justify-center">服務中斷</div>
+                    <div class="mt-2 text-sm font-semibold text-red-600">Downtime</div>
+                </div>
+                <div class="traffic-arrow text-gray-400 text-3xl font-mono relative">---></div>
+                <div class="text-center">
+                     <div class="diagram-box server-blue w-32">服務恢復</div>
+                     <div class="mt-2 text-sm font-semibold">v1.1</div>
+                </div>
+            </div>
+             <p class="text-center mt-2 text-sm text-gray-500">這個流程確保了環境的乾淨，但代價是數分鐘的停機時間。</p>
+        </section>
+
+        <main>
+            <div class="border-b border-gray-300 mb-8">
+                <nav class="flex -mb-px space-x-6">
+                    <button class="tab-btn active py-4 px-1 text-lg font-medium" data-tab="blue-green">方案一：藍綠部署</button>
+                    <button class="tab-btn py-4 px-1 text-lg font-medium" data-tab="rolling-update">方案二：滾動更新</button>
+                    <button class="tab-btn py-4 px-1 text-lg font-medium" data-tab="recommendations">方案比較與建議</button>
+                </nav>
+            </div>
+
+            <!-- Blue-Green Deployment Panel -->
+            <div id="blue-green" class="content-panel active">
+                <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">概念說明</h3>
+                    <p class="mb-4 text-gray-700">藍綠部署是透過維護兩套完全相同的生產環境（稱為「藍色」和「綠色」）來實現零停機。任何時候只有一套環境對外提供服務。部署新版本時，我們在閒置的環境上部署，測試通過後，只需切換反向代理（如 Nginx）的流量指向即可。如果新版出問題，可以秒級切換回舊版。</p>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-around">
+                            <div class="text-center">
+                                <div class="diagram-box server-blue">Blue (v1.0)</div>
+                                <div class="mt-2 text-sm">線上環境</div>
+                            </div>
+                            <div id="bg-arrow" class="traffic-arrow text-blue-500">↑</div>
+                            <div class="text-center">
+                                <div class="diagram-box server-green opacity-50">Green (v1.1)</div>
+                                <div class="mt-2 text-sm">閒置/部署中</div>
+                            </div>
+                        </div>
+                        <div class="text-center my-2">
+                            <div class="font-bold">Nginx (反向代理)</div>
+                        </div>
+                        <div class="text-center">
+                            <button id="switch-traffic-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all">模擬切換流量至 Green</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">優缺點</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-green-700 mb-2">優點</h4>
+                            <ul class="pro-con-list pro-list relative">
+                                <li class="relative mb-2 pl-6"><strong>秒級回滾：</strong>出問題時，只需將流量切回舊環境，風險極低。</li>
+                                <li class="relative mb-2 pl-6"><strong>充分測試：</strong>可以在新環境上線前進行完整的整合測試。</li>
+                                <li class="relative mb-2 pl-6"><strong>環境隔離：</strong>新舊版本完全隔離，不會互相影響。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-red-700 mb-2">缺點</h4>
+                             <ul class="pro-con-list con-list relative">
+                                <li class="relative mb-2 pl-6"><strong>資源成本高：</strong>需要維護兩套生產環境，硬體成本近乎加倍。</li>
+                                <li class="relative mb-2 pl-6"><strong>設定較複雜：</strong>需要額外設定反向代理來管理流量。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">實作步驟與程式碼</h3>
+                    <p class="mb-4 text-gray-700">我們需要引入 Nginx 作為反向代理。部署流程將改為在 GitLab CI 中編寫腳本，動態地更新 Nginx 設定檔以切換流量。</p>
+
+                    <h4 class="font-semibold mt-6 mb-2">1. 新的 `docker-compose.yml`</h4>
+                    <p class="mb-2 text-sm text-gray-600">定義 blue、green 兩個服務以及 nginx 代理。</p>
+                    <div class="relative">
+                        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  blue:
+    build: .
+    container_name: eip-ui-blue
+    image: eip-ui:blue
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Ho_Chi_Minh
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: always
+    networks:
+      - eip_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  green:
+    build: .
+    container_name: eip-ui-green
+    image: eip-ui:green
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Ho_Chi_Minh
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: always
+    networks:
+      - eip_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: eip-ui-proxy
+    ports:
+      - "8888:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - blue
+      - green
+    networks:
+      - eip_network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  eip_network:
+    driver: bridge
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+
+                    <h4 class="font-semibold mt-6 mb-2">2. Nginx 設定檔 (`nginx/default.conf`) (已修正)</h4>
+                    <p class="mb-2 text-sm text-gray-600">移除佔位符，將 `proxy_pass` 預設指向 `blue_upstream`，確保 Nginx 總能以有效的設定啟動。</p>
+                     <div class="relative">
+                        <pre><code class="language-nginx">upstream blue_upstream {
+    server blue:3000;
+}
+
+upstream green_upstream {
+    server green:3000;
+}
+
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://blue_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+
+                    <h4 class="font-semibold mt-6 mb-2">3. 部署腳本 (`deploy.sh`) (已修正)</h4>
+                    <p class="mb-2 text-sm text-gray-600">此版本修正了 `sed` 指令，使其能在 `blue_upstream` 和 `green_upstream` 之間正確切換。</p>
+                     <div class="relative">
+                        <pre><code class="language-bash">#!/bin/bash
+set -e
+
+# 定義 Nginx 設定檔的路徑
+NGINX_CONFIG_FILE="./nginx/default.conf"
+
+# 檢查 Nginx 設定檔是否存在
+if [ ! -f "$NGINX_CONFIG_FILE" ]; then
+    echo "錯誤: Nginx 設定檔不存在於 $NGINX_CONFIG_FILE"
+    exit 1
+fi
+
+# 找出當前活躍的 upstream 和閒置的顏色
+ACTIVE_UPSTREAM=$(grep "proxy_pass http://" "$NGINX_CONFIG_FILE" | awk -F'//' '{print $2}' | sed 's/;//')
+
+if [ "$ACTIVE_UPSTREAM" == "blue_upstream" ]; then
+  INACTIVE_COLOR="green"
+  ACTIVE_COLOR="blue"
+else
+  INACTIVE_COLOR="blue"
+  ACTIVE_COLOR="green"
+fi
+
+echo "當前活躍服務: $ACTIVE_COLOR"
+echo "將要部署到: $INACTIVE_COLOR"
+
+# 步驟 1: 只建立新版本服務的映像檔
+echo "正在建立新版本 $INACTIVE_COLOR 的映像檔..."
+sudo docker compose build $INACTIVE_COLOR
+
+# 步驟 2: 啟動所有服務 (Compose 會自動使用新的映像檔)
+echo "正在啟動所有服務..."
+sudo docker compose up -d
+
+# 等待新容器健康檢查通過
+echo "等待 $INACTIVE_COLOR 服務健康..."
+while [ "$(sudo docker inspect -f {{.State.Health.Status}} eip-ui-${INACTIVE_COLOR})" != "healthy" ]; do
+    echo -n "."
+    sleep 3
+done
+echo ""
+echo "$INACTIVE_COLOR 服務已準備就緒！"
+
+# 確保 Nginx 服務正在運行
+echo "正在檢查 Nginx 服務狀態..."
+while [ "$(sudo docker inspect -f {{.State.Status}} eip-ui-proxy)" != "running" ]; do
+    echo "Nginx 尚未運行，等待中..."
+    sleep 3
+done
+echo "Nginx 服務已運行！"
+
+# 切換 Nginx 流量
+echo "正在切換流量至 $INACTIVE_COLOR..."
+sed -i "s/proxy_pass http:\/\/$ACTIVE_UPSTREAM;/proxy_pass http:\/\/${INACTIVE_COLOR}_upstream;/" "$NGINX_CONFIG_FILE"
+
+# 重新載入 Nginx 設定
+sudo docker compose exec nginx nginx -s reload
+echo "流量已成功切換！"
+
+# 停止舊的容器 (可選，也可以保留作為快速回滾)
+echo "正在停止舊的 $ACTIVE_COLOR 服務..."
+sudo docker compose stop $ACTIVE_COLOR
+
+echo "部署完成！"
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+
+                    <h4 class="font-semibold mt-6 mb-2">4. 更新後的 `.gitlab-ci.yml`</h4>
+                    <p class="mb-2 text-sm text-gray-600">將部署階段的 script 改為執行我們的 `deploy.sh` 腳本。</p>
+                     <div class="relative">
+                        <pre><code class="language-yaml">stages:
+  - deploy
+  - notify
+
+deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  tags:
+    - docker-prod
+  script:
+    - echo "開始零停機部署..."
+    - cd $CI_PROJECT_DIR
+    - chmod +x deploy.sh
+    - ./deploy.sh
+    - echo "零停機部署完成！"
+
+# ... notify stages remain the same ...
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Rolling Update Panel -->
+            <div id="rolling-update" class="content-panel">
+                <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">概念說明</h3>
+                    <p class="mb-4 text-gray-700">滾動更新是逐步用新版本容器替換舊版本容器。例如，如果您有 3 個服務實例，滾動更新會先啟動一個 v1.1 的新實例，待其健康後，再關閉一個 v1.0 的舊實例，重複此過程直到所有實例都更新為新版。Docker Compose 本身不直接支援，但可以透過腳本和 `--scale` 參數模擬。</p>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <div id="rolling-diagram" class="grid grid-cols-4 gap-4 items-center justify-items-center">
+                            <div class="diagram-box server-old">v1.0</div>
+                            <div class="diagram-box server-old">v1.0</div>
+                            <div class="diagram-box server-old">v1.0</div>
+                            <div class="text-center">
+                                <button id="start-rolling-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all">模擬更新</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                 <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">優缺點</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-green-700 mb-2">優點</h4>
+                            <ul class="pro-con-list pro-list relative">
+                                <li class="relative mb-2 pl-6"><strong>資源成本低：</strong>不需要額外的伺服器資源。</li>
+                                <li class="relative mb-2 pl-6"><strong>部署過程平滑：</strong>流量逐步轉移，對使用者影響小。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-red-700 mb-2">缺點</h4>
+                             <ul class="pro-con-list con-list relative">
+                                <li class="relative mb-2 pl-6"><strong>回滾複雜：</strong>回滾需要反向執行更新流程，比藍綠部署慢。</li>
+                                <li class="relative mb-2 pl-6"><strong>版本共存問題：</strong>更新期間，新舊版本 API 可能會同時存在，需確保向下相容。</li>
+                                <li class="relative mb-2 pl-6"><strong>不適合單一實例：</strong>如果只有一個服務實例，此方法無效，仍會造成停機。</li>
+                            </ul>
+                        </div>
+                </section>
+                <section class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">實作步驟與程式碼</h3>
+                    <p class="mb-4 text-gray-700">此方案需要您的服務能水平擴展（運行多個實例）。我們將使用 Docker Compose 的 `--scale` 命令和內建的 `deploy.update_config` 來實現。注意：這需要在 Docker Swarm 模式下才能獲得最佳效果，但我們可以在單機上用腳本模擬。</p>
+                    
+                    <h4 class="font-semibold mt-6 mb-2">1. `docker-compose.yml` (加入 replicas 和 update_config)</h4>
+                    <p class="mb-2 text-sm text-gray-600">使用 `deploy` key 來定義更新策略和副本數量。</p>
+                    <div class="relative">
+                    <pre><code class="language-yaml">version: '3.8'
+
+services:
+  eip-ui-v2:
+    image: your-repo/eip-ui:${CI_COMMIT_SHORT_SHA} # 鏡像標籤應該是動態的
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:3000"
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Ho_Chi_Minh
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - EipApps_network
+    deploy:
+      replicas: 3 # 運行 3 個實例
+      update_config:
+        parallelism: 1 # 一次只更新一個實例
+        delay: 10s # 每個實例更新間隔 10 秒
+        order: start-first # 先啟動新實例，再關閉舊實例
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  EipApps_network:
+    external: true
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+
+                    <h4 class="font-semibold mt-6 mb-2">2. 更新後的 `.gitlab-ci.yml`</h4>
+                    <p class="mb-2 text-sm text-gray-600">部署指令改為 `docker stack deploy`，這會利用 Swarm 模式的滾動更新能力。</p>
+                    <div class="relative">
+                    <pre><code class="language-yaml">stages:
+  - build
+  - deploy
+  - notify
+
+build:
+  stage: build
+  script:
+    - docker build -t your-repo/eip-ui:${CI_COMMIT_SHORT_SHA} .
+    - docker push your-repo/eip-ui:${CI_COMMIT_SHORT_SHA} # 需要推送到 Docker Registry
+
+deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  tags:
+    - docker-prod
+  script:
+    - echo "初始化 Docker Swarm (如果尚未初始化)..."
+    - docker swarm init --advertise-addr $(hostname -i) || true
+    - echo "開始滾動更新部署..."
+    # 使用 docker stack deploy 來觸發滾動更新
+    - docker stack deploy -c docker-compose.yml eip-stack --with-registry-auth
+    - echo "滾動更新部署已觸發！"
+
+# ... notify stages ...
+</code></pre>
+                        <button class="copy-btn">複製</button>
+                    </div>
+                     <div class="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                        <p class="font-bold">重要提示</p>
+                        <p>滾動更新方案強烈建議在 **Docker Swarm** 模式下運行，它原生支持 `deploy` 配置。如果您不想啟用 Swarm，則需要編寫更複雜的 shell 腳本來手動 `docker compose up --scale` 和 `stop` 舊容器，這會更繁瑣且容易出錯。</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Recommendations Panel -->
+            <div id="recommendations" class="content-panel">
+                 <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">方案比較與選擇建議</h3>
+                    <p class="mb-4 text-gray-700">選擇哪種方案取決於您對資源成本、風險容忍度和團隊維運能力的權衡。以下是兩個方案的直觀比較。</p>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container relative h-[350px] w-full max-w-md mx-auto">
+                            <canvas id="strategyChart"></canvas>
+                        </div>
+                        <div>
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border-b-2 p-2">評估維度</th>
+                                        <th class="border-b-2 p-2 text-blue-600">藍綠部署</th>
+                                        <th class="border-b-2 p-2 text-green-600">滾動更新</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-2 font-medium">資源成本</td>
+                                        <td class="p-2">高 (⭐️⭐️⭐️⭐️)</td>
+                                        <td class="p-2">低 (⭐️)</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-2 font-medium">實作複雜度</td>
+                                        <td class="p-2">中 (⭐️⭐️⭐️)</td>
+                                        <td class="p-2">中/高 (⭐️⭐️⭐️⭐️)</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-2 font-medium">回滾速度</td>
+                                        <td class="p-2">極快 (⭐️)</td>
+                                        <td class="p-2">慢 (⭐️⭐️⭐️⭐️)</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-2 font-medium">部署風險</td>
+                                        <td class="p-2">低 (⭐️)</td>
+                                        <td class="p-2">中 (⭐️⭐️⭐️)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                             <p class="text-xs text-gray-500 mt-2">註：星號越多代表程度越高（例如成本越高、速度越慢）。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h4 class="font-semibold text-lg mb-2">我的建議</h4>
+                        <p class="text-gray-700">對於大多數尋求穩定且風險可控的團隊，我強烈推薦從**藍綠部署**開始。雖然它需要額外的資源，但其極低的部署風險和近乎即時的回滾能力，為線上服務提供了強大的安全保障。</p>
+                        <p class="mt-2 text-gray-700">當您的服務成熟到需要運行大量實例，並且對成本極為敏感時，再考慮引入 Docker Swarm 或 Kubernetes，並採用更精細的滾動更新或金雀部署策略。</p>
+                    </div>
+
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const panels = document.querySelectorAll('.content-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const target = tab.getAttribute('data-tab');
+                    panels.forEach(panel => {
+                        if (panel.id === target) {
+                            panel.classList.add('active');
+                        } else {
+                            panel.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Copy button functionality
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const pre = button.previousElementSibling;
+                    const code = pre.querySelector('code').innerText;
+                    
+                    // Fallback for environments with restricted clipboard access
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    // Make the textarea invisible
+                    textArea.style.position = 'fixed';
+                    textArea.style.top = '-9999px';
+                    textArea.style.left = '-9999px';
+                    
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        button.innerText = '已複製!';
+                    } catch (err) {
+                        console.error('Fallback: Oops, unable to copy', err);
+                        button.innerText = '複製失敗';
+                    }
+                    
+                    document.body.removeChild(textArea);
+
+                    setTimeout(() => {
+                        button.innerText = '複製';
+                    }, 2000);
+                });
+            });
+            
+            // Blue-Green animation
+            const switchBtn = document.getElementById('switch-traffic-btn');
+            const bgArrow = document.getElementById('bg-arrow');
+            const blueServer = document.querySelector('.server-blue');
+            const greenServer = document.querySelector('.server-green');
+            let isBlueActive = true;
+
+            switchBtn.addEventListener('click', () => {
+                if (isBlueActive) {
+                    bgArrow.style.transform = 'rotate(180deg)';
+                    bgArrow.classList.remove('text-blue-500');
+                    bgArrow.classList.add('text-green-500');
+                    greenServer.classList.remove('opacity-50');
+                    blueServer.classList.add('opacity-50');
+                    switchBtn.innerText = '模擬切換流量至 Blue';
+                } else {
+                    bgArrow.style.transform = 'rotate(0deg)';
+                    bgArrow.classList.add('text-blue-500');
+                    bgArrow.classList.remove('text-green-500');
+                    blueServer.classList.remove('opacity-50');
+                    greenServer.classList.add('opacity-50');
+                    switchBtn.innerText = '模擬切換流量至 Green';
+                }
+                isBlueActive = !isBlueActive;
+            });
+
+            // Rolling update animation
+            const startRollingBtn = document.getElementById('start-rolling-btn');
+            const rollingDiagram = document.getElementById('rolling-diagram');
+            const originalServers = rollingDiagram.innerHTML;
+
+            startRollingBtn.addEventListener('click', () => {
+                rollingDiagram.innerHTML = originalServers; // Reset
+                const servers = rollingDiagram.querySelectorAll('.diagram-box');
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i < servers.length) {
+                        const server = servers[i];
+                        server.classList.remove('server-old');
+                        server.classList.add('server-new');
+                        server.innerText = 'v1.1';
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 800);
+            });
+
+
+            // Chart.js Radar Chart
+            const ctx = document.getElementById('strategyChart').getContext('2d');
+            const chartData = {
+                labels: ['資源成本', '實作複雜度', '回滾速度', '部署風險'],
+                datasets: [{
+                    label: '藍綠部署',
+                    data: [4, 3, 1, 1],
+                    fill: true,
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: 'rgb(37, 99, 235)',
+                    pointBackgroundColor: 'rgb(37, 99, 235)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(37, 99, 235)'
+                }, {
+                    label: '滾動更新',
+                    data: [1, 4, 4, 3],
+                    fill: true,
+                    backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                    borderColor: 'rgb(22, 163, 74)',
+                    pointBackgroundColor: 'rgb(22, 163, 74)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(22, 163, 74)'
+                }]
+            };
+            new Chart(ctx, {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                }
+                            },
+                             ticks: {
+                                backdropColor: 'rgba(0,0,0,0)',
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        const mapping = ['極低', '低', '中', '高', '極高'];
+                                        label += mapping[context.parsed.r-1] || context.parsed.r;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
