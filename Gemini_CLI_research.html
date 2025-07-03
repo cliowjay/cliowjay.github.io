@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：深度剖析 Google Gemini CLI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page exploratory dashboard. Instead of a linear document, the content is organized into thematic sections accessible via a sticky top navigation: 1. **總覽 (Overview)**: A high-level introduction. 2. **核心引擎 (Core Engine)**: Uses an interactive HTML/CSS diagram to explain the ReAct loop, making abstract concepts tangible. 3. **開發流程 (Dev Workflow)**: Employs simulated terminal pop-ups to demonstrate practical applications (scaffolding, debugging, etc.), providing a hands-on feel. 4. **工具比較 (Tool Comparison)**: Features an interactive Chart.js radar chart, allowing users to visually compare Gemini CLI with its competitors across key metrics, which is more intuitive than a static table. 5. **戰略與實踐 (Strategy & Practice)**: Presents advanced concepts and recommendations in an accordion format for easy digestion. This task-oriented, non-linear structure respects the user's time and allows them to jump directly to the most relevant information, fostering understanding through interaction rather than passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core Architecture (ReAct loop) -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS diagram with clickable elements. Justification: Breaks down the complex cycle into understandable, explorable parts. Library/Method: Vanilla JS, Tailwind CSS.
+        - Report Info: Development Lifecycle Examples -> Goal: Demonstrate -> Viz: Simulated terminal windows. Justification: More engaging and contextual than plain code blocks, mimics the actual user experience. Library/Method: Vanilla JS, Tailwind CSS.
+        - Report Info: Competitive Analysis Matrix -> Goal: Compare -> Viz: Interactive Radar Chart. Justification: Provides an immediate, powerful visual summary of tool strengths and weaknesses, superior to scanning a table. Library/Method: Chart.js.
+        - Report Info: Vibe Coding & Pro-Tips -> Goal: Summarize/Guide -> Viz: Accordion UI component. Justification: Condenses detailed advice into scannable topics, allowing users to expand only what interests them. Library/Method: Vanilla JS, Tailwind CSS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 50vh; }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+        .terminal {
+            background-color: #1E293B;
+            color: #E2E8F0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .terminal-prompt::before { content: '>'; margin-right: 0.75rem; color: #34D399; }
+        .terminal-response { color: #93C5FD; padding-left: 1.75rem; white-space: pre-wrap; }
+        .terminal-tool-call { color: #FBBF24; font-style: italic; margin-left: 1.75rem; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-slate-50/80 backdrop-blur-lg sticky top-0 z-50 border-b border-slate-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-cyan-600">Gemini CLI</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium">總覽</a>
+                        <a href="#engine" class="text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium">核心引擎</a>
+                        <a href="#workflow" class="text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium">開發流程</a>
+                        <a href="#comparison" class="text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium">工具比較</a>
+                        <a href="#strategy" class="text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium">戰略與實踐</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Section: Overview -->
+        <section id="overview" class="mb-24 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">終端機的再想像</h1>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto">為資深軟體工程師深度剖析 Google Gemini CLI，一個將強大 AI 代理能力直接注入您最熟悉工作環境的典範轉移。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-3">🚀</div>
+                    <h3 class="text-lg font-semibold mb-2">加速開發</h3>
+                    <p class="text-sm text-slate-500">從概念到原型，將數小時的手動設定壓縮到幾分鐘的對話式互動。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-3">🧩</div>
+                    <h3 class="text-lg font-semibold mb-2">卸載認知負荷</h3>
+                    <p class="text-sm text-slate-500">自動化繁瑣任務，如程式碼理解、測試生成，讓您專注於更高層次的創造性工作。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-3">🔧</div>
+                    <h3 class="text-lg font-semibold mb-2">規模化最佳實踐</h3>
+                    <p class="text-sm text-slate-500">將團隊規範編碼到 AI 行為中，在整個組織內提升程式碼品質與一致性。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Core Engine -->
+        <section id="engine" class="mb-24 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">核心引擎剖析</h2>
+                <p class="text-md text-slate-500 max-w-2xl mx-auto">Gemini CLI 的強大源於其精心設計的架構。點擊下方圖示，探索其智慧的來源。</p>
+            </div>
+            <div class="max-w-4xl mx-auto">
+                <div id="react-diagram" class="relative flex flex-col md:flex-row items-center justify-between p-8 bg-white rounded-xl shadow-md border border-slate-200">
+                    <div class="flex flex-col items-center p-4 cursor-pointer diagram-node" data-target="info-reason">
+                        <div class="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-3xl">🧠</div>
+                        <span class="mt-2 font-semibold">推理 (Reason)</span>
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl text-slate-300 hidden md:block">&rarr;</div>
+                    <div class="text-5xl text-slate-300 md:hidden">&darr;</div>
+                    <div class="flex flex-col items-center p-4 cursor-pointer diagram-node" data-target="info-act">
+                        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-3xl">🛠️</div>
+                        <span class="mt-2 font-semibold">行動 (Act)</span>
+                    </div>
+                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl text-slate-300 hidden md:block" style="transform: translate(150%, -50%) rotate(90deg);">&rarr;</div>
+                     <div class="text-5xl text-slate-300 md:hidden">&darr;</div>
+                    <div class="flex flex-col items-center p-4 cursor-pointer diagram-node" data-target="info-observe">
+                        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-3xl">👀</div>
+                        <span class="mt-2 font-semibold">觀察 (Observe)</span>
+                    </div>
+                </div>
+                <div id="diagram-info-box" class="mt-6 bg-cyan-50 p-6 rounded-lg border border-cyan-200 text-slate-700 transition-opacity duration-300 opacity-0 min-h-[100px]">
+                    <div id="info-default" class="info-content">
+                        <h4 class="font-bold text-cyan-800">推理-行動-觀察 (ReAct) 循環</h4>
+                        <p class="text-sm mt-1">此智慧循環賦予 Gemini CLI 處理多步驟複雜任務和自我修正錯誤的能力。點擊上方任一節點以了解更多詳情。</p>
+                    </div>
+                    <div id="info-reason" class="info-content hidden">
+                        <h4 class="font-bold text-sky-800">🧠 推理 (Reason)</h4>
+                        <p class="text-sm mt-1">基於 Gemini 1.5 Pro 的強大能力和高達100萬 Token 的上下文視窗，代理能理解您的意圖、分析整個程式碼庫，並制定行動計畫。</p>
+                    </div>
+                    <div id="info-act" class="info-content hidden">
+                        <h4 class="font-bold text-amber-800">🛠️ 行動 (Act)</h4>
+                        <p class="text-sm mt-1">代理利用豐富的內建工具集（如 `read-file`, `write-file`, `shell`）與您的本地環境互動，執行計畫中的步驟。透過模型上下文協定 (MCP)，它甚至可以擴充使用第三方工具。</p>
+                    </div>
+                    <div id="info-observe" class="info-content hidden">
+                        <h4 class="font-bold text-emerald-800">👀 觀察 (Observe)</h4>
+                        <p class="text-sm mt-1">代理會觀察行動的結果，例如指令的輸出或錯誤訊息。這種回饋是其學習和修正後續計畫的關鍵，也是「Vibe Coding」流暢體驗的基礎。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Workflow -->
+        <section id="workflow" class="mb-24 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">融入您的開發流程</h2>
+                <p class="text-md text-slate-500 max-w-2xl mx-auto">從專案啟動到後期維護，Gemini CLI 都能在每個階段提供實質幫助。看看它在真實場景中的表現。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+                    <h3 class="text-lg font-semibold mb-2">專案搭建</h3>
+                    <p class="text-sm text-slate-500 mb-4 flex-grow">將一個高層次概念，轉化為結構完整的應用程式骨架。</p>
+                    <button class="workflow-btn w-full bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition" data-target="term-scaffold">觀看模擬</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+                    <h3 class="text-lg font-semibold mb-2">程式碼理解</h3>
+                    <p class="text-sm text-slate-500 mb-4 flex-grow">利用百萬級上下文視窗，快速掌握龐大或陌生的遺留專案。</p>
+                    <button class="workflow-btn w-full bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition" data-target="term-understand">觀看模擬</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+                    <h3 class="text-lg font-semibold mb-2">迭代與除錯</h3>
+                    <p class="text-sm text-slate-500 mb-4 flex-grow">互動式地分析錯誤、提出修復建議，並在您的確認下安全地修改程式碼。</p>
+                    <button class="workflow-btn w-full bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition" data-target="term-debug">觀看模擬</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col">
+                    <h3 class="text-lg font-semibold mb-2">測試生成</h3>
+                    <p class="text-sm text-slate-500 mb-4 flex-grow">自動為新功能或修復產生單元測試，實現「測試驅動的 AI 開發」。</p>
+                    <button class="workflow-btn w-full bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition" data-target="term-test">觀看模擬</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Comparison -->
+        <section id="comparison" class="mb-24 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">AI 編碼助手比較</h2>
+                <p class="text-md text-slate-500 max-w-2xl mx-auto">市場上有多種工具，但其設計哲學各異。這張雷達圖揭示了各工具在關鍵維度上的權衡。</p>
+            </div>
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border border-slate-200">
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Strategy -->
+        <section id="strategy" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">戰略與實踐</h2>
+                <p class="text-md text-slate-500 max-w-2xl mx-auto">掌握高階技巧，從「副駕駛」模式進化到「協作者」模式，建構最大化生產力的混合工作流程。</p>
+            </div>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-5 font-semibold">
+                        <span>Vibe Coding: 精髓與實踐</span>
+                        <span class="accordion-icon transition-transform transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 pt-0 text-slate-600 text-sm">
+                            <p>"Vibe Coding" 的核心是將實作的「如何做」委託給 AI 代理，讓開發者專注於創意的「做什麼」。這不是一個 UI 功能，而是當強大的推理引擎被賦予在終端機中行動能力時所湧現的自然體驗。AI 在封閉回饋循環中嘗試、失敗、學習並最終達成目標，讓開發過程感覺更像是指揮一個能幹的助手。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-5 font-semibold">
+                        <span>高階提示詞技巧：「授人以漁」</span>
+                        <span class="accordion-icon transition-transform transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 pt-0 text-slate-600 text-sm">
+                            <ul class="space-y-2 list-disc pl-5">
+                                <li><strong>武裝你的 CLI：</strong> 利用 `Makefile` 等工具封裝複雜操作，並在 `GEMINI.md` 中教導 AI 使用這些自訂指令。</li>
+                                <li><strong>利用 RAG 增強理解：</strong> 在 `GEMINI.md` 中提供關鍵文件的 URL，指示代理在執行任務前先閱讀。</li>
+                                <li><strong>專注於成果而非過程：</strong> 描述期望的「最終狀態」，讓代理自行規劃路徑，激發更具創造性的解決方案。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-5 font-semibold">
+                        <span>超級使用者的混合之道</span>
+                        <span class="accordion-icon transition-transform transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 pt-0 text-slate-600 text-sm">
+                            <p class="mb-2">最高效的工程師會建構一個混合工作流程，發揮各工具的獨特優勢：</p>
+                            <ol class="space-y-2 list-decimal pl-5">
+                                <li><strong>日常編碼基石 (VS Code Copilot):</strong> 用於「心流中」的即時行內程式碼補全。</li>
+                                <li><strong>重型任務主力 (Gemini CLI):</strong> 在整合終端機中開啟，用於全程式碼庫分析、大規模重構等複雜操作。</li>
+                                <li><strong>攻堅克難王牌 (Claude Code):</strong> 當面臨最棘手的除錯或演算法設計時，利用其卓越的推理品質。</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Terminal Simulation -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-slate-800 w-full max-w-4xl rounded-lg shadow-xl relative">
+            <button id="modal-close" class="absolute top-3 right-4 text-slate-400 hover:text-white text-2xl">&times;</button>
+            <div id="term-scaffold" class="terminal-content hidden">
+                <div class="terminal">
+                    <div class="terminal-prompt">為我建立一個 Flask 應用程式，用來顯示即時板球比分。</div>
+                    <div class="terminal-response">好的，我將建立一個名為 `cricket-scores-app` 的目錄，並設定基本的 Flask 結構，包含主 Python 檔案、`templates` 資料夾和一個 `requirements.txt`。</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: shell(mkdir cricket-scores-app && cd cricket-scores-app)</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: write-file(app.py, content="...")</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: write-file(requirements.txt, content="Flask==2.0.1")</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: write-file(templates/index.html, content="<h1>板球比分</h1>...")</div>
+                    <div class="terminal-response">專案結構已建立。您現在可以執行 `pip install -r requirements.txt` 和 `flask run` 來啟動應用程式。</div>
+                </div>
+            </div>
+            <div id="term-understand" class="terminal-content hidden">
+                 <div class="terminal">
+                    <div class="terminal-prompt">描述這個 @legacy-project/ 目錄的系統架構。</div>
+                    <div class="terminal-tool-call">[TOOL] 正在分析 @legacy-project/ ...</div>
+                    <div class="terminal-response">分析完成。這個專案是一個採用微服務架構的系統：
+- `auth-service/`: 處理使用者認證。
+- `order-service/`: 負責訂單處理邏輯。
+- `api-gateway/`: 作為所有服務的統一入口點。
+- `shared-lib/`: 包含各服務共享的通用程式碼。
+資料庫似乎是 PostgreSQL，設定檔位於每個服務的 `config.py` 中。</div>
+                </div>
+            </div>
+            <div id="term-debug" class="terminal-content hidden">
+                <div class="terminal">
+                    <div class="terminal-prompt">!npm test</div>
+                    <div class="terminal-response" style="color: #FDA4AF;">FAIL  src/utils.test.js
+●  calculateTotal › should handle empty array
+  TypeError: Cannot read properties of null (reading 'reduce')
+</div>
+                    <div class="terminal-prompt">解釋這個錯誤並提出修復方案。</div>
+                    <div class="terminal-tool-call">[TOOL] 正在分析 src/utils.js 和 src/utils.test.js ...</div>
+                    <div class="terminal-response">錯誤發生在 `calculateTotal` 函式中，當傳入空陣列時，試圖對 null 執行 `reduce`。
+我建議在函式開頭增加一個檢查，如果輸入陣列為空，則直接返回 0。
+
+我將為您產生一個修改預覽 (diff)：</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: edit(src/utils.js)
+<pre class="bg-slate-900 p-2 rounded text-xs">
+--- a/src/utils.js
++++ b/src/utils.js
+@@ -1,4 +1,5 @@
+ function calculateTotal(items) {
++  if (!items || items.length === 0) return 0;
+   return items.reduce((acc, item) => acc + item.price, 0);
+ }
+</pre>
+                    </div>
+                     <div class="terminal-response">您接受此項變更嗎？ (y/n)</div>
+                </div>
+            </div>
+            <div id="term-test" class="terminal-content hidden">
+                <div class="terminal">
+                    <div class="terminal-prompt">為剛剛在 `src/utils.js` 中的修復，在 `src/utils.test.js` 中撰寫一個 pytest 單元測試。</div>
+                    <div class="terminal-tool-call">[TOOL] 正在執行: edit(src/utils.test.js)
+<pre class="bg-slate-900 p-2 rounded text-xs">
+...
++ test('should return 0 for an empty array', () => {
++   expect(calculateTotal([])).toBe(0);
++ });
+...
+</pre>
+</div>
+                    <div class="terminal-response">已在 `src/utils.test.js` 中新增測試案例。您現在可以執行 `!npm test` 來驗證修復。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ReAct Diagram Interaction
+            const diagramNodes = document.querySelectorAll('.diagram-node');
+            const infoBox = document.getElementById('diagram-info-box');
+            const infoContents = document.querySelectorAll('.info-content');
+            let activeNode = null;
+
+            infoBox.style.opacity = 1;
+
+            diagramNodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    const targetId = node.dataset.target;
+                    
+                    if (activeNode === node) {
+                        // Deselect
+                        activeNode.querySelector('div').classList.remove('ring-4', 'ring-cyan-300');
+                        activeNode = null;
+                        infoContents.forEach(content => content.classList.add('hidden'));
+                        document.getElementById('info-default').classList.remove('hidden');
+                    } else {
+                        // Select new
+                        if(activeNode) activeNode.querySelector('div').classList.remove('ring-4', 'ring-cyan-300');
+                        node.querySelector('div').classList.add('ring-4', 'ring-cyan-300');
+                        activeNode = node;
+                        infoContents.forEach(content => content.classList.add('hidden'));
+                        document.getElementById(targetId).classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Accordion Interaction
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.accordion-icon');
+                    const item = header.parentElement;
+
+                    item.classList.toggle('bg-cyan-50');
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.classList.remove('rotate-45');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-45');
+                    }
+                });
+            });
+
+            // Modal Interaction
+            const modal = document.getElementById('modal');
+            const modalCloseBtn = document.getElementById('modal-close');
+            const workflowBtns = document.querySelectorAll('.workflow-btn');
+            const terminalContents = document.querySelectorAll('.terminal-content');
+
+            workflowBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.dataset.target;
+                    terminalContents.forEach(term => term.classList.add('hidden'));
+                    document.getElementById(targetId).classList.remove('hidden');
+                    modal.classList.remove('hidden');
+                });
+            });
+
+            const closeModal = () => modal.classList.add('hidden');
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Comparison Chart
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const comparisonData = {
+                labels: ['上下文視窗', '終端機控制力', 'IDE 整合度', '推理品質', '擴充性 (MCP)', '免費方案慷慨度'],
+                datasets: [
+                    {
+                        label: 'Gemini CLI',
+                        data: [5, 5, 3, 4, 5, 5],
+                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        pointBackgroundColor: 'rgba(14, 165, 233, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(14, 165, 233, 1)'
+                    },
+                    {
+                        label: 'VS Code Copilot',
+                        data: [3, 2, 5, 4, 4, 2],
+                        backgroundColor: 'rgba(132, 94, 247, 0.2)',
+                        borderColor: 'rgba(132, 94, 247, 1)',
+                        pointBackgroundColor: 'rgba(132, 94, 247, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(132, 94, 247, 1)'
+                    },
+                    {
+                        label: 'Claude Code',
+                        data: [4, 4, 3, 5, 4, 2],
+                        backgroundColor: 'rgba(217, 119, 6, 0.2)',
+                        borderColor: 'rgba(217, 119, 6, 1)',
+                        pointBackgroundColor: 'rgba(217, 119, 6, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(217, 119, 6, 1)'
+                    }
+                ]
+            };
+            const comparisonChart = new Chart(ctx, {
+                type: 'radar',
+                data: comparisonData,
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0,0,0,0.1)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            pointLabels: {
+                                font: { size: 12, family: "'Inter', 'Noto Sans TC', sans-serif" },
+                                color: '#475569'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(255,255,255,0.75)',
+                                stepSize: 1,
+                                min: 0,
+                                max: 5
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Inter', 'Noto Sans TC', sans-serif"
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
