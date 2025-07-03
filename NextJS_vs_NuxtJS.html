@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：Next.js vs Nuxt.js 深度對決</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a single, vertically scrolling narrative. It starts with a high-level overview, then delves into specific comparison points using interactive visualizations: 1. **At a Glance:** Quick card comparison. 2. **Market Pulse:** A bar chart for NPM downloads to visually show community size. 3. **The "Why" (SSR):** An interactive toggle to explain the core problem. 4. **Rendering Deep Dive:** Tabbed code comparison. 5. **Performance Battle:** A radar chart for abstract comparisons. 6. **Decision Helper:** An interactive quiz-like section. This structure guides the user from general understanding to specific details and finally to a personalized recommendation, making the dense report content more digestible and actionable. -->
+    <!-- Visualization & Content Choices: 1. **Characteristics:** Side-by-side cards (HTML/CSS) for easy comparison. 2. **NPM Downloads:** Bar chart (Chart.js) to powerfully visualize the scale difference. 3. **SSR Explanation:** Interactive toggle (JS) to contrast CSR/SSR concepts. 4. **Code Examples:** Tabbed view (JS) for direct, non-cluttered comparison. 5. **Performance Concepts:** Radar chart (Chart.js) to compare abstract attributes effectively. 6. **Decision Matrix:** Interactive buttons (JS) to turn a static table into a personalized tool. All choices prioritize interaction and clarity over static text. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #17A2B8;
+            border-bottom-color: #17A2B8;
+        }
+        .decision-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .decision-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .framework-card.highlight-next {
+            box-shadow: 0 0 15px 2px rgba(59, 130, 246, 0.5);
+            border-color: rgba(59, 130, 246, 1);
+        }
+        .framework-card.highlight-nuxt {
+            box-shadow: 0 0 15px 2px rgba(34, 197, 94, 0.5);
+            border-color: rgba(34, 197, 94, 1);
+        }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <header class="sticky top-0 bg-white/80 backdrop-blur-lg z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <ul class="flex justify-center items-center space-x-4 sm:space-x-8 text-sm sm:text-base font-medium text-gray-600">
+                <li><a href="#overview" class="nav-link py-2">總覽</a></li>
+                <li><a href="#market" class="nav-link py-2">市場脈動</a></li>
+                <li><a href="#ssr" class="nav-link py-2">SSR解析</a></li>
+                <li><a href="#performance" class="nav-link py-2">效能對決</a></li>
+                <li><a href="#code-examples" class="nav-link py-2">程式碼範例</a></li>
+                <li><a href="#decision" class="nav-link py-2">決策輔助</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 md:p-8">
+
+        <section id="intro" class="text-center my-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Next.js vs Nuxt.js</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">一份為技術領導者設計的互動式分析報告，助您在React與Vue的元宇宙中做出最佳決策。</p>
+        </section>
+
+        <section id="overview" class="my-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">核心對比：一眼看懂</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">本區塊旨在快速呈現兩大框架的核心哲學與架構差異。您可以透過比較它們的基礎、理念和主要優勢，迅速建立起對兩者的初步印象。</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-center text-blue-600">Next.js</h3>
+                    <p class="text-center text-sm text-gray-500 mb-6">基於 React</p>
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">核心哲學：</strong>靈活性與非強制性，給予開發者最大控制權。</div></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">主要優勢：</strong>龐大的React生態系、企業級應用處理能力、Vercel強力支持。</div></li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">理想場景：</strong>大型、高度客製化、需要廣泛第三方函式庫的企業級應用。</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-center text-green-600">Nuxt.js</h3>
+                    <p class="text-center text-sm text-gray-500 mb-6">基於 Vue.js</p>
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">核心哲學：</strong>約定優於配置，提供高度整合的開發體驗。</div></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">主要優勢：</strong>卓越的開發者體驗（DX）、快速原型開發、豐富的模組生態。</div></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▶</span><div><strong class="font-semibold">理想場景：</strong>內容驅動型網站、重視開發速度與團隊滿意度的專案。</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="my-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">市場與社群脈動</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">社群規模直接影響著資源多寡、人才儲備與長期維護的風險。此圖表透過NPM週下載量，直觀展示了兩個框架在市場上的採用率差異，這是一個評估其生態系成熟度的關鍵指標。</p>
+            <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="npmDownloadsChart"></canvas>
+                </div>
+                 <p class="text-center text-xs text-gray-400 mt-4">數據來源：2025年NPM公開數據（示意）</p>
+            </div>
+        </section>
+
+        <section id="ssr" class="my-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">為何需要元框架？SSR的威力</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">僅有React/Vue的傳統客戶端渲染（CSR）在SEO和初始載入效能上存在致命缺陷。Next.js與Nuxt.js的核心價值在於提供了伺服器端渲染（SSR）能力。點擊下方按鈕，了解SSR如何解決這些痛點。</p>
+            
+            <div class="text-center mb-8">
+                 <div class="inline-flex rounded-md shadow-sm">
+                    <button id="csrBtn" class="px-4 py-2 text-sm font-medium text-white bg-gray-600 border border-gray-600 rounded-l-lg hover:bg-gray-700 focus:z-10 focus:ring-2 focus:ring-gray-500">客戶端渲染 (CSR)</button>
+                    <button id="ssrBtn" class="px-4 py-2 text-sm font-medium text-gray-800 bg-white border-t border-b border-r border-gray-600 hover:bg-gray-50 rounded-r-lg focus:z-10 focus:ring-2 focus:ring-gray-500">伺服器端渲染 (SSR)</button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div id="csr-panel" class="bg-white p-6 rounded-xl border-2 border-transparent transition-all duration-300">
+                    <h3 class="font-bold text-xl mb-4 text-center">傳統 CSR 模式</h3>
+                    <div class="space-y-4 text-gray-600">
+                        <p>1. 伺服器只回傳一個幾乎空白的HTML骨架。</p>
+                        <p>2. 瀏覽器需下載、解析、執行龐大的JavaScript檔案。</p>
+                        <p>3. JS執行完畢後，才發起API請求獲取資料。</p>
+                        <p>4. 資料回來後，才開始在前端渲染頁面內容。</p>
+                    </div>
+                    <div class="mt-6 p-4 rounded-lg bg-red-50 text-red-700">
+                        <strong class="block font-bold">主要缺陷：</strong>
+                        <ul class="list-disc list-inside mt-2">
+                            <li>SEO不佳：搜尋引擎爬蟲難以索引內容。</li>
+                            <li>效能緩慢：使用者會經歷明顯的白屏時間。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="ssr-panel" class="bg-white p-6 rounded-xl border-2 border-transparent transition-all duration-300">
+                    <h3 class="font-bold text-xl mb-4 text-center">現代 SSR 模式</h3>
+                     <div class="space-y-4 text-gray-600">
+                        <p>1. 伺服器在接收到請求後，直接獲取資料。</p>
+                        <p>2. 在伺服器上將完整的HTML頁面渲染出來。</p>
+                        <p>3. 將這個內容豐富的HTML直接回傳給瀏覽器。</p>
+                        <p>4. 瀏覽器立即顯示內容，同時在背景載入JS使其可互動。</p>
+                    </div>
+                    <div class="mt-6 p-4 rounded-lg bg-green-50 text-green-700">
+                        <strong class="block font-bold">核心優勢：</strong>
+                        <ul class="list-disc list-inside mt-2">
+                            <li>SEO絕佳：搜尋引擎能直接索引完整內容。</li>
+                            <li>體驗優異：使用者幾乎可以立即看到頁面。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="my-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">效能與開發體驗對決</h2>
+             <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">效能不僅是執行速度，還包含開發效率和架構彈性。這張雷達圖從多個維度對比了兩個框架的綜合特性，幫助您評估哪個框架的整體「效率」更符合您的團隊與專案需求。</p>
+            <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="performanceRadarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="code-examples" class="my-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">SSR 程式碼實踐與效率分析</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">理論之外，實際的程式碼更能揭示兩個框架在實現SSR時的差異。本區塊將展示兩者的標準資料獲取範例，並分析其執行流程與效率，讓您直觀感受它們的設計哲學。</p>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                    <h3 class="text-xl font-bold text-blue-600 mb-4">Next.js (Pages Router)</h3>
+                    <div class="code-block flex-grow mb-4">
+                        <pre><code>// pages/repo.tsx
+import type { GetServerSideProps } from 'next'
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const res = await fetch('...')
+  const repo = await res.json()
+  return { props: { repo } }
+}
+
+export default function Page({ repo }) {
+  return &lt;p&gt;{repo.stargazers_count} ★&lt;/p&gt;
+}</code></pre>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mt-4 mb-2">執行分析：</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 list-disc list-inside">
+                        <li><strong class="font-medium">執行上下文：</strong><code>getServerSideProps</code> 函式僅在伺服器端執行，可以安全地存取資料庫或內部 API。</li>
+                        <li><strong class="font-medium">資料流：</strong>資料透過頁面元件的 <code>props</code> 傳遞，流程非常明確、清晰。</li>
+                        <li><strong class="font-medium">效率：</strong>每次頁面請求都會重新執行，確保資料即時性。適合需要最新資料的頁面。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                    <h3 class="text-xl font-bold text-green-600 mb-4">Nuxt.js</h3>
+                    <div class="code-block flex-grow mb-4">
+                        <pre><code>&lt;script setup lang="ts"&gt;
+const { data: mountains, pending } = await useAsyncData(
+  'mountains',
+  () => $fetch('...')
+)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div v-if="!pending"&gt;
+    &lt;pre&gt;{{ mountains }}&lt;/pre&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mt-4 mb-2">執行分析：</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 list-disc list-inside">
+                        <li><strong class="font-medium">執行上下文：</strong><code>useAsyncData</code> 是通用的。首次載入在伺服器執行，後續客戶端導航時則在客戶端執行，避免重複請求。</li>
+                        <li><strong class="font-medium">資料流：</strong>資料透過響應式 <code>ref</code> 提供給元件，與 Vue 的組合式 API 無縫整合。</li>
+                        <li><strong class="font-medium">效率：</strong>框架會自動處理資料的序列化與快取，避免了客戶端的二次請求，Nitro 引擎對內部 API 請求還有進一步優化。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="decision" class="my-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">決策輔助工具</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">最終選擇取決於您的具體情況。點擊下方最符合您專案需求的優先級，我們將根據報告的分析，為您高亮推薦更合適的框架，並說明原因。</p>
+            
+            <div class="flex flex-wrap justify-center gap-4 mb-10">
+                <button data-choice="react" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">團隊精通 React</button>
+                <button data-choice="vue" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">團隊精通 Vue</button>
+                <button data-choice="complex" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">複雜的企業級應用</button>
+                <button data-choice="speed" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">追求最快開發速度</button>
+                <button data-choice="ecosystem" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">需要龐大生態系</button>
+                <button data-choice="portability" class="decision-btn bg-white px-5 py-3 rounded-full shadow-md font-semibold text-gray-700">重視部署可移植性</button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div id="next-card" class="framework-card bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-center text-blue-600 mb-4">推薦：Next.js</h3>
+                    <p id="next-reason" class="text-center text-gray-600 min-h-[6rem]">Next.js 的靈活性和龐大的 React 生態系使其成為構建大型、高度客製化應用的理想選擇，提供了無與倫比的控制力和資源支持。</p>
+                </div>
+                 <div id="nuxt-card" class="framework-card bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-center text-green-600 mb-4">推薦：Nuxt.js</h3>
+                    <p id="nuxt-reason" class="text-center text-gray-600 min-h-[6rem]">Nuxt.js 憑藉其「約定優於配置」的哲學和卓越的開發者體驗，能夠極大地提升開發速度，特別適合內容驅動型網站和快速原型開發。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center py-8 border-t border-gray-200">
+        <p class="text-gray-500 text-sm">互動式報告由 AI 根據技術文件生成</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const npmDownloadsData = {
+                labels: ['NPM 週下載量'],
+                datasets: [
+                    {
+                        label: 'Next.js',
+                        data: [11400000],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Nuxt.js',
+                        data: [936000],
+                        backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            new Chart(document.getElementById('npmDownloadsChart'), {
+                type: 'bar',
+                data: npmDownloadsData,
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'NPM 週下載量對比 (萬)', font: { size: 16 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('zh-Hant').format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value / 10000 + '萬';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const performanceRadarData = {
+                labels: ['生態系規模', '開發速度', '架構靈活性', '企業級應用', '學習曲線', '部署可移植性'],
+                datasets: [{
+                    label: 'Next.js',
+                    data: [95, 75, 90, 90, 70, 75],
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    pointBackgroundColor: 'rgb(59, 130, 246)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(59, 130, 246)'
+                }, {
+                    label: 'Nuxt.js',
+                    data: [75, 95, 70, 75, 90, 90],
+                    fill: true,
+                    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                    borderColor: 'rgb(34, 197, 94)',
+                    pointBackgroundColor: 'rgb(34, 197, 94)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(34, 197, 94)'
+                }]
+            };
+            new Chart(document.getElementById('performanceRadarChart'), {
+                type: 'radar',
+                data: performanceRadarData,
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: '框架特性綜合評估', font: { size: 16 } }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            pointLabels: { font: { size: 14 } }
+                        }
+                    }
+                }
+            });
+            
+            const csrBtn = document.getElementById('csrBtn');
+            const ssrBtn = document.getElementById('ssrBtn');
+            const csrPanel = document.getElementById('csr-panel');
+            const ssrPanel = document.getElementById('ssr-panel');
+
+            function updateSSRPanel(mode) {
+                if(mode === 'csr') {
+                    csrBtn.classList.remove('bg-white', 'text-gray-800');
+                    csrBtn.classList.add('bg-gray-600', 'text-white');
+                    ssrBtn.classList.remove('bg-gray-600', 'text-white');
+                    ssrBtn.classList.add('bg-white', 'text-gray-800');
+                    csrPanel.classList.add('border-red-400', 'shadow-xl');
+                    ssrPanel.classList.remove('border-green-400', 'shadow-xl');
+                } else {
+                    ssrBtn.classList.remove('bg-white', 'text-gray-800');
+                    ssrBtn.classList.add('bg-gray-600', 'text-white');
+                    csrBtn.classList.remove('bg-gray-600', 'text-white');
+                    csrBtn.classList.add('bg-white', 'text-gray-800');
+                    ssrPanel.classList.add('border-green-400', 'shadow-xl');
+                    csrPanel.classList.remove('border-red-400', 'shadow-xl');
+                }
+            }
+            
+            csrBtn.addEventListener('click', () => updateSSRPanel('csr'));
+            ssrBtn.addEventListener('click', () => updateSSRPanel('ssr'));
+            updateSSRPanel('ssr');
+
+
+            const decisionReasons = {
+                react: {
+                    next: '當團隊已深度掌握React時，選擇Next.js能最大化利用現有技能，降低學習成本，是最自然的延伸。',
+                    nuxt: '若團隊熟悉React，轉換至Nuxt需要學習Vue，可能不是最高效的選擇。'
+                },
+                vue: {
+                    next: '若團隊熟悉Vue，轉換至Next.js需要學習React，可能不是最高效的選擇。',
+                    nuxt: '當團隊已深度掌握Vue時，選擇Nuxt.js能最大化利用現有技能，享受其高度整合的開發體驗。'
+                },
+                complex: {
+                    next: '對於需要高度客製化架構的複雜企業級應用，Next.js的靈活性和非強制性特質提供了必要的控制權。',
+                    nuxt: 'Nuxt的約定雖能加速開發，但在極度複雜或非標準化的需求下，可能會帶來一些限制。'
+                },
+                speed: {
+                    next: '雖然Next.js開發也很迅速，但其靈活性意味著需要做更多架構決策。',
+                    nuxt: 'Nuxt的「約定優於配置」原則和自動化功能極大地簡化了設定，使其在快速原型開發和追求上市時間方面表現卓越。'
+                },
+                ecosystem: {
+                    next: '背靠龐大的React生態系，您可以輕易找到幾乎任何所需的UI元件庫、工具和解決方案，顯著降低專案風險。',
+                    nuxt: 'Vue/Nuxt生態系雖健壯，但在廣度和冷門工具的支援上，相較於React仍有差距。'
+                },
+                portability: {
+                    next: 'Next.js與其母公司Vercel的平台深度整合，雖然提供了極致的體驗，但也可能引發對廠商鎖定的擔憂。',
+                    nuxt: 'Nuxt的Nitro引擎被設計為平台無關，可以輕鬆部署在任何Node.js環境、Serverless或邊緣運算平台，提供了絕佳的可移植性。'
+                }
+            };
+            const decisionBtns = document.querySelectorAll('.decision-btn');
+            const nextCard = document.getElementById('next-card');
+            const nuxtCard = document.getElementById('nuxt-card');
+            const nextReason = document.getElementById('next-reason');
+            const nuxtReason = document.getElementById('nuxt-reason');
+
+            decisionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const choice = btn.dataset.choice;
+                    nextReason.textContent = decisionReasons[choice].next;
+                    nuxtReason.textContent = decisionReasons[choice].nuxt;
+
+                    nextCard.classList.remove('highlight-next', 'highlight-nuxt');
+                    nuxtCard.classList.remove('highlight-next', 'highlight-nuxt');
+
+                    if (['react', 'complex', 'ecosystem'].includes(choice)) {
+                        nextCard.classList.add('highlight-next');
+                    } else if (['vue', 'speed', 'portability'].includes(choice)) {
+                        nuxtCard.classList.add('highlight-nuxt');
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
