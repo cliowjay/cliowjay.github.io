@@ -8,9 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
-    <!-- Application Structure Plan: The application is designed as an interactive dashboard. The top features prominent buttons for selecting a system (Docker, Podman, containerd), encouraging immediate interaction. The main body is split into two columns: the left side dynamically displays detailed information (description, pros, cons, and architecture diagram) for the selected system, while the right side features a static "at-a-glance" comparison chart. This structure was chosen to facilitate direct comparison and focused learning. Users can easily switch between systems to see their specific attributes or view the summary chart for a high-level understanding, making it more engaging and usable than a static text document. -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard. The top features prominent buttons for selecting a system (Docker, Podman, containerd), encouraging immediate interaction. The main body is split into two columns: the left side dynamically displays detailed information (description, pros, cons, and architecture diagram) for the selected system, while the right side features a static "at-a-glance" comparison chart. This structure was chosen to facilitate direct comparison and focused learning. Users can easily switch between systems to see their specific attributes or view the summary chart for a high-level understanding, making it more engaging and usable than a static text document. A language selector is added to the header for internationalization. -->
     <!-- Visualization & Content Choices: 
         - Report Info: System descriptions, pros/cons. -> Goal: Inform/Compare. -> Viz/Presentation: Dynamically updated HTML text blocks and lists. -> Interaction: Content changes on system selection. -> Justification: Clear, direct presentation of core information. -> Method: Vanilla JS DOM manipulation.
         - Report Info: Architectural differences (daemon vs. daemonless). -> Goal: Organize/Compare. -> Viz/Presentation: Simple diagrams built with HTML/Tailwind. -> Interaction: Diagram updates based on selection. -> Justification: Visually explains a key technical difference more effectively than text alone. -> Method: HTML/CSS.
@@ -22,6 +22,11 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f8fafc;
         }
+        .lang-en body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }
+        .lang-ja body { font-family: 'Noto Sans JP', sans-serif; }
+        .lang-vi body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .lang-de body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }
+
         .chart-container {
             position: relative;
             width: 100%;
@@ -66,9 +71,19 @@
 <body class="text-slate-800">
 
     <div class="min-h-screen container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl sm:text-4xl font-bold text-teal-800 tracking-tight">現代容器化技術大比拼</h1>
-            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">容器化技術徹底改變了軟體開發與部署。本頁面將帶您深入探索當前主流的容器系統：Docker、Podman 與 containerd，透過互動式比較，助您了解它們各自的架構、優缺點與最佳應用場景。</p>
+        <header class="relative text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-teal-800 tracking-tight" data-i18n="mainTitle">現代容器化技術大比拼</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto" data-i18n="subTitle">容器化技術徹底改變了軟體開發與部署。本頁面將帶您深入探索當前主流的容器系統：Docker、Podman 與 containerd，透過互動式比較，助您了解它們各自的架構、優缺點與最佳應用場景。</p>
+            
+            <div class="absolute top-0 right-0">
+                <select id="language-selector" class="bg-white border border-slate-300 rounded-md shadow-sm py-2 px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="zh-TW">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
         </header>
 
         <nav class="flex justify-center items-center space-x-2 sm:space-x-4 mb-10" id="system-selector">
@@ -85,14 +100,14 @@
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-                <div id="system-details" class="content-card bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div id="system-details" class="content-card bg-white p-6 sm:p-8 rounded-2xl shadow-lg min-h-[400px]">
                 </div>
             </div>
 
             <aside class="lg:col-span-1 space-y-8">
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <h2 class="text-xl font-bold text-teal-800 mb-4">綜合特性速覽</h2>
-                    <p class="text-slate-600 mb-6 text-sm">此圖表根據普遍認知，對各系統在開發者友好度、安全性和輕量化程度上進行評分，讓您快速掌握其核心特性。</p>
+                    <h2 class="text-xl font-bold text-teal-800 mb-4" data-i18n="chartTitle">綜合特性速覽</h2>
+                    <p class="text-slate-600 mb-6 text-sm" data-i18n="chartSubTitle">此圖表根據普遍認知，對各系統在開發者友好度、安全性和輕量化程度上進行評分，讓您快速掌握其核心特性。</p>
                     <div class="chart-container">
                         <canvas id="comparisonChart"></canvas>
                     </div>
@@ -103,132 +118,288 @@
     </div>
 
     <script>
-        const systemData = {
-            docker: {
-                name: 'Docker',
-                description: '目前市場上最流行且應用最廣泛的容器化平台。它提供了一套完整的生態系，從映像檔建構、分發到容器運行，極大地簡化了應用程式的打包與部署流程，是許多開發者的入門首選。',
-                advantages: [
-                    '生態系完整，社群龐大，擁有海量的教學資源與預製映像檔。',
-                    '工具鏈成熟，使用者體驗佳，入門門檻相對較低。',
-                    '跨平台支援良好，在 Windows、macOS 和 Linux 上都能流暢使用。'
-                ],
-                disadvantages: [
-                    '依賴一個中央化的背景守護行程 (daemon)，可能成為單點故障或安全瓶頸。',
-                    '相較於其他方案，功能較為臃腫，佔用資源較多。',
-                    '預設以 root 權限運行 daemon，存在一定的安全風險。'
-                ],
-                architecture: {
-                    title: 'Daemon-based 架構',
-                    description: '使用者透過 Docker CLI 與 Docker Daemon 溝通，再由 Daemon 負責所有容器的生命週期管理。',
-                    diagram: `
-                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
-                            <div class="text-sm font-semibold mb-2">用戶 (User)</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Docker CLI</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">Docker Daemon (root)</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
-                        </div>
-                    `
-                }
+        const i18nData = {
+            'zh-TW': {
+                mainTitle: '現代容器化技術大比拼',
+                subTitle: '容器化技術徹底改變了軟體開發與部署。本頁面將帶您深入探索當前主流的容器系統：Docker、Podman 與 containerd，透過互動式比較，助您了解它們各自的架構、優缺點與最佳應用場景。',
+                chartTitle: '綜合特性速覽',
+                chartSubTitle: '此圖表根據普遍認知，對各系統在開發者友好度、安全性和輕量化程度上進行評分，讓您快速掌握其核心特性。',
+                advantages: '主要優點',
+                disadvantages: '主要缺點',
+                architecture: '架構',
+                docker: {
+                    name: 'Docker',
+                    description: '目前市場上最流行且應用最廣泛的容器化平台。它提供了一套完整的生態系，從映像檔建構、分發到容器運行，極大地簡化了應用程式的打包與部署流程，是許多開發者的入門首選。',
+                    advantages: ['生態系完整，社群龐大，擁有海量的教學資源與預製映像檔。','工具鏈成熟，使用者體驗佳，入門門檻相對較低。','跨平台支援良好，在 Windows、macOS 和 Linux 上都能流暢使用。'],
+                    disadvantages: ['依賴一個中央化的背景守護行程 (daemon)，可能成為單點故障或安全瓶頸。','相較於其他方案，功能較為臃腫，佔用資源較多。','預設以 root 權限運行 daemon，存在一定的安全風險。'],
+                    architecture: { title: 'Daemon-based 架構', description: '使用者透過 Docker CLI 與 Docker Daemon 溝通，再由 Daemon 負責所有容器的生命週期管理。', diagramUser: '用戶 (User)', diagramDaemon: 'Docker Daemon (root)' }
+                },
+                podman: {
+                    name: 'Podman',
+                    description: '一個無守護行程 (daemonless) 的開源容器引擎，其指令集與 Docker 高度相容。它允許使用者，甚至是無 root 權限的使用者，直接管理容器，大幅提升了安全性，被視為 Docker 的有力替代者。',
+                    advantages: ['無守護行程架構，減少了攻擊面，安全性更高。','支援無 root 權限運行容器，符合最小權限原則。','指令與 Docker 高度相容，開發者可以無痛轉換。','支援管理 Pods，能更好地與 Kubernetes 生態整合。'],
+                    disadvantages: ['生態系不如 Docker 成熟，週邊工具和社群資源相對較少。','主要為 Linux 設計，在 Windows 和 macOS 上的支援需透過虛擬機。','對於新手來說，學習曲線可能比 Docker 稍陡峭。'],
+                    architecture: { title: 'Daemonless 架構', description: '使用者透過 Podman CLI 直接與核心的容器執行環境互動，無需中央守護行程。', diagramUser: '用戶 (User/non-root)' }
+                },
+                containerd: {
+                    name: 'containerd',
+                    description: '一個專注於核心容器功能的工業級標準容器執行時 (runtime)。它強調簡單、穩健與可攜性，負責管理容器的整個生命週期，包括映像檔的傳輸與儲存、容器的執行與監管等，是許多大型容器平台（包括 Docker）的底層基礎。',
+                    advantages: ['極度輕量化，資源消耗少，專注於核心的容器管理功能。','效能高、穩定可靠，被雲端原生計算基金會 (CNCF) 接納為畢業專案。','作為底層元件，提供了標準化的 API，易於被上層平台整合。'],
+                    disadvantages: ['本身不提供像 Docker CLI 那樣豐富的開發者工具，使用者體驗較為原始。','不是一個開箱即用的完整解決方案，通常作為其他平台的一部分使用。','對於應用程式開發者來說，直接使用它的場景較少。'],
+                    architecture: { title: '底層 Runtime 架構', description: '通常由更高層級的工具（如 Docker 或 CRI）調用其 API 來管理容器。', diagramUser: '上層工具 (e.g. Docker)', diagramDaemon: 'containerd (daemon)' }
+                },
+                chartLabels: ['開發者友好度', '安全性 (開箱即用)', '輕量化程度'],
+                chartAxisLabel: '評分 (1-10)'
             },
-            podman: {
-                name: 'Podman',
-                description: '一個無守護行程 (daemonless) 的開源容器引擎，其指令集與 Docker 高度相容。它允許使用者，甚至是無 root 權限的使用者，直接管理容器，大幅提升了安全性，被視為 Docker 的有力替代者。',
-                advantages: [
-                    '無守護行程架構，減少了攻擊面，安全性更高。',
-                    '支援無 root 權限運行容器，符合最小權限原則。',
-                    '指令與 Docker 高度相容，開發者可以無痛轉換。',
-                    '支援管理 Pods，能更好地與 Kubernetes 生態整合。'
-                ],
-                disadvantages: [
-                    '生態系不如 Docker 成熟，週邊工具和社群資源相對較少。',
-                    '主要為 Linux 設計，在 Windows 和 macOS 上的支援需透過虛擬機。',
-                    '對於新手來說，學習曲線可能比 Docker 稍陡峭。'
-                ],
-                architecture: {
-                    title: 'Daemonless 架構',
-                    description: '使用者透過 Podman CLI 直接與核心的容器執行環境互動，無需中央守護行程。',
-                    diagram: `
-                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
-                            <div class="text-sm font-semibold mb-2">用戶 (User/non-root)</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Podman CLI</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                             <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
-                        </div>
-                    `
-                }
+            'en': {
+                mainTitle: 'Modern Containerization Technology Showdown',
+                subTitle: 'Containerization has revolutionized software development and deployment. This page will guide you through today\'s mainstream container systems: Docker, Podman, and containerd, helping you understand their architectures, pros, cons, and best use cases through interactive comparison.',
+                chartTitle: 'At-a-Glance Feature Comparison',
+                chartSubTitle: 'This chart rates each system on developer friendliness, security, and lightness based on general consensus, allowing you to quickly grasp their core characteristics.',
+                advantages: 'Key Advantages',
+                disadvantages: 'Key Disadvantages',
+                architecture: 'Architecture',
+                docker: {
+                    name: 'Docker',
+                    description: 'The most popular and widely used containerization platform on the market. It provides a complete ecosystem, from image building and distribution to container execution, greatly simplifying the process of packaging and deploying applications. It is the entry point for many developers.',
+                    advantages: ['Complete ecosystem, large community, with vast amounts of tutorials and pre-built images.', 'Mature toolchain, great user experience, and a relatively low entry barrier.', 'Good cross-platform support, running smoothly on Windows, macOS, and Linux.'],
+                    disadvantages: ['Relies on a centralized background daemon, which can be a single point of failure or security bottleneck.', 'More bloated and resource-intensive compared to other solutions.', 'The daemon runs with root privileges by default, posing a security risk.'],
+                    architecture: { title: 'Daemon-based Architecture', description: 'The user communicates with the Docker Daemon via the Docker CLI, and the Daemon is responsible for managing the entire container lifecycle.', diagramUser: 'User', diagramDaemon: 'Docker Daemon (root)' }
+                },
+                podman: {
+                    name: 'Podman',
+                    description: 'A daemonless open-source container engine with a command set highly compatible with Docker. It allows users, even non-root users, to manage containers directly, significantly enhancing security. It is considered a strong alternative to Docker.',
+                    advantages: ['Daemonless architecture reduces the attack surface and improves security.', 'Supports running containers as a non-root user, adhering to the principle of least privilege.', 'Commands are highly compatible with Docker, allowing for a painless transition for developers.', 'Supports managing Pods, enabling better integration with the Kubernetes ecosystem.'],
+                    disadvantages: ['The ecosystem is less mature than Docker\'s, with fewer peripheral tools and community resources.', 'Primarily designed for Linux; support on Windows and macOS requires a VM.', 'The learning curve might be slightly steeper for beginners compared to Docker.'],
+                    architecture: { title: 'Daemonless Architecture', description: 'The user interacts directly with the core container runtime via the Podman CLI, without a central daemon.', diagramUser: 'User (non-root)' }
+                },
+                containerd: {
+                    name: 'containerd',
+                    description: 'An industry-standard container runtime focused on core container functionalities. It emphasizes simplicity, robustness, and portability, managing the entire container lifecycle, including image transfer, storage, and execution. It is the underlying foundation for many large container platforms, including Docker.',
+                    advantages: ['Extremely lightweight, consuming few resources and focusing on core container management functions.', 'High performance, stable, and reliable; accepted as a graduated project by the CNCF.', 'As a low-level component, it provides a standardized API, making it easy to integrate with higher-level platforms.'],
+                    disadvantages: ['Does not provide rich developer tools like the Docker CLI, resulting in a more primitive user experience.', 'Not a complete out-of-the-box solution; typically used as part of another platform.', 'Direct usage scenarios are rare for application developers.'],
+                    architecture: { title: 'Low-level Runtime Architecture', description: 'Typically, its API is called by higher-level tools (like Docker or CRI) to manage containers.', diagramUser: 'Higher-level Tool (e.g. Docker)', diagramDaemon: 'containerd (daemon)' }
+                },
+                chartLabels: ['Developer Friendliness', 'Out-of-the-box Security', 'Lightweight Level'],
+                chartAxisLabel: 'Rating (1-10)'
             },
-            containerd: {
-                name: 'containerd',
-                description: '一個專注於核心容器功能的工業級標準容器執行時 (runtime)。它強調簡單、穩健與可攜性，負責管理容器的整個生命週期，包括映像檔的傳輸與儲存、容器的執行與監管等，是許多大型容器平台（包括 Docker）的底層基礎。',
-                advantages: [
-                    '極度輕量化，資源消耗少，專注於核心的容器管理功能。',
-                    '效能高、穩定可靠，被雲端原生計算基金會 (CNCF) 接納為畢業專案。',
-                    '作為底層元件，提供了標準化的 API，易於被上層平台整合。'
-                ],
-                disadvantages: [
-                    '本身不提供像 Docker CLI 那樣豐富的開發者工具，使用者體驗較為原始。',
-                    '不是一個開箱即用的完整解決方案，通常作為其他平台的一部分使用。',
-                    '對於應用程式開發者來說，直接使用它的場景較少。'
-                ],
-                architecture: {
-                    title: '底層 Runtime 架構',
-                    description: '通常由更高層級的工具（如 Docker 或 CRI）調用其 API 來管理容器。',
-                    diagram: `
-                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
-                             <div class="py-2 px-4 bg-purple-100 text-purple-800 rounded-md shadow-sm">上層工具 (e.g. Docker)</div>
-                             <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">containerd (daemon)</div>
-                            <div class="w-px h-6 bg-slate-400"></div>
-                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
-                        </div>
-                    `
-                }
+            'ja': {
+                mainTitle: '現代コンテナ技術の徹底比較',
+                subTitle: 'コンテナ化はソフトウェア開発とデプロイを革命的に変えました。このページでは、現代の主要なコンテナシステムであるDocker、Podman、containerdを対話的に比較し、それぞれのアーキテクチャ、長所、短所、最適な利用シーンを理解する手助けをします。',
+                chartTitle: '総合特性一覧',
+                chartSubTitle: 'このチャートは、一般的な認識に基づき、各システムの開発者フレンドリーさ、セキュリティ、軽量性を評価し、その核心的な特徴を素早く把握できるようにします。',
+                advantages: '主な長所',
+                disadvantages: '主な短所',
+                architecture: 'アーキテクチャ',
+                docker: {
+                    name: 'Docker',
+                    description: '現在市場で最も人気があり、広く利用されているコンテナ化プラットフォームです。イメージの構築、配布からコンテナの実行まで、完全なエコシステムを提供し、アプリケーションのパッケージングとデプロイのプロセスを大幅に簡素化します。多くの開発者にとっての入門ツールです。',
+                    advantages: ['完全なエコシステム、巨大なコミュニティ、豊富なチュートリアルと既製イメージ。', '成熟したツールチェーン、優れたユーザーエクスペリエンス、比較的低い参入障壁。', 'Windows、macOS、Linuxでの良好なクロスプラットフォームサポート。'],
+                    disadvantages: ['中央集権的なバックグラウンドデーモンに依存し、単一障害点やセキュリティのボトルネックになる可能性がある。', '他のソリューションに比べて機能が肥大化し、リソース消費が多い。', 'デフォルトでデーモンがroot権限で実行されるため、セキュリティリスクが存在する。'],
+                    architecture: { title: 'デーモンベースのアーキテクチャ', description: 'ユーザーはDocker CLIを介してDockerデーモンと通信し、デーモンがコンテナのライフサイクル全体を管理します。', diagramUser: 'ユーザー (User)', diagramDaemon: 'Dockerデーモン (root)' }
+                },
+                podman: {
+                    name: 'Podman',
+                    description: 'Dockerと高い互換性を持つコマンドセットを備えた、デーモンレスのオープンソースコンテナエンジンです。ユーザー（非rootユーザーも含む）が直接コンテナを管理できるため、セキュリティが大幅に向上し、Dockerの強力な代替と見なされています。',
+                    advantages: ['デーモンレスアーキテクチャにより、攻撃対象領域が減少し、セキュリティが向上。', '非rootユーザーでのコンテナ実行をサポートし、最小権限の原則に準拠。', 'Dockerとコマンドの互換性が高く、開発者はスムーズに移行可能。', 'Podの管理をサポートし、Kubernetesエコシステムとの連携が向上。'],
+                    disadvantages: ['エコシステムはDockerほど成熟しておらず、周辺ツールやコミュニティリソースが少ない。', '主にLinux向けに設計されており、WindowsやmacOSでのサポートにはVMが必要。', '初心者にとって学習曲線がDockerよりやや急である可能性がある。'],
+                    architecture: { title: 'デーモンレスアーキテクチャ', description: 'ユーザーはPodman CLIを介して、中央デーモンなしで直接コアコンテナランタイムと対話します。', diagramUser: 'ユーザー (非root)' }
+                },
+                containerd: {
+                    name: 'containerd',
+                    description: 'コアなコンテナ機能に特化した、業界標準のコンテナランタイムです。シンプルさ、堅牢性、移植性を重視し、イメージ転送、ストレージ、実行を含むコンテナのライフサイクル全体を管理します。Dockerを含む多くの大規模コンテナプラットフォームの基盤となっています。',
+                    advantages: ['非常に軽量で、リソース消費が少なく、コアなコンテナ管理機能に集中。', '高性能で安定しており、CNCFの卒業プロジェクトとして承認されている。', '低レベルコンポーネントとして標準化されたAPIを提供し、高レベルプラットフォームとの統合が容易。'],
+                    disadvantages: ['Docker CLIのような豊富な開発者ツールを提供せず、ユーザーエクスペリエンスは原始的。', 'すぐに使える完全なソリューションではなく、通常は他のプラットフォームの一部として使用される。', 'アプリケーション開発者が直接使用する場面は少ない。'],
+                    architecture: { title: '低レベルランタイムアーキテクチャ', description: '通常、そのAPIは高レベルツール（DockerやCRIなど）によって呼び出され、コンテナを管理します。', diagramUser: '高レベルツール (例: Docker)', diagramDaemon: 'containerd (デーモン)' }
+                },
+                chartLabels: ['開発者フレンドリーさ', 'デフォルトセキュリティ', '軽量性'],
+                chartAxisLabel: '評価 (1-10)'
+            },
+            'vi': {
+                mainTitle: 'So Sánh Các Công Nghệ Container Hiện Đại',
+                subTitle: 'Công nghệ container đã cách mạng hóa việc phát triển và triển khai phần mềm. Trang này sẽ giúp bạn khám phá các hệ thống container phổ biến hiện nay: Docker, Podman và containerd, thông qua so sánh tương tác để hiểu rõ kiến trúc, ưu nhược điểm và các trường hợp sử dụng tốt nhất của chúng.',
+                chartTitle: 'Tổng Quan Nhanh Các Tính Năng',
+                chartSubTitle: 'Biểu đồ này đánh giá mỗi hệ thống về mức độ thân thiện với nhà phát triển, bảo mật và độ nhẹ dựa trên sự đồng thuận chung, giúp bạn nhanh chóng nắm bắt các đặc điểm cốt lõi của chúng.',
+                advantages: 'Ưu điểm chính',
+                disadvantages: 'Nhược điểm chính',
+                architecture: 'Kiến trúc',
+                docker: {
+                    name: 'Docker',
+                    description: 'Nền tảng container hóa phổ biến và được sử dụng rộng rãi nhất trên thị trường. Nó cung cấp một hệ sinh thái hoàn chỉnh, từ xây dựng và phân phối image đến thực thi container, giúp đơn giản hóa đáng kể quy trình đóng gói và triển khai ứng dụng. Đây là điểm khởi đầu của nhiều nhà phát triển.',
+                    advantages: ['Hệ sinh thái hoàn chỉnh, cộng đồng lớn, với vô số tài liệu hướng dẫn và image dựng sẵn.', 'Chuỗi công cụ trưởng thành, trải nghiệm người dùng tuyệt vời và rào cản gia nhập tương đối thấp.', 'Hỗ trợ đa nền tảng tốt, chạy mượt mà trên Windows, macOS và Linux.'],
+                    disadvantages: ['Phụ thuộc vào một tiến trình daemon chạy nền tập trung, có thể trở thành điểm lỗi duy nhất hoặc узким местом bảo mật.', 'Cồng kềnh và tốn nhiều tài nguyên hơn so với các giải pháp khác.', 'Daemon chạy với quyền root theo mặc định, gây ra rủi ro bảo mật.'],
+                    architecture: { title: 'Kiến trúc dựa trên Daemon', description: 'Người dùng giao tiếp với Docker Daemon thông qua Docker CLI, và Daemon chịu trách nhiệm quản lý toàn bộ vòng đời của container.', diagramUser: 'Người dùng (User)', diagramDaemon: 'Docker Daemon (root)' }
+                },
+                podman: {
+                    name: 'Podman',
+                    description: 'Một công cụ container mã nguồn mở không có daemon, với bộ lệnh tương thích cao với Docker. Nó cho phép người dùng, ngay cả người dùng không có quyền root, quản lý trực tiếp các container, tăng cường đáng kể tính bảo mật. Nó được coi là một sự thay thế mạnh mẽ cho Docker.',
+                    advantages: ['Kiến trúc không daemon giúp giảm bề mặt tấn công và cải thiện bảo mật.', 'Hỗ trợ chạy container với người dùng không có quyền root, tuân thủ nguyên tắc đặc quyền tối thiểu.', 'Lệnh tương thích cao với Docker, cho phép các nhà phát triển chuyển đổi dễ dàng.', 'Hỗ trợ quản lý Pod, cho phép tích hợp tốt hơn với hệ sinh thái Kubernetes.'],
+                    disadvantages: ['Hệ sinh thái chưa trưởng thành bằng Docker, với ít công cụ ngoại vi và tài nguyên cộng đồng hơn.', 'Chủ yếu được thiết kế cho Linux; hỗ trợ trên Windows và macOS yêu cầu máy ảo.', 'Đường cong học tập có thể hơi khó hơn cho người mới bắt đầu so với Docker.'],
+                    architecture: { title: 'Kiến trúc không Daemon', description: 'Người dùng tương tác trực tiếp với runtime container cốt lõi thông qua Podman CLI, không cần daemon trung tâm.', diagramUser: 'Người dùng (không root)' }
+                },
+                containerd: {
+                    name: 'containerd',
+                    description: 'Một runtime container tiêu chuẩn công nghiệp tập trung vào các chức năng container cốt lõi. Nó nhấn mạnh sự đơn giản, mạnh mẽ và tính di động, quản lý toàn bộ vòng đời của container, bao gồm chuyển giao image, lưu trữ và thực thi. Nó là nền tảng cơ bản cho nhiều nền tảng container lớn, bao gồm cả Docker.',
+                    advantages: ['Cực kỳ nhẹ, tiêu thụ ít tài nguyên và tập trung vào các chức năng quản lý container cốt lõi.', 'Hiệu suất cao, ổn định và đáng tin cậy; được CNCF chấp nhận là một dự án đã tốt nghiệp.', 'Là một thành phần cấp thấp, nó cung cấp một API được tiêu chuẩn hóa, giúp dễ dàng tích hợp với các nền tảng cấp cao hơn.'],
+                    disadvantages: ['Không cung cấp các công cụ phát triển phong phú như Docker CLI, dẫn đến trải nghiệm người dùng sơ khai hơn.', 'Không phải là một giải pháp hoàn chỉnh sẵn dùng; thường được sử dụng như một phần của nền tảng khác.', 'Các kịch bản sử dụng trực tiếp rất hiếm đối với các nhà phát triển ứng dụng.'],
+                    architecture: { title: 'Kiến trúc Runtime cấp thấp', description: 'Thông thường, API của nó được các công cụ cấp cao hơn (như Docker hoặc CRI) gọi để quản lý container.', diagramUser: 'Công cụ cấp cao (ví dụ: Docker)', diagramDaemon: 'containerd (daemon)' }
+                },
+                chartLabels: ['Thân thiện với nhà phát triển', 'Bảo mật mặc định', 'Độ nhẹ'],
+                chartAxisLabel: 'Đánh giá (1-10)'
+            },
+            'de': {
+                mainTitle: 'Vergleich Moderner Container-Technologien',
+                subTitle: 'Containerisierung hat die Softwareentwicklung und -bereitstellung revolutioniert. Diese Seite führt Sie durch die gängigsten Container-Systeme von heute: Docker, Podman und containerd. Ein interaktiver Vergleich hilft Ihnen, deren Architekturen, Vor- und Nachteile sowie die besten Anwendungsfälle zu verstehen.',
+                chartTitle: 'Funktionsvergleich auf einen Blick',
+                chartSubTitle: 'Dieses Diagramm bewertet jedes System hinsichtlich Entwicklerfreundlichkeit, Sicherheit und Leichtgewichtigkeit basierend auf allgemeiner Einschätzung, um Ihnen einen schnellen Überblick über die Kernmerkmale zu geben.',
+                advantages: 'Wichtige Vorteile',
+                disadvantages: 'Wichtige Nachteile',
+                architecture: 'Architektur',
+                docker: {
+                    name: 'Docker',
+                    description: 'Die populärste und am weitesten verbreitete Container-Plattform auf dem Markt. Sie bietet ein komplettes Ökosystem, vom Erstellen und Verteilen von Images bis zur Ausführung von Containern, und vereinfacht den Prozess des Packens und Bereitstellens von Anwendungen erheblich. Für viele Entwickler ist es der Einstiegspunkt.',
+                    advantages: ['Vollständiges Ökosystem, große Community mit riesigen Mengen an Tutorials und vorgefertigten Images.', 'Ausgereifte Toolchain, großartige Benutzererfahrung und eine relativ niedrige Einstiegshürde.', 'Gute plattformübergreifende Unterstützung, läuft reibungslos unter Windows, macOS und Linux.'],
+                    disadvantages: ['Abhängigkeit von einem zentralen Hintergrund-Daemon, der ein Single Point of Failure oder ein Sicherheitsrisiko sein kann.', 'Im Vergleich zu anderen Lösungen überladener und ressourcenintensiver.', 'Der Daemon läuft standardmäßig mit Root-Rechten, was ein Sicherheitsrisiko darstellt.'],
+                    architecture: { title: 'Daemon-basierte Architektur', description: 'Der Benutzer kommuniziert über die Docker-CLI mit dem Docker-Daemon, und der Daemon ist für die Verwaltung des gesamten Container-Lebenszyklus verantwortlich.', diagramUser: 'Benutzer (User)', diagramDaemon: 'Docker Daemon (root)' }
+                },
+                podman: {
+                    name: 'Podman',
+                    description: 'Eine Daemon-lose Open-Source-Container-Engine mit einem zu Docker hochkompatiblen Befehlssatz. Sie ermöglicht es Benutzern, sogar Nicht-Root-Benutzern, Container direkt zu verwalten, was die Sicherheit erheblich erhöht. Sie gilt als starke Alternative zu Docker.',
+                    advantages: ['Die Daemon-lose Architektur reduziert die Angriffsfläche und verbessert die Sicherheit.', 'Unterstützt das Ausführen von Containern als Nicht-Root-Benutzer und folgt dem Prinzip der geringsten Rechte.', 'Die Befehle sind hochkompatibel mit Docker, was Entwicklern einen problemlosen Übergang ermöglicht.', 'Unterstützt die Verwaltung von Pods, was eine bessere Integration in das Kubernetes-Ökosystem ermöglicht.'],
+                    disadvantages: ['Das Ökosystem ist weniger ausgereift als das von Docker, mit weniger Peripherie-Tools und Community-Ressourcen.', 'Hauptsächlich für Linux konzipiert; die Unterstützung unter Windows und macOS erfordert eine VM.', 'Die Lernkurve kann für Anfänger etwas steiler sein als bei Docker.'],
+                    architecture: { title: 'Daemon-lose Architektur', description: 'Der Benutzer interagiert direkt über die Podman-CLI mit der Core-Container-Runtime, ohne einen zentralen Daemon.', diagramUser: 'Benutzer (nicht-root)' }
+                },
+                containerd: {
+                    name: 'containerd',
+                    description: 'Eine branchenübliche Container-Runtime, die sich auf Kernfunktionen von Containern konzentriert. Sie legt Wert auf Einfachheit, Robustheit und Portabilität und verwaltet den gesamten Lebenszyklus von Containern, einschließlich Image-Übertragung, Speicherung und Ausführung. Sie ist die Grundlage für viele große Container-Plattformen, einschließlich Docker.',
+                    advantages: ['Extrem leichtgewichtig, verbraucht wenig Ressourcen und konzentriert sich auf Kernfunktionen der Container-Verwaltung.', 'Hohe Leistung, stabil und zuverlässig; von der CNCF als "graduated" Projekt anerkannt.', 'Als Low-Level-Komponente bietet es eine standardisierte API, die die Integration in High-Level-Plattformen erleichtert.'],
+                    disadvantages: ['Bietet keine reichhaltigen Entwickler-Tools wie die Docker-CLI, was zu einer primitiveren Benutzererfahrung führt.', 'Keine vollständige Out-of-the-Box-Lösung; wird typischerweise als Teil einer anderen Plattform verwendet.', 'Direkte Anwendungsszenarien für Anwendungsentwickler sind selten.'],
+                    architecture: { title: 'Low-Level-Runtime-Architektur', description: 'Typischerweise wird seine API von übergeordneten Tools (wie Docker oder CRI) aufgerufen, um Container zu verwalten.', diagramUser: 'Übergeordnetes Tool (z.B. Docker)', diagramDaemon: 'containerd (Daemon)' }
+                },
+                chartLabels: ['Entwicklerfreundlichkeit', 'Sicherheit (Standard)', 'Leichtgewichtigkeit'],
+                chartAxisLabel: 'Bewertung (1-10)'
             }
         };
 
         const detailsContainer = document.getElementById('system-details');
         const selector = document.getElementById('system-selector');
         let currentSystem = 'docker';
+        let currentLang = 'zh-TW';
+        let comparisonChart;
 
         function updateDetails(systemKey) {
-            const data = systemData[systemKey];
+            const data = i18nData[currentLang][systemKey];
             if (!data) return;
 
             detailsContainer.style.opacity = 0;
             
             setTimeout(() => {
+                const archData = data.architecture;
+                let diagramHtml = '';
+                if (systemKey === 'docker') {
+                    diagramHtml = `<div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                            <div class="text-sm font-semibold mb-2">${archData.diagramUser}</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Docker CLI</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">${archData.diagramDaemon}</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">Container</div>
+                        </div>`;
+                } else if (systemKey === 'podman') {
+                     diagramHtml = `<div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                            <div class="text-sm font-semibold mb-2">${archData.diagramUser}</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Podman CLI</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                             <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">Container</div>
+                        </div>`;
+                } else { // containerd
+                    diagramHtml = `<div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                             <div class="py-2 px-4 bg-purple-100 text-purple-800 rounded-md shadow-sm">${archData.diagramUser}</div>
+                             <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">${archData.diagramDaemon}</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">Container</div>
+                        </div>`;
+                }
+
                 detailsContainer.innerHTML = `
                     <h2 class="text-2xl sm:text-3xl font-bold text-teal-800 mb-4">${data.name}</h2>
                     <p class="text-slate-600 mb-8">${data.description}</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h3 class="text-lg font-semibold mb-4 text-slate-700">主要優點</h3>
+                            <h3 class="text-lg font-semibold mb-4 text-slate-700">${i18nData[currentLang].advantages}</h3>
                             <ul class="space-y-3 text-slate-600">
                                 ${data.advantages.map(adv => `<li class="advantage">${adv}</li>`).join('')}
                             </ul>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold mb-4 text-slate-700">主要缺點</h3>
+                            <h3 class="text-lg font-semibold mb-4 text-slate-700">${i18nData[currentLang].disadvantages}</h3>
                             <ul class="space-y-3 text-slate-600">
                                 ${data.disadvantages.map(dis => `<li class="disadvantage">${dis}</li>`).join('')}
                             </ul>
                         </div>
                     </div>
                      <div class="mt-8 pt-8 border-t border-slate-200">
-                        <h3 class="text-lg font-semibold mb-4 text-slate-700">${data.architecture.title}</h3>
-                        <p class="text-slate-600 mb-4 text-sm">${data.architecture.description}</p>
-                        ${data.architecture.diagram}
+                        <h3 class="text-lg font-semibold mb-4 text-slate-700">${archData.title}</h3>
+                        <p class="text-slate-600 mb-4 text-sm">${archData.description}</p>
+                        ${diagramHtml}
                     </div>
                 `;
                 detailsContainer.style.opacity = 1;
             }, 250);
         }
+
+        function updateChart() {
+            const chartData = i18nData[currentLang];
+            if (!comparisonChart) {
+                const ctx = document.getElementById('comparisonChart').getContext('2d');
+                comparisonChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.chartLabels,
+                        datasets: [
+                            { label: 'Docker', data: [9, 6, 6], backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 },
+                            { label: 'Podman', data: [8, 9, 7], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1 },
+                            { label: 'containerd', data: [4, 7, 9], backgroundColor: 'rgba(16, 185, 129, 0.6)', borderColor: 'rgba(16, 185, 129, 1)', borderWidth: 1 }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            x: { beginAtZero: true, max: 10, title: { display: true, text: chartData.chartAxisLabel, font: { size: 12 } } },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 20, padding: 20, font: { size: 12 } } },
+                            tooltip: { enabled: true }
+                        }
+                    }
+                });
+            } else {
+                comparisonChart.data.labels = chartData.chartLabels;
+                comparisonChart.options.scales.x.title.text = chartData.chartAxisLabel;
+                comparisonChart.update();
+            }
+        }
         
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.className = `lang-${lang.split('-')[0]}`;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                el.textContent = i18nData[lang][key] || el.textContent;
+            });
+            updateDetails(currentSystem);
+            updateChart();
+        }
+
         selector.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
                 const system = e.target.dataset.system;
@@ -244,74 +415,13 @@
             }
         });
 
+        document.getElementById('language-selector').addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelector(`[data-system="${currentSystem}"]`).classList.add('active');
-            updateDetails(currentSystem);
-
-            const ctx = document.getElementById('comparisonChart').getContext('2d');
-            const comparisonChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['開發者友好度', '安全性 (開箱即用)', '輕量化程度'],
-                    datasets: [
-                        {
-                            label: 'Docker',
-                            data: [9, 6, 6],
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Podman',
-                            data: [8, 9, 7],
-                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                            borderColor: 'rgba(239, 68, 68, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'containerd',
-                            data: [4, 7, 9],
-                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                            borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    indexAxis: 'y',
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 10,
-                            title: {
-                                display: true,
-                                text: '評分 (1-10)',
-                                font: { size: 12 }
-                            }
-                        },
-                        y: {
-                           grid: {
-                                display: false
-                           }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 20,
-                                padding: 20,
-                                font: { size: 12 }
-                            }
-                        },
-                        tooltip: {
-                            enabled: true
-                        }
-                    }
-                }
-            });
+            setLanguage(currentLang);
         });
     </script>
 </body>
