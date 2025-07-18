@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>容器化技術比較：Docker、Podman 與 containerd</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard. The top features prominent buttons for selecting a system (Docker, Podman, containerd), encouraging immediate interaction. The main body is split into two columns: the left side dynamically displays detailed information (description, pros, cons, and architecture diagram) for the selected system, while the right side features a static "at-a-glance" comparison chart. This structure was chosen to facilitate direct comparison and focused learning. Users can easily switch between systems to see their specific attributes or view the summary chart for a high-level understanding, making it more engaging and usable than a static text document. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: System descriptions, pros/cons. -> Goal: Inform/Compare. -> Viz/Presentation: Dynamically updated HTML text blocks and lists. -> Interaction: Content changes on system selection. -> Justification: Clear, direct presentation of core information. -> Method: Vanilla JS DOM manipulation.
+        - Report Info: Architectural differences (daemon vs. daemonless). -> Goal: Organize/Compare. -> Viz/Presentation: Simple diagrams built with HTML/Tailwind. -> Interaction: Diagram updates based on selection. -> Justification: Visually explains a key technical difference more effectively than text alone. -> Method: HTML/CSS.
+        - Report Info: Overall characteristics (friendliness, security, weight). -> Goal: Compare. -> Viz/Presentation: Horizontal Bar Chart. -> Interaction: Hover tooltips provide exact values. -> Justification: A horizontal bar chart is ideal for comparing ranked attributes across a small number of items, offering an intuitive summary. -> Library/Method: Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #0d9488;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+         .nav-button:not(.active):hover {
+            background-color: #f0fdfa;
+            border-color: #14b8a6;
+            color: #0f766e;
+        }
+        .content-card {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .advantage::before {
+            content: '✓';
+            color: #10b981;
+            margin-right: 0.75rem;
+            font-weight: bold;
+        }
+        .disadvantage::before {
+            content: '✗';
+            color: #ef4444;
+            margin-right: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="min-h-screen container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-teal-800 tracking-tight">現代容器化技術大比拼</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">容器化技術徹底改變了軟體開發與部署。本頁面將帶您深入探索當前主流的容器系統：Docker、Podman 與 containerd，透過互動式比較，助您了解它們各自的架構、優缺點與最佳應用場景。</p>
+        </header>
+
+        <nav class="flex justify-center items-center space-x-2 sm:space-x-4 mb-10" id="system-selector">
+            <button data-system="docker" class="nav-button w-28 sm:w-36 text-sm sm:text-base font-semibold py-2 px-4 rounded-full border-2 border-slate-300 bg-white">
+                Docker
+            </button>
+            <button data-system="podman" class="nav-button w-28 sm:w-36 text-sm sm:text-base font-semibold py-2 px-4 rounded-full border-2 border-slate-300 bg-white">
+                Podman
+            </button>
+            <button data-system="containerd" class="nav-button w-28 sm:w-36 text-sm sm:text-base font-semibold py-2 px-4 rounded-full border-2 border-slate-300 bg-white">
+                containerd
+            </button>
+        </nav>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                <div id="system-details" class="content-card bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                </div>
+            </div>
+
+            <aside class="lg:col-span-1 space-y-8">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-xl font-bold text-teal-800 mb-4">綜合特性速覽</h2>
+                    <p class="text-slate-600 mb-6 text-sm">此圖表根據普遍認知，對各系統在開發者友好度、安全性和輕量化程度上進行評分，讓您快速掌握其核心特性。</p>
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+    </div>
+
+    <script>
+        const systemData = {
+            docker: {
+                name: 'Docker',
+                description: '目前市場上最流行且應用最廣泛的容器化平台。它提供了一套完整的生態系，從映像檔建構、分發到容器運行，極大地簡化了應用程式的打包與部署流程，是許多開發者的入門首選。',
+                advantages: [
+                    '生態系完整，社群龐大，擁有海量的教學資源與預製映像檔。',
+                    '工具鏈成熟，使用者體驗佳，入門門檻相對較低。',
+                    '跨平台支援良好，在 Windows、macOS 和 Linux 上都能流暢使用。'
+                ],
+                disadvantages: [
+                    '依賴一個中央化的背景守護行程 (daemon)，可能成為單點故障或安全瓶頸。',
+                    '相較於其他方案，功能較為臃腫，佔用資源較多。',
+                    '預設以 root 權限運行 daemon，存在一定的安全風險。'
+                ],
+                architecture: {
+                    title: 'Daemon-based 架構',
+                    description: '使用者透過 Docker CLI 與 Docker Daemon 溝通，再由 Daemon 負責所有容器的生命週期管理。',
+                    diagram: `
+                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                            <div class="text-sm font-semibold mb-2">用戶 (User)</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Docker CLI</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">Docker Daemon (root)</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
+                        </div>
+                    `
+                }
+            },
+            podman: {
+                name: 'Podman',
+                description: '一個無守護行程 (daemonless) 的開源容器引擎，其指令集與 Docker 高度相容。它允許使用者，甚至是無 root 權限的使用者，直接管理容器，大幅提升了安全性，被視為 Docker 的有力替代者。',
+                advantages: [
+                    '無守護行程架構，減少了攻擊面，安全性更高。',
+                    '支援無 root 權限運行容器，符合最小權限原則。',
+                    '指令與 Docker 高度相容，開發者可以無痛轉換。',
+                    '支援管理 Pods，能更好地與 Kubernetes 生態整合。'
+                ],
+                disadvantages: [
+                    '生態系不如 Docker 成熟，週邊工具和社群資源相對較少。',
+                    '主要為 Linux 設計，在 Windows 和 macOS 上的支援需透過虛擬機。',
+                    '對於新手來說，學習曲線可能比 Docker 稍陡峭。'
+                ],
+                architecture: {
+                    title: 'Daemonless 架構',
+                    description: '使用者透過 Podman CLI 直接與核心的容器執行環境互動，無需中央守護行程。',
+                    diagram: `
+                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                            <div class="text-sm font-semibold mb-2">用戶 (User/non-root)</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-blue-100 text-blue-800 rounded-md shadow-sm">Podman CLI</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                             <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
+                        </div>
+                    `
+                }
+            },
+            containerd: {
+                name: 'containerd',
+                description: '一個專注於核心容器功能的工業級標準容器執行時 (runtime)。它強調簡單、穩健與可攜性，負責管理容器的整個生命週期，包括映像檔的傳輸與儲存、容器的執行與監管等，是許多大型容器平台（包括 Docker）的底層基礎。',
+                advantages: [
+                    '極度輕量化，資源消耗少，專注於核心的容器管理功能。',
+                    '效能高、穩定可靠，被雲端原生計算基金會 (CNCF) 接納為畢業專案。',
+                    '作為底層元件，提供了標準化的 API，易於被上層平台整合。'
+                ],
+                disadvantages: [
+                    '本身不提供像 Docker CLI 那樣豐富的開發者工具，使用者體驗較為原始。',
+                    '不是一個開箱即用的完整解決方案，通常作為其他平台的一部分使用。',
+                    '對於應用程式開發者來說，直接使用它的場景較少。'
+                ],
+                architecture: {
+                    title: '底層 Runtime 架構',
+                    description: '通常由更高層級的工具（如 Docker 或 CRI）調用其 API 來管理容器。',
+                    diagram: `
+                        <div class="flex flex-col items-center p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                             <div class="py-2 px-4 bg-purple-100 text-purple-800 rounded-md shadow-sm">上層工具 (e.g. Docker)</div>
+                             <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-red-100 text-red-800 rounded-md shadow-sm font-bold">containerd (daemon)</div>
+                            <div class="w-px h-6 bg-slate-400"></div>
+                            <div class="py-2 px-4 bg-teal-100 text-teal-800 rounded-md shadow-sm">容器 (Container)</div>
+                        </div>
+                    `
+                }
+            }
+        };
+
+        const detailsContainer = document.getElementById('system-details');
+        const selector = document.getElementById('system-selector');
+        let currentSystem = 'docker';
+
+        function updateDetails(systemKey) {
+            const data = systemData[systemKey];
+            if (!data) return;
+
+            detailsContainer.style.opacity = 0;
+            
+            setTimeout(() => {
+                detailsContainer.innerHTML = `
+                    <h2 class="text-2xl sm:text-3xl font-bold text-teal-800 mb-4">${data.name}</h2>
+                    <p class="text-slate-600 mb-8">${data.description}</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4 text-slate-700">主要優點</h3>
+                            <ul class="space-y-3 text-slate-600">
+                                ${data.advantages.map(adv => `<li class="advantage">${adv}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4 text-slate-700">主要缺點</h3>
+                            <ul class="space-y-3 text-slate-600">
+                                ${data.disadvantages.map(dis => `<li class="disadvantage">${dis}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="mt-8 pt-8 border-t border-slate-200">
+                        <h3 class="text-lg font-semibold mb-4 text-slate-700">${data.architecture.title}</h3>
+                        <p class="text-slate-600 mb-4 text-sm">${data.architecture.description}</p>
+                        ${data.architecture.diagram}
+                    </div>
+                `;
+                detailsContainer.style.opacity = 1;
+            }, 250);
+        }
+        
+        selector.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const system = e.target.dataset.system;
+                if (system && system !== currentSystem) {
+                    currentSystem = system;
+                    updateDetails(system);
+                    
+                    document.querySelectorAll('#system-selector button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector(`[data-system="${currentSystem}"]`).classList.add('active');
+            updateDetails(currentSystem);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['開發者友好度', '安全性 (開箱即用)', '輕量化程度'],
+                    datasets: [
+                        {
+                            label: 'Docker',
+                            data: [9, 6, 6],
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Podman',
+                            data: [8, 9, 7],
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'containerd',
+                            data: [4, 7, 9],
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: '評分 (1-10)',
+                                font: { size: 12 }
+                            }
+                        },
+                        y: {
+                           grid: {
+                                display: false
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 20,
+                                padding: 20,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
