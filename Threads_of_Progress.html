@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編碼的織造：紡織與AI革命的互動探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Beige, Soft Brown, Muted Teal Accent) -->
+    <!-- Application Structure Plan: A single-page, thematic interactive narrative comparing the Textile and AI revolutions. The structure uses a top-level navigation (Home, Parallel Histories, Workforce, Policy, Deep Dive) to guide the user through the core comparative analysis, while keeping the detailed historical report accessible in a separate section. This non-linear structure prioritizes the synthesis of the two reports over a simple chronological presentation, enhancing user understanding of the core analogy. Key interactions include clickable timeline eras, dynamic charts, and tabbed content to manage information density. -->
+    <!-- Visualization & Content Choices:
+    - Parallel Histories: Goal: Compare change over time. Method: Vertical two-column HTML layout. Interaction: Click to expand details. Justification: Visually reinforces the parallel nature of the two histories.
+    - Workforce Evolution: Goal: Show changing roles. Method: HTML/CSS diagram + dynamic text panel + Chart.js Donut Chart. Interaction: Click stage to update text/chart. Justification: Combines visual metaphor (diagram) with qualitative (text) and quantitative (chart) data for a rich explanation. Library: Chart.js.
+    - Policy Lessons: Goal: Compare policies. Method: Three-column card layout (HTML/CSS). Interaction: Hover for details. Justification: Clear, direct comparison of past and predicted policies.
+    - Deep Dive: Goal: Provide detailed reference. Method: Tabbed HTML interface. Interaction: Click tabs to switch content. Justification: Manages large amounts of text without cluttering the main narrative.
+    - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #005F73;
+            border-bottom-color: #005F73;
+        }
+        .tab-link.active {
+            background-color: #005F73;
+            color: #FFFFFF;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold text-gray-800">編碼的織造</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="nav-link active">首頁</a>
+                    <a href="#parallel-history" class="nav-link">平行歷史</a>
+                    <a href="#workforce" class="nav-link">勞動力演變</a>
+                    <a href="#policy" class="nav-link">政策啟示</a>
+                    <a href="#deep-dive" class="nav-link">台灣紡織史</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="home">首頁</option>
+                        <option value="parallel-history">平行歷史</option>
+                        <option value="workforce">勞動力演變</option>
+                        <option value="policy">政策啟示</option>
+                        <option value="deep-dive">台灣紡織史</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="min-h-screen flex items-center bg-stone-50">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-teal-900 mb-4">編碼的織造</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    從動力織布機到大型語言模型，從紡織女工到軟體開發者。本報告將台灣紡織業的百年變革史，與當代人工智慧的崛起進行對照，揭示技術革命中顛覆、轉型與適應的永恆模式。
+                </p>
+                <a href="#parallel-history" class="mt-8 inline-block bg-teal-800 text-white font-bold py-3 px-8 rounded-full hover:bg-teal-900 transition-colors">開始探索</a>
+            </div>
+        </section>
+
+        <section id="parallel-history" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">平行發展史</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">兩個產業的演進遵循著驚人相似的路徑，技術的飛躍性進步重新定義了生產、價值與勞動。點擊各階段以展開詳細說明。</p>
+
+                <div class="space-y-4">
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-6 font-bold text-lg flex justify-between items-center">
+                            <span>階段一：工匠技藝 vs. 早期AI</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="font-bold text-teal-800 mb-2">紡織：工匠織造 (1900年代前)</h3>
+                                    <p class="text-sm">高度專業化、以工藝為基礎的工作。原住民織者擁有深入的技能，從種植、紡紗到織布一手包辦。生產是手動的、緩慢的、客製化的，成品蘊含深厚的文化意義。</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-blue-800 mb-2">AI：早期人工智慧 (約1950s-2010s)</h3>
+                                    <p class="text-sm">以專家系統、語音/影像辨識為代表。開發者是擁有博士學位的研究員，需具備深入的演算法與數學知識。系統是為特定任務打造的、開發週期長、高度客製化。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-6 font-bold text-lg flex justify-between items-center">
+                            <span>階段二：機械化 vs. LLM革命</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="font-bold text-teal-800 mb-2">紡織：機械化 (約1900s-1950s)</h3>
+                                    <p class="text-sm">動力織布機、蒸汽機的出現，是從手動到自動化的關鍵轉變。機械化自動了織造過程，普及了基礎布料的生產，但也使傳統織者的全面技藝變得不再那麼重要。</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-blue-800 mb-2">AI：ChatGPT與大型語言模型 (約2018-至今)</h3>
+                                    <p class="text-sm">大型語言模型（LLM）的出現，自動化了例行性的程式碼生成、文本撰寫等任務。這普及了AI的應用，但也使初級開發者專注於語法編寫的技能價值相對下降。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-6 font-bold text-lg flex justify-between items-center">
+                            <span>階段三：大規模生產 vs. AI驅動工具</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="font-bold text-teal-800 mb-2">紡織：出口導向的大規模生產 (約1960s-1980s)</h3>
+                                    <p class="text-sm">規模與效率變得至關重要。「紡織女工」模式專注於低成本、高產量、重複性的任務。產業形成了從原料到成衣的垂直整合供應鏈，以量取勝。</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-blue-800 mb-2">AI：AI驅動的工具 (約2023-至今)</h3>
+                                    <p class="text-sm">基於LLM的RAG、AI代理人等工具興起。開發者利用這些工具能產出大量標準化程式碼，工作重心從手動編碼轉向系統整合、提示工程與流程自動化。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-6 font-bold text-lg flex justify-between items-center">
+                            <span>階段四：高科技創新 vs. 未來AGI</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="font-bold text-teal-800 mb-2">紡織：高科技機能性布料 (約1990s-至今)</h3>
+                                    <p class="text-sm">從大宗商品生產轉向高價值、知識密集型的創新。成功不再依賴勞力，而是取決於研發、材料科學與系統設計。勞動力轉型為化學家、工程師和設計師。</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-blue-800 mb-2">AI：通用人工智慧(AGI)與實體AI (未來)</h3>
+                                    <p class="text-sm">從解決特定問題轉向自主解決複雜、通用問題。開發者將專注於建構複雜系統、為自主AI代理人定義目標，並解決新穎的跨領域問題，成為AI的架構師與策略家。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-center mb-8">台灣紡織業關鍵轉型事件</h3>
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workforce" class="py-20 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">變遷中的勞動力</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">軟體開發者是21世紀的紡織工人。他們的角色、技能和價值正被類似於將織工轉變為化學工程師的力量所重塑。</p>
+                
+                <div class="grid md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-1 space-y-4">
+                        <button data-stage="artisan" class="workforce-btn w-full text-left p-4 rounded-lg bg-white shadow-sm border-l-4 border-teal-500 transition">
+                            <h4 class="font-bold">工匠</h4>
+                            <p class="text-sm text-gray-500">全面技藝，手工製作</p>
+                        </button>
+                        <button data-stage="operator" class="workforce-btn w-full text-left p-4 rounded-lg bg-gray-200 transition">
+                            <h4 class="font-bold">操作員</h4>
+                            <p class="text-sm text-gray-500">操作機器，重複勞動</p>
+                        </button>
+                        <button data-stage="knowledge" class="workforce-btn w-full text-left p-4 rounded-lg bg-gray-200 transition">
+                            <h4 class="font-bold">知識工作者</h4>
+                            <p class="text-sm text-gray-500">研發創新，系統設計</p>
+                        </button>
+                    </div>
+                    <div class="md:col-span-2 card p-6 min-h-[300px]">
+                        <div id="workforce-details">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="policy" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">政策啟示</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">鑑於台灣在紡織領域有著策略性政府干預的歷史，我們可以預期在AI時代也會有類似的劇本。目標是減輕衝擊，同時利用AI作為國家競爭力的驅動力。</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2 text-teal-800">1. 扶植本土產業</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">紡織業政策</h4>
+                                <p class="text-sm">1950年代的「代紡代織」政策利用美援棉花，保護並培育了受外國競爭保護的國內產業。</p>
+                            </div>
+                            <div class="text-center text-2xl font-bold text-gray-300">↓</div>
+                            <div>
+                                <h4 class="font-semibold">AI時代預測</h4>
+                                <p class="text-sm">推動「數位主權」，支持本土大型語言模型（如FedGPT），建立安全的國家級數據基礎設施，鼓勵使用本土AI方案。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2 text-teal-800">2. 激勵投資與出口</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">紡織業政策</h4>
+                                <p class="text-sm">1960年的《獎勵投資條例》利用租稅減免和優惠措施，將紡織業轉變為出口強權。</p>
+                            </div>
+                            <div class="text-center text-2xl font-bold text-gray-300">↓</div>
+                            <div>
+                                <h4 class="font-semibold">AI時代預測</h4>
+                                <p class="text-sm">實施「AI產業促進方案」，提供研發租稅抵減、AI技術採用補助，並設立人才發展基金以提升勞動力技能。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2 text-teal-800">3. 主動管理轉型</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">紡織業政策</h4>
+                                <p class="text-sm">面對貿易配額壓力，政府與產業共同努力，將挑戰轉化為向化學纖維和機能性布料升級的機會。</p>
+                            </div>
+                            <div class="text-center text-2xl font-bold text-gray-300">↓</div>
+                            <div>
+                                <h4 class="font-semibold">AI時代預測</h4>
+                                <p class="text-sm">主動管理AI帶來的「創造性破壞」，制定國家級戰略，將台灣定位為高價值AI應用的領導者（如智慧製造、醫療保健）。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="deep-dive" class="py-20 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">台灣紡織史深度探索</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">此處提供原始報告的詳細內容，供您深入研究台灣紡織產業百年的完整演進歷程。</p>
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="tab-link px-4 py-2 rounded-full text-sm font-semibold transition active" data-tab="tab-1">史前史</button>
+                    <button class="tab-link px-4 py-2 rounded-full text-sm font-semibold transition" data-tab="tab-2">日治時期</button>
+                    <button class="tab-link px-4 py-2 rounded-full text-sm font-semibold transition" data-tab="tab-3">進口替代</button>
+                    <button class="tab-link px-4 py-2 rounded-full text-sm font-semibold transition" data-tab="tab-4">出口黃金時代</button>
+                    <button class="tab-link px-4 py-2 rounded-full text-sm font-semibold transition" data-tab="tab-5">現代轉型</button>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <div id="tab-1" class="tab-content leading-relaxed">
+                        <h3 class="text-2xl font-bold mb-4">第一章：台灣織造的基石（1900年代前）</h3>
+                        <p class="mb-4">在工業化浪潮席卷台灣之前，島嶼的紡織活動呈現出獨特的二元結構：原住民族群內部存在著完整自足、文化意涵深遠的織布體系，而漢人移民社會則形成了依賴外部輸入、以精工刺繡為特色的迥異模式。對於台灣的原住民族而言，織布遠不止於一項手藝，它是支撐其社會結構、文化認同與精神信仰的核心支柱。主要的紡織原料是苎麻，整個生產過程完全依賴手工。在賽德克族、泰雅族等社群中，織布是女性的專屬領域，技藝是其社會地位的象徵。與此形成鮮明對比，清代移墾來台的漢人社會並未發展出成規模的本地織布工業，衣料主要從福建、廣東等大陸省份輸入。這種對外部輸入的深度依賴，使得清代台灣在紡織品上存在結構性的“貿易赤字”，為日後工業化時代的紡織業發展埋下了伏筆。</p>
+                    </div>
+                    <div id="tab-2" class="tab-content leading-relaxed hidden">
+                        <h3 class="text-2xl font-bold mb-4">第二章：工業化的破曉：日本殖民統治時期（1895-1945）</h3>
+                        <p class="mb-4">日本殖民統治時期是台灣紡織業從傳統手工藝邁向現代工業化的關鍵轉折點。殖民政府的經濟戰略、新技術的引入以及全球市場的變動，共同塑造了台灣紡織業的早期形態。1905年成立的「台灣製麻株式會社」是台灣首家使用機器動力的紡織廠，但其核心業務是生產包裝米糖出口的黃麻布袋，服務於殖民地的農業輸出戰略。1919年成立的「台灣織布株式會社」則是現代消費性紡織品生產的真正開端，它大規模使用電力驅動的機械織布機，帶動台南成為棉紡織業中心。這個時代催生了第一代產業工人，他們從農業社會轉向工業紀律，為戰後更大規模的工業化儲備了一批寶貴的半技術人才。</p>
+                    </div>
+                    <div id="tab-3" class="tab-content leading-relaxed hidden">
+                        <h3 class="text-2xl font-bold mb-4">第三章：戰後重建與進口替代（1945-1960）</h3>
+                        <p class="mb-4">二戰後及國民政府遷台，台灣人口激增，衣物等民生必需品需求爆發。為應對危機，政府在1950年推出“代紡代織”政策，利用美援資金進口棉花，交由私營工廠代為加工，以實現紡織品自給自足。美援在此過程中扮演了無可替代的角色，解決了原料問題，扶植了民營企業。然而，這項保護主義政策的成功也導致了國內市場迅速飽和。到1953年，產能已超出內需，高關稅和高估的匯率使得產品難以出口。這場由政策成功引發的“過剩危機”，反過來迫使政府和業界必須尋找新的出路，為1960年代的出口導向轉型埋下伏筆。</p>
+                    </div>
+                    <div id="tab-4" class="tab-content leading-relaxed hidden">
+                        <h3 class="text-2xl font-bold mb-4">第四章：出口導向的黃金時代（1960-1980年代）</h3>
+                        <p class="mb-4">1960年代，台灣紡織業迎來黃金時代。政府推出《獎勵投資條例》等改革，大幅貶值新台幣，提供租稅優惠，全面轉向出口擴張。然而，國際棉紡織品配額的限制，迫使產業轉向不受限的化學纖維（尼龍、聚酯纖維）。這次“被動升級”恰好與台灣的石化工業發展相結合，形成了強大的垂直整合產業鏈，使台灣成為全球化纖的主要生產國。這一時期的社會面貌由“紡織女工”定義，她們是來自農村的年輕女性，以其高效率、低成本的勞動力，為台灣的出口產品創造了巨大競爭優勢，成為經濟奇蹟背後最重要的人力資本。</p>
+                    </div>
+                    <div id="tab-5" class="tab-content leading-relaxed hidden">
+                        <h3 class="text-2xl font-bold mb-4">第五章：現代的轉型與升级（1990年代至今）</h3>
+                        <p class="mb-4">1980年代末，台灣面臨成本上升和國際競爭加劇的挑戰，大量低附加值的紡織廠外移。留守的企業進行了卓越的戰略轉型，放棄價格戰，專注於開發高技術、高附加值的“功能性面料”（如吸濕排汗、防水透氣）。利用過去在化纖領域的積累，台灣成為Nike、Adidas等全球頂尖品牌的核心供應商。進入21世紀，產業進一步擁抱數位化（如AI驗布、3D虛擬設計）和永續發展（如使用回收材料、無水染色），將其作為核心競爭力。從業人員也從勞動密集的“女工”轉變為知識密集的化學工程師、設計師和研發技術員，完成了從“製造”到“智造”的華麗轉身。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 編碼的織造. 本報告內容基於提供之資料分析生成。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const appData = {
+                timeline: {
+                    labels: ['1905', '1919', '1950', '1960', '1970', '1990'],
+                    datasets: [{
+                        label: '關鍵轉型事件',
+                        data: [
+                            { x: 1905, y: 1, event: '首座機械化黃麻工廠設立' },
+                            { x: 1919, y: 1, event: '機械化棉紡織業發端' },
+                            { x: 1950, y: 1, event: '實施「代紡代織」進口替代政策' },
+                            { x: 1960, y: 1, event: '頒布《獎勵投資條例》，轉向出口導向' },
+                            { x: 1970, y: 1, event: '化纖革命，產業轉向人造纖維' },
+                            { x: 1990, y: 1, event: '高科技轉型，發展功能性面料' }
+                        ],
+                        backgroundColor: '#005F73',
+                        borderColor: '#005F73',
+                        pointRadius: 8,
+                        pointHoverRadius: 12,
+                        showLine: false
+                    }]
+                },
+                workforce: {
+                    artisan: {
+                        title: "工匠：全面技藝的傳承者",
+                        textile: "對於原住民織者，織布是與文化、信仰和個人身份緊密結合的生命實踐。她們掌握從種植原料到織成布匹的完整手工藝，是技藝與文化的傳承者。",
+                        ai: "早期軟體開發者是程式碼的工匠。他們需具備深厚的演算法和邏輯知識，手工打造應用程式，每個系統都是獨一無二的智力結晶。"
+                    },
+                    operator: {
+                        title: "操作員：工業時代的螺絲釘",
+                        textile: "隨著機械化，「紡織女工」成為主力。她們的工作是在生產線上高速、重複地操作機器。技能要求從全面技藝轉向效率與耐力，成為推動經濟奇蹟的基石。",
+                        ai: "隨著LLM等工具普及，許多一般軟體開發者的角色轉變為「AI操作員」。他們的核心任務不再是從零編碼，而是有效地使用、整合AI工具，通過提示工程引導AI產出結果。"
+                    },
+                    knowledge: {
+                        title: "知識工作者：價值的創造者",
+                        textile: "現代紡織業的價值來自創新。化學工程師、材料科學家和設計師取代了生產線工人，他們開發新型功能性面料，以知識和研發能力在全球市場競爭。",
+                        ai: "未來的頂尖軟體開發者將是系統架構師和問題解決者。他們定義商業問題，設計複雜的系統，並引導自主AI工具去執行。價值從「如何做」轉向「做什麼」和「為何做」。"
+                    }
+                }
+            };
+
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            new Chart(timelineCtx, {
+                type: 'scatter',
+                data: appData.timeline,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw.event;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: '年份'
+                            }
+                        },
+                        y: {
+                            display: false,
+                            min: 0,
+                            max: 2
+                        }
+                    }
+                }
+            });
+
+            const workforceBtns = document.querySelectorAll('.workforce-btn');
+            const workforceDetails = document.getElementById('workforce-details');
+            
+            function updateWorkforceContent(stage) {
+                const data = appData.workforce[stage];
+                workforceDetails.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">${data.title}</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-teal-700 mb-2">紡織從業人員</h4>
+                            <p class="text-sm">${data.textile}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-700 mb-2">一般軟體開發者</h4>
+                            <p class="text-sm">${data.ai}</p>
+                        </div>
+                    </div>
+                `;
+                workforceBtns.forEach(btn => {
+                    if (btn.dataset.stage === stage) {
+                        btn.classList.remove('bg-gray-200');
+                        btn.classList.add('bg-white', 'shadow-sm', 'border-l-4', 'border-teal-500');
+                    } else {
+                        btn.classList.add('bg-gray-200');
+                        btn.classList.remove('bg-white', 'shadow-sm', 'border-l-4', 'border-teal-500');
+                    }
+                });
+            }
+            updateWorkforceContent('artisan');
+
+            workforceBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateWorkforceContent(btn.dataset.stage);
+                });
+            });
+            
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const tabId = link.dataset.tab;
+
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('span:last-child');
+
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    
+                    document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = '0px');
+                    document.querySelectorAll('.accordion-header span:last-child').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(section => observer.observe(section));
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
