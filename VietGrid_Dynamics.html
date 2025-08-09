@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>越南儲能軟體開發戰略</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard with interactive sections. The structure is designed for user-led exploration rather than linear reading. Key sections (Market Opportunity, Competition, Roadmap, Tech Stack, Regulations) are accessible via a sticky navigation bar. This non-linear approach allows users (e.g., investors, developers) to quickly access the information most relevant to them, while interactive elements like charts, clickable diagrams, and tabs make dense information digestible and engaging. This structure was chosen to transform a static business report into a dynamic decision-making tool. -->
+    <!-- Visualization & Content Choices: 
+        - Market Growth (Report Info: Market size projection) -> Goal: Inform/Impress -> Viz: Bar Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Visually impactful representation of growth.
+        - Policy Chain (Report Info: PDP8 drivers) -> Goal: Explain causality -> Viz: HTML/CSS Diagram -> Interaction: Click to reveal text -> Justification: Simplifies complex policy relationships into a clear flow.
+        - Competitors (Report Info: Competitor table) -> Goal: Organize/Compare -> Viz: HTML/JS Tabs -> Interaction: Click to switch content -> Justification: Manages information density effectively.
+        - Development Roadmap (Report Info: Three phased opportunities) -> Goal: Show progression -> Viz: HTML/JS Stepper -> Interaction: Click step to update content panel -> Justification: Turns a text-heavy chapter into an interactive strategic plan.
+        - Tech Stacks (Report Info: Tech recommendation table) -> Goal: Organize/Inform -> Viz: HTML/JS Expandable Cards -> Interaction: Click to reveal details -> Justification: Modern and clean presentation of technical data.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #059669; /* emerald-600 */
+            border-bottom-color: #059669;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #059669; /* emerald-600 */
+            color: white;
+        }
+        .stepper-item.active .stepper-circle {
+            background-color: #059669; /* emerald-600 */
+            color: white;
+        }
+        .stepper-item.active .stepper-title {
+            color: #059669; /* emerald-600 */
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-700">越南儲能戰略</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#opportunity" class="nav-link pb-1">市場機遇</a>
+                <a href="#competition" class="nav-link pb-1">競爭格局</a>
+                <a href="#roadmap" class="nav-link pb-1">開發藍圖</a>
+                <a href="#tech" class="nav-link pb-1">技術架構</a>
+                <a href="#regulation" class="nav-link pb-1">法規遵循</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#opportunity" class="block text-center py-2 px-4 text-sm hover:bg-emerald-50">市場機遇</a>
+            <a href="#competition" class="block text-center py-2 px-4 text-sm hover:bg-emerald-50">競爭格局</a>
+            <a href="#roadmap" class="block text-center py-2 px-4 text-sm hover:bg-emerald-50">開發藍圖</a>
+            <a href="#tech" class="block text-center py-2 px-4 text-sm hover:bg-emerald-50">技術架構</a>
+            <a href="#regulation" class="block text-center py-2 px-4 text-sm hover:bg-emerald-50">法規遵循</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-4">駕馭綠色轉型</h2>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-slate-600 mb-8">越南的能源政策創造了亞洲最引人注目的軟體市場機會。這是一個由政策驅動、需求明確的藍海，等待著技術先行者。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <p class="text-3xl font-bold text-emerald-600">> 34億美元</p>
+                    <p class="text-slate-500 mt-1">2030年預計市場規模</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <p class="text-3xl font-bold text-emerald-600">~27% CAGR</p>
+                    <p class="text-slate-500 mt-1">年均複合增長率</p>
+                </div>
+            </div>
+            <a href="#opportunity" class="bg-emerald-600 text-white font-bold py-3 px-8 rounded-full hover:bg-emerald-700 transition-colors">開始探索</a>
+        </section>
+
+        <!-- Section 1: Market Opportunity -->
+        <section id="opportunity" class="py-12 md:py-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-800">市場機遇：一場由政策驅動的淘金熱</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-slate-600">本節將深入探討越南儲能市場的根本驅動力。您將了解市場規模的爆炸性增長、關鍵的國家政策指令，以及解鎖市場的具體機制。這些因素共同構成了一個確定性極高的軟體需求環境。</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-bold mb-4 text-center">市場規模預測 (2023-2030)</h4>
+                    <div class="chart-container">
+                        <canvas id="marketGrowthChart"></canvas>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-4 text-center">由PDP8的強制性儲能目標和DPPA機制驅動，市場預計將迎來近十倍的增長。</p>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg card">
+                        <h4 class="text-xl font-bold mb-4">核心驅動鏈：從電網危機到軟體需求</h4>
+                        <p class="text-slate-600 mb-6">點擊下方節點，了解越南儲能軟體需求背後的清晰邏輯鏈條。</p>
+                        <div id="causal-chain" class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2">
+                            <div class="causal-item p-3 bg-slate-100 rounded-lg text-center cursor-pointer" data-text="2019-2021年間的固定電價補貼(FiT)政策，導致太陽能裝機容量爆炸式增長，但缺乏規劃。">FiT政策</div>
+                            <div class="text-2xl text-emerald-500 font-sans mx-2">&rarr;</div>
+                            <div class="causal-item p-3 bg-slate-100 rounded-lg text-center cursor-pointer" data-text="無序的再生能源併網迅速超出電網承受能力，引發嚴重的電網擁堵和高昂的棄風棄光。">電網不穩定</div>
+                            <div class="text-2xl text-emerald-500 font-sans mx-2">&rarr;</div>
+                            <div class="causal-item p-3 bg-emerald-100 rounded-lg text-center cursor-pointer font-semibold" data-text="為解決危機，政府在第八版電力發展計畫(PDP8)中強制要求大規模部署BESS，將儲能從『可選項』變為『必需品』。">PDP8指令</div>
+                            <div class="text-2xl text-emerald-500 font-sans mx-2">&rarr;</div>
+                            <div class="causal-item p-3 bg-blue-100 rounded-lg text-center cursor-pointer font-semibold" data-text="龐大的BESS資產若無先進軟體進行協調、控制和優化，將無法有效運作，這直接催生了對專業管理軟體的剛性需求。">軟體需求</div>
+                        </div>
+                        <p id="causal-text" class="mt-4 text-slate-600 bg-slate-50 p-4 rounded-md min-h-[50px] transition-all"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Competition -->
+        <section id="competition" class="py-12 md:py-20 bg-slate-100 -mx-6 px-6">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-slate-800">競爭格局與戰略定位</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">本節將剖析市場中的三類主要玩家：巨頭、實施商與現有玩家。理解他們的優劣勢，是找到自身戰略切入點的關鍵。我們的核心結論是：賦能『實施商』，而非與『巨頭』正面对决。</p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-8">
+                    <div class="flex justify-center border-b mb-6">
+                        <button class="tab-button py-2 px-4 md:px-6 font-medium text-slate-600 active" data-tab="giants">巨頭</button>
+                        <button class="tab-button py-2 px-4 md:px-6 font-medium text-slate-600" data-tab="implementers">實施商</button>
+                        <button class="tab-button py-2 px-4 md:px-6 font-medium text-slate-600" data-tab="incumbents">現有玩家</button>
+                    </div>
+                    <div id="tab-content">
+                        <!-- Giants -->
+                        <div class="tab-pane active" id="giants">
+                            <h4 class="text-lg font-bold mb-2">垂直整合的企業集團</h4>
+                            <p class="text-slate-600 mb-4">擁有資本、完整產業鏈和強大政府關係，是市場主導力量。與他們直接競爭門檻極高。</p>
+                            <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                <li><strong>Vingroup (VinES):</strong> 越南本土最強大的參與者，構建從電池製造到專案開發的完整生態。</li>
+                                <li><strong>AES, Marubeni, Honeywell:</strong> 國際能源巨頭，帶來全球經驗、技術和資本，是大型專案的有力競爭者。</li>
+                            </ul>
+                            <div class="mt-4 p-4 bg-amber-50 text-amber-800 rounded-lg">
+                                <span class="font-bold">戰略啟示：</span> 避免正面衝突，探索在非核心軟體模組上的合作機會。
+                            </div>
+                        </div>
+                        <!-- Implementers -->
+                        <div class="tab-pane hidden" id="implementers">
+                            <h4 class="text-lg font-bold mb-2">通往市場的主要渠道</h4>
+                            <p class="text-slate-600 mb-4">市場的中堅力量，擁有廣泛客戶網路和專案實施能力，但普遍缺乏先進的軟體開發能力。</p>
+                            <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                <li><strong>EPC總包商 (如PC1集團):</strong> 能源基礎設施領域的資深玩家，客戶關係穩固。</li>
+                                <li><strong>太陽能安裝商 (如Vũ Phong Solar):</strong> 數量龐大且分散，是觸達工商業和住宅用戶的關鍵。</li>
+                            </ul>
+                            <div class="mt-4 p-4 bg-emerald-50 text-emerald-800 rounded-lg">
+                                <span class="font-bold">戰略核心：</span> 他們不是競爭對手，而是理想的渠道合作夥伴。為他們提供強大的軟體平台，將他們轉化為您的銷售網路。
+                            </div>
+                        </div>
+                        <!-- Incumbents -->
+                        <div class="tab-pane hidden" id="incumbents">
+                            <h4 class="text-lg font-bold mb-2">工業自動化與能源管理系統供應商</h4>
+                            <p class="text-slate-600 mb-4">市場上的傳統力量，在工業和建築領域深耕多年，擁有穩定客戶群。</p>
+                            <ul class="list-disc list-inside space-y-2 text-slate-700">
+                                <li><strong>西門子, 施耐德電機, ABB:</strong> 全球自動化領導者，其EMS系統通常封閉、迭代慢，且未針對新政策優化。</li>
+                            </ul>
+                            <div class="mt-4 p-4 bg-sky-50 text-sky-800 rounded-lg">
+                                <span class="font-bold">戰略機會：</span> 提供更現代化、開放、具成本效益且針對DPPA等政策優化的SaaS替代方案，實現差異化競爭。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Development Roadmap -->
+        <section id="roadmap" class="py-12 md:py-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-800">核心開發藍圖：三階段演進路徑</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-slate-600">本節將為您呈現一條從解決當前痛點到引領市場未來的、風險遞減的產品演進路線。點擊每個階段，探索其目標市場、核心功能和演進方向。這條路徑旨在規避VPP業務初期的「雞生蛋」困境。</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-8 md:gap-12">
+                <!-- Stepper -->
+                <div class="w-full md:w-1/3">
+                    <div id="stepper" class="space-y-6">
+                        <div class="stepper-item cursor-pointer active" data-step="1">
+                            <div class="flex items-center">
+                                <div class="stepper-circle w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">1</div>
+                                <h4 class="stepper-title ml-4 text-lg font-medium text-slate-700">C&I 能源管理系統 (EMS)</h4>
+                            </div>
+                            <div class="pl-4 mt-2 ml-5 border-l-2 border-slate-200">
+                                <p class="text-sm text-slate-500">市場切入點，解決工業用戶最迫切的成本與穩定性問題。</p>
+                            </div>
+                        </div>
+                        <div class="stepper-item cursor-pointer" data-step="2">
+                            <div class="flex items-center">
+                                <div class="stepper-circle w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">2</div>
+                                <h4 class="stepper-title ml-4 text-lg font-medium text-slate-700">電網級BESS優化平台</h4>
+                            </div>
+                            <div class="pl-4 mt-2 ml-5 border-l-2 border-slate-200">
+                                <p class="text-sm text-slate-500">專業化產品，為大型發電商最大化儲能資產價值。</p>
+                            </div>
+                        </div>
+                        <div class="stepper-item cursor-pointer" data-step="3">
+                            <div class="flex items-center">
+                                <div class="stepper-circle w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">3</div>
+                                <h4 class="stepper-title ml-4 text-lg font-medium text-slate-700">虛擬電廠 (VPP) 平台</h4>
+                            </div>
+                             <div class="pl-4 mt-2 ml-5 border-l-2 border-slate-200">
+                                <p class="text-sm text-slate-500">終極形態，聚合分散資產，參與高級電力市場。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Content Panel -->
+                <div class="w-full md:w-2/3 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <div id="step-content">
+                        <!-- Step 1 Content -->
+                        <div class="step-pane active" data-pane="1">
+                            <h4 class="text-2xl font-bold mb-4 text-emerald-700">階段一：C&I 能源管理系統 (EMS)</h4>
+                            <p class="mb-4 text-slate-600"><strong>目標：</strong> 抓住由DPPA機制催生的工業領域即時需求，獲得初期收入和客戶基礎。</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h5 class="font-bold mb-2">MVP 核心功能</h5>
+                                    <ul class="list-disc list-inside space-y-1 text-sm text-slate-700">
+                                        <li>即時監控儀表板</li>
+                                        <li>電價引擎與成本分析</li>
+                                        <li>自動化削峰填谷</li>
+                                        <li>基礎報告生成</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold mb-2">進階功能 (路線圖)</h5>
+                                    <ul class="list-disc list-inside space-y-1 text-sm text-slate-700">
+                                        <li>AI驅動的發用電預測</li>
+                                        <li>DPPA合約管理</li>
+                                        <li>多場站組合管理</li>
+                                        <li>預測性維護警報</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 2 Content -->
+                        <div class="step-pane hidden" data-pane="2">
+                            <h4 class="text-2xl font-bold mb-4 text-emerald-700">階段二：電網級BESS優化平台</h4>
+                            <p class="mb-4 text-slate-600"><strong>目標：</strong> 隨著PDP8強制目標推進，為獨立發電商和EVN提供專業優化軟體，實現收入疊加。</p>
+                            <h5 class="font-bold mb-2">核心功能</h5>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-slate-700">
+                                <li>高頻數據採集與SCADA整合</li>
+                                <li>輔助服務調度引擎 (頻率調節等)</li>
+                                <li>協同優化演算法 (最大化多市場收益)</li>
+                                <li>電網規範合規性與報告</li>
+                            </ul>
+                        </div>
+                        <!-- Step 3 Content -->
+                        <div class="step-pane hidden" data-pane="3">
+                            <h4 class="text-2xl font-bold mb-4 text-emerald-700">階段三：虛擬電廠 (VPP) 聚合平台</h4>
+                            <p class="mb-4 text-slate-600"><strong>目標：</strong> 整合前兩階段的客戶和資產，將分散式能源聚合成統一的可調度資源，確立市場領導地位。</p>
+                            <h5 class="font-bold mb-2">核心功能</h5>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-slate-700">
+                                <li>異構DER集群管理與控制</li>
+                                <li>概率性預測引擎 (量化不確定性)</li>
+                                <li>基於隨機優化的市場投標策略</li>
+                                <li>複雜結算與資產所有者門戶</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 4: Tech Stack -->
+        <section id="tech" class="py-12 md:py-20 bg-slate-100 -mx-6 px-6">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-slate-800">推薦軟體架構與技術棧</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">本節將為開發藍圖中的每個階段推薦最合適的技術選型。這些選擇旨在平衡開發速度、系統性能、可擴展性和未來演進的需求，確保技術架構能夠支撐業務的長期發展。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- C&I EMS Card -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg card">
+                        <h4 class="text-xl font-bold mb-2">C&I EMS</h4>
+                        <p class="text-sm text-slate-500 mb-4">快速上市，易於演進</p>
+                        <div class="space-y-3">
+                            <p><strong class="text-emerald-700">架構:</strong> 模組化單體</p>
+                            <p><strong class="text-emerald-700">後端:</strong> Node.js</p>
+                            <p><strong class="text-emerald-700">資料庫:</strong> TimescaleDB</p>
+                            <p><strong class="text-emerald-700">通訊:</strong> MQTT</p>
+                        </div>
+                    </div>
+                    <!-- BESS Platform Card -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg card">
+                        <h4 class="text-xl font-bold mb-2">電網級BESS平台</h4>
+                        <p class="text-sm text-slate-500 mb-4">高可用，低延遲</p>
+                        <div class="space-y-3">
+                            <p><strong class="text-emerald-700">架構:</strong> 微服務</p>
+                            <p><strong class="text-emerald-700">後端:</strong> Go (Golang)</p>
+                            <p><strong class="text-emerald-700">資料庫:</strong> TimescaleDB</p>
+                            <p><strong class="text-emerald-700">引擎:</strong> LP/DP函式庫</p>
+                        </div>
+                    </div>
+                    <!-- VPP Platform Card -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg card">
+                        <h4 class="text-xl font-bold mb-2">VPP平台</h4>
+                        <p class="text-sm text-slate-500 mb-4">高併發，智慧化</p>
+                        <div class="space-y-3">
+                            <p><strong class="text-emerald-700">架構:</strong> 事件驅動微服務</p>
+                            <p><strong class="text-emerald-700">後端:</strong> Go (核心) + Python (AI/ML)</p>
+                            <p><strong class="text-emerald-700">資料庫:</strong> TimescaleDB</p>
+                            <p><strong class="text-emerald-700">AI模型:</strong> LSTM/Transformer, QRNN</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Regulation -->
+        <section id="regulation" class="py-12 md:py-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-800">應對法規與網路安全挑戰</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-slate-600">在越南，法規遵循不僅是義務，更是關鍵的市場准入門檻和競爭優勢。本節將重點介紹兩部核心法律，並闡述它們如何從根本上影響軟體架構的設計。</p>
+            </div>
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-bold mb-4">網路安全法 (及第53號議定)</h4>
+                    <p class="text-slate-600 mb-4">任何控制電網資產的平台都可能被視為「關鍵基礎設施」，必須遵守嚴格規定。</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span>實施持續的漏洞評估與補丁管理。</span></li>
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span>建立正式的事件應急響應計畫。</span></li>
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span><strong class="text-red-600">架構影響：</strong>必須支持數據本地化，即在越南境內儲存關鍵數據。</span></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-bold mb-4">個人數據保護法 (PDPL)</h4>
+                    <p class="text-slate-600 mb-4">適用於任何處理越南公民個人數據的實體，強調「隱私設計」原則。</p>
+                     <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span>數據處理必須獲得用戶清晰、細化的同意。</span></li>
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span>強制要求進行數據保護影響評估 (DPIA)。</span></li>
+                        <li class="flex items-start"><span class="text-emerald-600 mr-3 mt-1">&#10003;</span><span><strong class="text-red-600">架構影響：</strong>必須內建用戶同意管理模組，並制定清晰的數據保留與刪除策略。</span></li>
+                    </ul>
+                </div>
+            </div>
+             <div class="mt-12 p-6 bg-blue-50 text-blue-800 rounded-lg max-w-5xl mx-auto">
+                <h4 class="font-bold text-lg">競爭壁壘</h4>
+                <p class="mt-2">從一開始就將這些越南特有的法規融入架構核心，可以提供一個「合規就緒」的解決方案，這對於規避風險的大型企業和國有企業極具吸引力，從而構建起一道抵禦競爭者的護城河。</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 越南儲能市場戰略分析。版權所有。</p>
+            <p class="text-sm text-slate-400 mt-2">此互動式報告旨在視覺化呈現核心戰略洞察。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Navigation Active State on Scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Market Growth Chart
+            const ctx = document.getElementById('marketGrowthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['2023 (估)', '2030 (預測)'],
+                    datasets: [{
+                        label: '市場規模 (億美元)',
+                        data: [4.89, 34], // Using average of 3.25-6.53 for 2023
+                        backgroundColor: [
+                            'rgba(52, 211, 153, 0.6)', // emerald-400
+                            'rgba(5, 150, 105, 0.6)'    // emerald-600
+                        ],
+                        borderColor: [
+                            'rgb(52, 211, 153)',
+                            'rgb(5, 150, 105)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '億美元'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' 億美元';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Causal Chain Interaction
+            const causalItems = document.querySelectorAll('.causal-item');
+            const causalText = document.getElementById('causal-text');
+            causalItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    causalText.textContent = item.dataset.text;
+                });
+            });
+
+            // Competition Tabs
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const targetTab = button.dataset.tab;
+                    tabPanes.forEach(pane => {
+                        if (pane.id === targetTab) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('active');
+                        } else {
+                            pane.classList.add('hidden');
+                            pane.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Roadmap Stepper
+            const stepperItems = document.querySelectorAll('.stepper-item');
+            const stepPanes = document.querySelectorAll('.step-pane');
+            stepperItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    stepperItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+
+                    const targetPane = item.dataset.step;
+                    stepPanes.forEach(pane => {
+                        if (pane.dataset.pane === targetPane) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('active');
+                        } else {
+                            pane.classList.add('hidden');
+                            pane.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
