@@ -3,384 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-key="pageTitle">平陽至潘切3天2夜旅遊攻略</title>
+    <title>越南海濱雙城互動分析儀表板 | 潘切 vs 頭頓</title>
+    <!-- Chosen Palette: Coastal Neutrals -->
+    <!-- Application Structure Plan: A "City vs. City" dashboard layout. The primary interaction is a main toggle to switch between cities, which dynamically updates all modules on the page: a summary card, an accommodation analysis section with a doughnut chart and a filterable table, a food scene comparison, an attractions grid, and a final "Verdict" section with interactive traveler profiles. This structure transforms the linear report into a non-linear decision-making tool, allowing users to compare information thematically and efficiently to find their ideal destination. -->
+    <!-- Visualization & Content Choices: 
+        - Accommodation Mix: Report Info -> Market structure overview -> Goal: Compare market composition -> Viz: Doughnut Chart -> Interaction: Updates on city selection -> Justification: Instantly shows the dominant accommodation type (resorts in Phan Thiet vs. diverse in Vung Tau) -> Library: Chart.js (Canvas).
+        - Hotel Details: Report Info -> Tables 1 & 3 -> Goal: Browse specific hotels -> Viz: HTML Table -> Interaction: Filterable by price/type, content switches with city -> Justification: Makes a large dataset actionable and user-sortable -> Method: Vanilla JS.
+        - Cuisine Availability: Report Info -> International cuisine analysis -> Goal: Clarify dining options -> Viz: Icon-based checklist (HTML/CSS) -> Interaction: Updates with city -> Justification: Provides a quick, clear answer to a key user question (e.g., "Is there Japanese food?") -> Method: HTML/CSS.
+        - Traveler Profiles: Report Info -> Section 5.2 -> Goal: Provide personalized recommendations -> Viz: Interactive buttons -> Interaction: Click a persona to reveal the recommended city and rationale -> Justification: Creates a satisfying, user-centric conclusion -> Method: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Noto Sans TC', 'Noto Sans SC', sans-serif;
-        }
-        .lang-sc {
-            font-family: 'Noto Sans SC', sans-serif;
-        }
-        .lang-tc {
             font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4; /* Warm Neutral: Light Beige */
+            color: #4B4B4B;
         }
-        .active-lang {
-            background-color: #1d4ed8;
+        .header-gradient {
+            background: linear-gradient(120deg, #A8D5E2 0%, #F0EFEB 100%);
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .nav-btn.active {
+            border-bottom-color: #4A90E2; /* Accent Blue */
+            color: #2c5282;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            transform: translateY(-4px);
+        }
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active {
+            background-color: #4A90E2;
             color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .inactive-lang {
-            background-color: #e5e7eb;
-            color: #374151;
+        .persona-btn.active {
+            background-color: #E6F0FA;
+            border-color: #4A90E2;
+            color: #2c5282;
+            transform: scale(1.05);
         }
-        .card-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="antialiased">
 
-    <!-- Header and Language Switcher -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-bold text-blue-800" data-key="headerTitle">平陽至潘切旅遊攻略</h1>
-            <div class="flex items-center space-x-1 border border-gray-300 rounded-full p-1">
-                <button id="lang-tc" class="px-3 py-1 text-sm rounded-full transition-colors duration-300" data-key="langTC">繁體</button>
-                <button id="lang-sc" class="px-3 py-1 text-sm rounded-full transition-colors duration-300" data-key="langSC">简体</button>
-            </div>
+    <header class="header-gradient py-8">
+        <div class="container mx-auto text-center px-4">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800">越南海濱雙城對決</h1>
+            <p class="mt-2 text-lg md:text-xl text-gray-600">潘切 vs 頭頓：哪個才是你的命定海灘？</p>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
+    <nav class="bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+        <div class="container mx-auto flex justify-center items-center py-2 px-4">
+            <button id="nav-phanthiet" class="nav-btn active text-xl md:text-2xl font-bold py-3 px-6 md:px-12 text-gray-700">🏖️ 潘切 (美奈)</button>
+            <div class="text-2xl font-light text-gray-300 mx-2">|</div>
+            <button id="nav-vungtau" class="nav-btn text-xl md:text-2xl font-bold py-3 px-6 md:px-12 text-gray-500">🏙️ 頭頓</button>
+        </div>
+    </nav>
 
-        <!-- Introduction -->
-        <section class="mb-12 text-center">
-            <h2 class="text-3xl font-bold mb-4" data-key="introTitle">陽光、沙丘與海洋之旅</h2>
-            <p class="max-w-3xl mx-auto" data-key="introText">
-                從平陽省出發，踏上一段前往平順省陽光海岸的旅程。這份攻略將引領您體驗美奈的標誌性沙丘、神奇仙女溪、充滿活-力的漁村，以及新鮮的海產美食世界。準備好迎接一場結合冒險與身心修復的完美假期！
-            </p>
-        </section>
-
-        <!-- Attractions -->
-        <section id="attractions" class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4" data-key="attractionsTitle">必遊景點</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <a href="https://www.facebook.com/laylapham0084/posts/%EF%B8%8F%E8%97%A9%E5%88%87%E8%87%AA%E7%94%B1%E8%A1%8C%E5%BF%85%E7%9C%8B2025%E5%B9%B4%E6%9C%80%E6%96%B0%E7%89%88%E8%97%A9%E5%88%87%E7%BE%8E%E9%A3%9F-%E6%99%AF%E9%BB%9E%E6%8E%A8%E8%96%A6%E6%83%B3%E8%A6%8F%E5%8A%83%E8%B6%8A%E5%8D%97%E4%B8%AD%E9%83%A8%E6%B5%B7%E5%B2%B8%E4%B9%8B%E6%97%85%E8%97%A9%E5%88%87phan-thiet%E6%98%AF%E4%BD%A0%E4%B8%8D%E8%83%BD%E9%8C%AF%E9%81%8E%E7%9A%84%E5%AF%B6%E8%97%8F%E7%9B%AE%E7%9A%84%E5%9C%B0%E7%84%A1%E8%AB%96%E6%98%AF%E6%B5%B7%E9%AE%AE%E7%BE%8E%E9%A3%9F%E6%BB%91%E6%B2%99%E6%A8%82%E8%B6%A3%E9%82%84%E6%98%AF%E6%AD%B7%E5%8F%B2%E9%81%BA%E8%B7%A1%E9%80%99%E8%A3%A1%E9%83%BD/621946170838675/" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="attraction1">白沙丘</p>
-                        <p class="text-xs text-gray-500" data-key="attraction1Desc">沙漠日出</p>
-                    </div>
-                </a>
-                <a href="https://www.facebook.com/laylapham0084/posts/%EF%B8%8F%E8%97%A9%E5%88%87%E8%87%AA%E7%94%B1%E8%A1%8C%E5%BF%85%E7%9C%8B2025%E5%B9%B4%E6%9C%80%E6%96%B0%E7%89%88%E8%97%A9%E5%88%87%E7%BE%8E%E9%A3%9F-%E6%99%AF%E9%BB%9E%E6%8E%A8%E8%96%A6%E6%83%B3%E8%A6%8F%E5%8A%83%E8%B6%8A%E5%8D%97%E4%B8%AD%E9%83%A8%E6%B5%B7%E5%B2%B8%E4%B9%8B%E6%97%85%E8%97%A9%E5%88%87phan-thiet%E6%98%AF%E4%BD%A0%E4%B8%8D%E8%83%BD%E9%8C%AF%E9%81%8E%E7%9A%84%E5%AF%B6%E8%97%8F%E7%9B%AE%E7%9A%84%E5%9C%B0%E7%84%A1%E8%AB%96%E6%98%AF%E6%B5%B7%E9%AE%AE%E7%BE%8E%E9%A3%9F%E6%BB%91%E6%B2%99%E6%A8%82%E8%B6%A3%E9%82%84%E6%98%AF%E6%AD%B7%E5%8F%B2%E9%81%BA%E8%B7%A1%E9%80%99%E8%A3%A1%E9%83%BD/621946170838675/" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="attraction2">紅沙丘</p>
-                        <p class="text-xs text-gray-500" data-key="attraction2Desc">壯麗日落</p>
-                    </div>
-                </a>
-                <a href="https://www.facebook.com/laylapham0084/posts/%EF%B8%8F%E8%97%A9%E5%88%87%E8%87%AA%E7%94%B1%E8%A1%8C%E5%BF%85%E7%9C%8B2025%E5%B9%B4%E6%9C%80%E6%96%B0%E7%89%88%E8%97%A9%E5%88%87%E7%BE%8E%E9%A3%9F-%E6%99%AF%E9%BB%9E%E6%8E%A8%E8%96%A6%E6%83%B3%E8%A6%8F%E5%8A%83%E8%B6%8A%E5%8D%97%E4%B8%AD%E9%83%A8%E6%B5%B7%E5%B2%B8%E4%B9%8B%E6%97%85%E8%97%A9%E5%88%87phan-thiet%E6%98%AF%E4%BD%A0%E4%B8%8D%E8%83%BD%E9%8C%AF%E9%81%8E%E7%9A%84%E5%AF%B6%E8%97%8F%E7%9B%AE%E7%9A%84%E5%9C%B0%E7%84%A1%E8%AB%96%E6%98%AF%E6%B5%B7%E9%AE%AE%E7%BE%8E%E9%A3%9F%E6%BB%91%E6%B2%99%E6%A8%82%E8%B6%A3%E9%82%84%E6%98%AF%E6%AD%B7%E5%8F%B2%E9%81%BA%E8%B7%A1%E9%80%99%E8%A3%A1%E9%83%BD/621946170838675/" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="attraction3">仙女溪</p>
-                        <p class="text-xs text-gray-500" data-key="attraction3Desc">水中漫步</p>
-                    </div>
-                </a>
-                <a href="https://www.facebook.com/laylapham0084/posts/%EF%B8%8F%E8%97%A9%E5%88%87%E8%87%AA%E7%94%B1%E8%A1%8C%E5%BF%85%E7%9C%8B2025%E5%B9%B4%E6%9C%80%E6%96%B0%E7%89%88%E8%97%A9%E5%88%87%E7%BE%8E%E9%A3%9F-%E6%99%景%E9%BB%9E%E6%8E%A8%E8%96%A6%E6%83%B3%E8%A6%8F%E5%8A%83%E8%B6%8A%E5%8D%97%E4%B8%AD%E9%83%A8%E6%B5%B7%E5%B2%B8%E4%B9%8B%E6%97%85%E8%97%A9%E5%88%87phan-thiet%E6%98%AF%E4%BD%A0%E4%B8%8D%E8%83%BD%E9%8C%AF%E9%81%8E%E7%9A%84%E5%AF%B6%E8%97%8F%E7%9B%AE%E7%9A%84%E5%9C%B0%E7%84%A1%E8%AB%96%E6%98%AF%E6%B5%B7%E9%AE%AE%E7%BE%8E%E9%A3%9F%E6%BB%91%E6%B2%99%E6%A8%82%E8%B6%A3%E9%82%84%E6%98%AF%E6%AD%B7%E5%8F%B2%E9%81%BA%E8%B7%A1%E9%80%99%E8%A3%A1%E9%83%BD/621946170838675/" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="attraction4">美奈漁村</p>
-                        <p class="text-xs text-gray-500" data-key="attraction4Desc">在地生活</p>
-                    </div>
-                </a>
+    <main class="container mx-auto p-4 md:p-8 space-y-12">
+        
+        <!-- Section 1: At a Glance -->
+        <section id="at-a-glance" class="card p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-center mb-1 text-gray-800">第一印象</h2>
+            <p class="text-center text-gray-500 mb-6">這座城市的氛圍與核心魅力是什麼？</p>
+            <div id="glance-content" class="text-center fade-in">
+                <!-- Content will be dynamically inserted here -->
             </div>
         </section>
 
-        <!-- Local Snacks -->
-        <section id="snacks" class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4" data-key="snacksTitle">特色小吃</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <a href="https://www.vietjetair.com/zh-TW/pages/%E6%97%85%E9%81%8A%E6%89%8B%E5%86%8A-1697697722841/%E5%9C%A8%E6%BD%98%E5%88%87%E5%90%83%E4%BB%80%E9%BA%BC%EF%BC%9F%E8%91%97%E5%90%8D%E7%BE%8E%E9%A3%9F%E5%9C%B0%E9%BB%9E%E6%8E%A8%E8%96%A6-1751351534443" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="snack1">魚生沙拉</p>
-                        <p class="text-xs text-gray-500" data-key="snack1Desc">Gỏi Cá Mai</p>
+        <!-- Section 2: Accommodation Deep Dive -->
+        <section class="card p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-center mb-1 text-gray-800">住宿深度解析</h2>
+            <p class="text-center text-gray-500 mb-6">從奢華度假村到經濟型公寓，找到你的理想住處。</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="order-2 md:order-1">
+                    <h3 class="text-xl font-semibold mb-2 text-center">住宿市場結構</h3>
+                    <p id="accommodation-market-summary" class="text-center text-sm text-gray-600 mb-4 fade-in">
+                        <!-- Summary text will be dynamically inserted here -->
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="accommodationChart"></canvas>
                     </div>
-                </a>
-                <a href="https://www.vietjetair.com/zh-TW/pages/%E6%97%85%E9%81%8A%E6%89%8B%E5%86%8A-1697697722841/%E5%9C%A8%E6%BD%98%E5%88%87%E5%90%83%E4%BB%80%E9%BA%BC%EF%BC%9F%E8%91%97%E5%90%8D%E7%BE%8E%E9%A3%9F%E5%9C%B0%E9%BB%9E%E6%8E%A8%E8%96%A6-1751351534443" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="snack2">魚丸湯粉</p>
-                        <p class="text-xs text-gray-500" data-key="snack2Desc">Bánh Canh Chả Cá</p>
+                </div>
+                <div class="order-1 md:order-2">
+                    <h3 class="text-xl font-semibold mb-4 text-center">重點住宿篩選</h3>
+                    <div class="flex flex-wrap justify-center gap-2 mb-4">
+                        <button class="filter-btn active bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium" data-filter-group="price" data-filter="all">所有價位</button>
+                        <button class="filter-btn bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium" data-filter-group="price" data-filter="豪華">豪華</button>
+                        <button class="filter-btn bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium" data-filter-group="price" data-filter="中階">中階</button>
+                        <button class="filter-btn bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium" data-filter-group="price" data-filter="經濟">經濟</button>
                     </div>
-                </a>
-                <a href="https://www.vietjetair.com/zh-TW/pages/%E6%97%85%E9%81%8A%E6%89%8B%E5%86%8A-1697697722841/%E5%9C%A8%E6%BD%98%E5%88%87%E5%90%83%E4%BB%80%E9%BA%BC%EF%BC%9F%E8%91%97%E5%90%8D%E7%BE%8E%E9%A3%9F%E5%9C%B0%E9%BB%9E%E6%8E%A8%E8%96%A6-1751351534443" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="snack3">炭烤春卷</p>
-                        <p class="text-xs text-gray-500" data-key="snack3Desc">Nem Nướng</p>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">名稱</th>
+                                    <th scope="col" class="px-4 py-3">類型</th>
+                                    <th scope="col" class="px-4 py-3">評級</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accommodation-table-body">
+                                <!-- Table rows will be dynamically inserted here -->
+                            </tbody>
+                        </table>
                     </div>
-                </a>
-                <a href="https://www.vietjetair.com/zh-TW/pages/%E6%97%85%E9%81%8A%E6%89%8B%E5%86%8A-1697697722841/%E5%9C%A8%E6%BD%98%E5%88%87%E5%90%83%E4%BB%80%E9%BA%BC%EF%BC%9F%E8%91%97%E5%90%8D%E7%BE%8E%E9%A3%9F%E5%9C%B0%E9%BB%9E%E6%8E%A8%E8%96%A6-1751351534443" target="_blank" rel="noopener noreferrer" class="block">
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center card-hover h-full flex flex-col justify-center">
-                        <p class="font-semibold" data-key="snack4">潘切魚餅</p>
-                        <p class="text-xs text-gray-500" data-key="snack4Desc">Chả Cá Phan Thiết</p>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Transportation -->
-        <section id="transport" class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4" data-key="transportTitle">交通規劃</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="font-bold text-lg mb-3" data-key="transportToTitle">前往目的地：從平陽到美奈</h3>
-                    <ul class="space-y-2 list-disc list-inside">
-                        <li data-key="transportTo1"><b>豪華轎車/商務車：</b>最推薦！兼具舒適與效率，經由新高速公路約3-4小時。</li>
-                        <li data-key="transportTo2"><b>私人包車：</b>最快最靈活的選擇，約2.5-3小時直達，適合家庭或團體。</li>
-                        <li data-key="transportTo3"><b>臥鋪巴士：</b>經濟實惠的選擇，但耗時較長，約4-6小時。</li>
-                    </ul>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="font-bold text-lg mb-3" data-key="transportLocalTitle">當地交通：探索潘切與美奈</h3>
-                     <ul class="space-y-2 list-disc list-inside">
-                        <li data-key="transportLocal1"><b>摩托車租賃：</b>最具自由度的選擇，每日租金約8-12美元。</li>
-                        <li data-key="transportLocal2"><b>Grab：</b>GrabBike很方便，但GrabCar在美奈較少，主要集中在潘切市。</li>
-                        <li data-key="transportLocal3"><b>計程車：</b>數量充足，安全可靠，適合團體或夜間出行。</li>
-                    </ul>
-                </div>
-            </div>
-             <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-8 rounded-md shadow">
-                <p class="font-bold" data-key="returnTripTitle">重要提醒：第三天返程規劃</p>
-                <p data-key="returnTripText">為確保在第三天晚上22:00前抵達胡志明新山一機場，最晚應在 **17:00** 從美奈出發。強烈建議 **提前預訂私人包車**，這是最可靠的選擇。</p>
-            </div>
-        </section>
-
-        <!-- Accommodation -->
-        <section id="accommodation" class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4" data-key="accommodationTitle">住宿推薦</h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
-                    <h3 class="font-bold text-lg mb-2" data-key="accommodationLuxury">奢華放鬆</h3>
-                    <p class="text-sm" data-key="accommodationLuxuryText">The Anam Mui Ne、Anantara Mui Ne Resort，提供頂級設施與寧靜氛圍。</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
-                    <h3 class="font-bold text-lg mb-2" data-key="accommodationFamily">家庭天堂</h3>
-                    <p class="text-sm" data-key="accommodationFamilyText">Centara Mirage Resort、Pandanus Resort，擁有多樣化的家庭娛樂設施。</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
-                    <h3 class="font-bold text-lg mb-2" data-key="accommodationBoutique">精品魅力</h3>
-                    <p class="text-sm" data-key="accommodationBoutiqueText">Bamboo Village Beach Resort、The Cliff Resort，體驗熱帶花園與懸崖海景。</p>
                 </div>
             </div>
         </section>
 
-        <!-- Itinerary -->
-        <section id="itinerary" class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 border-l-4 border-blue-600 pl-4" data-key="itineraryTitle">3天2夜行程安排</h2>
-            <div class="space-y-8">
-                <!-- Day 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="font-bold text-xl mb-4 text-blue-700" data-key="itineraryDay1">第一天：海岸沉浸 & 紅沙丘日落</h3>
-                    <ul class="space-y-3">
-                        <li data-key="itineraryDay1_1"><b>上午 (08:00-12:00):</b> 從平陽出發，中午抵達美奈。</li>
-                        <li data-key="itineraryDay1_2"><b>下午 (12:00-15:30):</b> 入住度假村，享用午餐並稍作休息。</li>
-                        <li data-key="itineraryDay1_3"><b>傍晚 (15:30-18:30):</b> 遊覽 **仙女溪**，體驗水中漫步的奇妙；接著前往 **紅沙丘** 觀賞壯麗日落。</li>
-                        <li data-key="itineraryDay1_4"><b>晚上 (19:00起):</b> 前往 **Bờ Kè海鮮街**，親自挑選生猛海鮮，享受一頓道地的海鮮燒烤大餐。</li>
-                    </ul>
+        <!-- Section 3: Food Scene Explorer -->
+        <section class="grid md:grid-cols-2 gap-8">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-center mb-4">必嚐在地風味</h2>
+                <div id="food-signature" class="space-y-4 fade-in">
+                    <!-- Signature dishes will be dynamically inserted here -->
                 </div>
-                <!-- Day 2 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="font-bold text-xl mb-4 text-blue-700" data-key="itineraryDay2">第二天：沙漠日出 & 占婆文化</h3>
-                    <ul class="space-y-3">
-                        <li data-key="itineraryDay2_1"><b>清晨 (04:30-09:00):</b> 參加 **日出吉普車之旅**，在 **白沙丘** 迎接第一道曙光，感受沙漠的浩瀚。</li>
-                        <li data-key="itineraryDay2_2"><b>上午 (09:00後):</b> 參觀充滿活力的 **美奈漁村**，感受當地漁民的生活氣息。之後返回飯店享用早餐。</li>
-                        <li data-key="itineraryDay2_3"><b>下午 (12:00-16:00):</b> 午餐後，參觀古老的 **婆薩努占婆塔**，了解占婆王國的歷史。</li>
-                        <li data-key="itineraryDay2_4"><b>晚上 (17:00起):</b> 享受一頓悠閒的告別晚餐，可選擇高檔度假村餐廳或探索其他本地美食。</li>
-                    </ul>
-                </div>
-                <!-- Day 3 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="font-bold text-xl mb-4 text-blue-700" data-key="itineraryDay3">第三天：自由時光 & 美食告別</h3>
-                    <ul class="space-y-3">
-                        <li data-key="itineraryDay3_1"><b>上午 (08:00-12:00):</b> 自由選擇活動：在度假村悠閒放鬆，或前往 **潘切市** 探索萬水秀廟與當地市場。</li>
-                        <li data-key="itineraryDay3_2"><b>午餐 (12:00-13:30):</b> 享用在越南的最後一餐，品嚐任何您錯過的美食。</li>
-                        <li data-key="itineraryDay3_3"><b>下午 (13:30-17:00):</b> 返回度假村收拾行李，辦理退房。</li>
-                        <li data-key="itineraryDay3_4"><b>出發 (17:00):</b> 準時從美奈出發，搭乘預訂好的私人包車前往新山一機場。</li>
-                    </ul>
+            </div>
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-center mb-4">國際美食選擇</h2>
+                <div id="food-international" class="space-y-3 fade-in">
+                    <!-- International food options will be dynamically inserted here -->
                 </div>
             </div>
         </section>
 
+        <!-- Section 4: Top Attractions -->
+        <section class="card p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-center mb-1 text-gray-800">熱門景點一覽</h2>
+            <p class="text-center text-gray-500 mb-6">探索這座城市不容錯過的打卡點。</p>
+            <div id="attractions-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 fade-in">
+                <!-- Attraction cards will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Section 5: The Verdict -->
+        <section class="card p-6 md:p-8 bg-gray-50">
+            <h2 class="text-2xl font-bold text-center mb-1 text-gray-800">最終裁決</h2>
+            <p class="text-center text-gray-500 mb-6">根據你的旅行風格，哪裡才是最佳選擇？</p>
+            <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-6">
+                <button class="persona-btn border-2 border-gray-300 bg-white rounded-lg p-3 md:p-4 text-center transition-all duration-200 w-full sm:w-auto flex-1" data-persona="luxury">
+                    <div class="text-2xl">💎</div>
+                    <div class="font-semibold text-sm mt-1">豪華度假追尋者</div>
+                </button>
+                <button class="persona-btn border-2 border-gray-300 bg-white rounded-lg p-3 md:p-4 text-center transition-all duration-200 w-full sm:w-auto flex-1" data-persona="foodie">
+                    <div class="text-2xl">🍜</div>
+                    <div class="font-semibold text-sm mt-1">道地美食探索家</div>
+                </button>
+                <button class="persona-btn border-2 border-gray-300 bg-white rounded-lg p-3 md:p-4 text-center transition-all duration-200 w-full sm:w-auto flex-1" data-persona="weekend">
+                    <div class="text-2xl">🚗</div>
+                    <div class="font-semibold text-sm mt-1">週末都市人</div>
+                </button>
+                <button class="persona-btn border-2 border-gray-300 bg-white rounded-lg p-3 md:p-4 text-center transition-all duration-200 w-full sm:w-auto flex-1" data-persona="family">
+                    <div class="text-2xl">👨‍👩‍👧‍👦</div>
+                    <div class="font-semibold text-sm mt-1">品味多樣家庭客</div>
+                </button>
+            </div>
+            <div id="verdict-result" class="text-center bg-white p-6 rounded-lg min-h-[100px] flex items-center justify-center transition-opacity duration-300">
+                <p class="text-gray-500">請選擇一種旅行風格以查看建議。</p>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white text-center py-4">
-        <p data-key="footerText">祝您旅途愉快！</p>
+    <footer class="text-center py-8 mt-8 bg-gray-800 text-white">
+        <p class="text-sm">基於深度比較分析報告生成的互動式儀表板</p>
     </footer>
 
-    <script>
-        const translations = {
-            'zh-TC': {
-                pageTitle: "平陽至潘切3天2夜旅遊攻略",
-                headerTitle: "平陽至潘切旅遊攻略",
-                langTC: "繁體",
-                langSC: "简体",
-                introTitle: "陽光、沙丘與海洋之旅",
-                introText: "從平陽省出發，踏上一段前往平順省陽光海岸的旅程。這份攻略將引領您體驗美奈的標誌性沙丘、神奇仙女溪、充滿活力的漁村，以及新鮮的海產美食世界。準備好迎接一場結合冒險與身心修復的完美假期！",
-                attractionsTitle: "必遊景點",
-                attraction1: "白沙丘",
-                attraction1Desc: "沙漠日出",
-                attraction2: "紅沙丘",
-                attraction2Desc: "壯麗日落",
-                attraction3: "仙女溪",
-                attraction3Desc: "水中漫步",
-                attraction4: "美奈漁村",
-                attraction4Desc: "在地生活",
-                snacksTitle: "特色小吃",
-                snack1: "魚生沙拉",
-                snack1Desc: "Gỏi Cá Mai",
-                snack2: "魚丸湯粉",
-                snack2Desc: "Bánh Canh Chả Cá",
-                snack3: "炭烤春卷",
-                snack3Desc: "Nem Nướng",
-                snack4: "潘切魚餅",
-                snack4Desc: "Chả Cá Phan Thiết",
-                transportTitle: "交通規劃",
-                transportToTitle: "前往目的地：從平陽到美奈",
-                transportTo1: "<b>豪華轎車/商務車：</b>最推薦！兼具舒適與效率，經由新高速公路約3-4小時。",
-                transportTo2: "<b>私人包車：</b>最快最靈活的選擇，約2.5-3小時直達，適合家庭或團體。",
-                transportTo3: "<b>臥鋪巴士：</b>經濟實惠的選擇，但耗時較長，約4-6小時。",
-                transportLocalTitle: "當地交通：探索潘切與美奈",
-                transportLocal1: "<b>摩托車租賃：</b>最具自由度的選擇，每日租金約8-12美元。",
-                transportLocal2: "<b>Grab：</b>GrabBike很方便，但GrabCar在美奈較少，主要集中在潘切市。",
-                transportLocal3: "<b>計程車：</b>數量充足，安全可靠，適合團體或夜間出行。",
-                returnTripTitle: "重要提醒：第三天返程規劃",
-                returnTripText: "為確保在第三天晚上22:00前抵達胡志明新山一機場，最晚應在 **17:00** 從美奈出發。強烈建議 **提前預訂私人包車**，這是最可靠的選擇。",
-                accommodationTitle: "住宿推薦",
-                accommodationLuxury: "奢華放鬆",
-                accommodationLuxuryText: "The Anam Mui Ne、Anantara Mui Ne Resort，提供頂級設施與寧靜氛圍。",
-                accommodationFamily: "家庭天堂",
-                accommodationFamilyText: "Centara Mirage Resort、Pandanus Resort，擁有多樣化的家庭娛樂設施。",
-                accommodationBoutique: "精品魅力",
-                accommodationBoutiqueText: "Bamboo Village Beach Resort、The Cliff Resort，體驗熱帶花園與懸崖海景。",
-                itineraryTitle: "3天2夜行程安排",
-                itineraryDay1: "第一天：海岸沉浸 & 紅沙丘日落",
-                itineraryDay1_1: "<b>上午 (08:00-12:00):</b> 從平陽出發，中午抵達美奈。",
-                itineraryDay1_2: "<b>下午 (12:00-15:30):</b> 入住度假村，享用午餐並稍作休息。",
-                itineraryDay1_3: "<b>傍晚 (15:30-18:30):</b> 遊覽 **仙女溪**，體驗水中漫步的奇妙；接著前往 **紅沙丘** 觀賞壯麗日落。",
-                itineraryDay1_4: "<b>晚上 (19:00起):</b> 前往 **Bờ Kè海鮮街**，親自挑選生猛海鮮，享受一頓道地的海鮮燒烤大餐。",
-                itineraryDay2: "第二天：沙漠日出 & 占婆文化",
-                itineraryDay2_1: "<b>清晨 (04:30-09:00):</b> 參加 **日出吉普車之旅**，在 **白沙丘** 迎接第一道曙光，感受沙漠的浩瀚。",
-                itineraryDay2_2: "<b>上午 (09:00後):</b> 參觀充滿活力的 **美奈漁村**，感受當地漁民的生活氣息。之後返回飯店享用早餐。",
-                itineraryDay2_3: "<b>下午 (12:00-16:00):</b> 午餐後，參觀古老的 **婆薩努占婆塔**，了解占婆王國的歷史。",
-                itineraryDay2_4: "<b>晚上 (17:00起):</b> 享受一頓悠閒的告別晚餐，可選擇高檔度假村餐廳或探索其他本地美食。",
-                itineraryDay3: "第三天：自由時光 & 美食告別",
-                itineraryDay3_1: "<b>上午 (08:00-12:00):</b> 自由選擇活動：在度假村悠閒放鬆，或前往 **潘切市** 探索萬水秀廟與當地市場。",
-                itineraryDay3_2: "<b>午餐 (12:00-13:30):</b> 享用在越南的最後一餐，品嚐任何您錯過的美食。",
-                itineraryDay3_3: "<b>下午 (13:30-17:00):</b> 返回度假村收拾行李，辦理退房。",
-                itineraryDay3_4: "<b>出發 (17:00):</b> 準時從美奈出發，搭乘預訂好的私人包車前往新山一機場。",
-                footerText: "祝您旅途愉快！"
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const data = {
+        phanthiet: {
+            glance: {
+                title: '悠閒開闊的度假天堂',
+                description: '以廣闊的度假村、壯觀的沙丘和悠閒避世的氛圍為特色，正朝著高端國際旅遊市場發展。',
+                tags: ['#度假村中心', '#自然奇觀', '#放鬆避世']
             },
-            'zh-CN': {
-                pageTitle: "平阳至潘切3天2夜旅游攻略",
-                headerTitle: "平阳至潘切旅游攻略",
-                langTC: "繁体",
-                langSC: "简体",
-                introTitle: "阳光、沙丘与海洋之旅",
-                introText: "从平阳省出发，踏上一段前往平顺省阳光海岸的旅程。这份攻略将引领您体验美奈的标志性沙丘、神奇仙女溪、充满活力的渔村，以及新鲜的海产美食世界。准备好迎接一场结合冒险与身心修复的完美假期！",
-                attractionsTitle: "必游景点",
-                attraction1: "白沙丘",
-                attraction1Desc: "沙漠日出",
-                attraction2: "红沙丘",
-                attraction2Desc: "壮丽日落",
-                attraction3: "仙女溪",
-                attraction3Desc: "水中漫步",
-                attraction4: "美奈渔村",
-                attraction4Desc: "在地生活",
-                snacksTitle: "特色小吃",
-                snack1: "鱼生沙拉",
-                snack1Desc: "Gỏi Cá Mai",
-                snack2: "鱼丸汤粉",
-                snack2Desc: "Bánh Canh Chả Cá",
-                snack3: "炭烤春卷",
-                snack3Desc: "Nem Nướng",
-                snack4: "潘切鱼饼",
-                snack4Desc: "Chả Cá Phan Thiết",
-                transportTitle: "交通规划",
-                transportToTitle: "前往目的地：从平阳到美奈",
-                transportTo1: "<b>豪华轿车/商务车：</b>最推荐！兼具舒适与效率，经由新高速公路约3-4小时。",
-                transportTo2: "<b>私人包车：</b>最快最灵活的选择，约2.5-3小时直达，适合家庭或团体。",
-                transportTo3: "<b>卧铺巴士：</b>经济实惠的选择，但耗时较长，约4-6小时。",
-                transportLocalTitle: "当地交通：探索潘切与美奈",
-                transportLocal1: "<b>摩托车租赁：</b>最具自由度的选择，每日租金约8-12美元。",
-                transportLocal2: "<b>Grab：</b>GrabBike很方便，但GrabCar在美奈较少，主要集中在潘切市。",
-                transportLocal3: "<b>计程车：</b>数量充足，安全可靠，适合团体或夜间出行。",
-                returnTripTitle: "重要提醒：第三天返程规划",
-                returnTripText: "为确保在第三天晚上22:00前抵达胡志明新山一机场，最晚应在 **17:00** 从美奈出发。强烈建议 **提前预订私人包车**，这是最可靠的选择。",
-                accommodationTitle: "住宿推荐",
-                accommodationLuxury: "奢华放松",
-                accommodationLuxuryText: "The Anam Mui Ne、Anantara Mui Ne Resort，提供顶级设施与宁静氛围。",
-                accommodationFamily: "家庭天堂",
-                accommodationFamilyText: "Centara Mirage Resort、Pandanus Resort，拥有多样化的家庭娱乐设施。",
-                accommodationBoutique: "精品魅力",
-                accommodationBoutiqueText: "Bamboo Village Beach Resort、The Cliff Resort，体验热带花园与悬崖海景。",
-                itineraryTitle: "3天2夜行程安排",
-                itineraryDay1: "第一天：海岸沉浸 & 红沙丘日落",
-                itineraryDay1_1: "<b>上午 (08:00-12:00):</b> 从平阳出发，中午抵达美奈。",
-                itineraryDay1_2: "<b>下午 (12:00-15:30):</b> 入住度假村，享用午餐并稍作休息。",
-                itineraryDay1_3: "<b>傍晚 (15:30-18:30):</b> 游览 **仙女溪**，体验水中漫步的奇妙；接着前往 **红沙丘** 观赏壮丽日落。",
-                itineraryDay1_4: "<b>晚上 (19:00起):</b> 前往 **Bờ Kè海鲜街**，亲自挑选生猛海鲜，享受一顿道地的海鲜烧烤大餐。",
-                itineraryDay2: "第二天：沙漠日出 & 占婆文化",
-                itineraryDay2_1: "<b>清晨 (04:30-09:00):</b> 参加 **日出吉普车之旅**，在 **白沙丘** 迎接第一道曙光，感受沙漠的浩瀚。",
-                itineraryDay2_2: "<b>上午 (09:00后):</b> 参观充满活力的 **美奈渔村**，感受当地渔民的生活气息。之后返回饭店享用早餐。",
-                itineraryDay2_3: "<b>下午 (12:00-16:00):</b> 午餐后，参观古老的 **婆萨努占婆塔**，了解占婆王国的历史。",
-                itineraryDay2_4: "<b>晚上 (17:00起):</b> 享受一顿悠闲的告别晚餐，可选择高档度假村餐厅或探索其他本地美食。",
-                itineraryDay3: "第三天：自由时光 & 美食告别",
-                itineraryDay3_1: "<b>上午 (08:00-12:00):</b> 自由选择活动：在度假村悠闲放松，或前往 **潘切市** 探索万水秀庙与当地市场。",
-                itineraryDay3_2: "<b>午餐 (12:00-13:30):</b> 享用在越南的最后一餐，品尝任何您错过的美食。",
-                itineraryDay3_3: "<b>下午 (13:30-17:00):</b> 返回度假村收拾行李，办理退房。",
-                itineraryDay3_4: "<b>出发 (17:00):</b> 准时从美奈出发，搭乘预订好的私人包车前往新山一机场。",
-                footerText: "祝您旅途愉快！"
+            accommodation: {
+                summary: '市場由「度假村」模式主導，近年有多家大型國際五星品牌進駐，豪華與中高階選項豐富。',
+                mix: { labels: ['度假村', '度假飯店/公寓', '其他'], values: [60, 40, 0] },
+                list: [
+                    { name: 'Mövenpick Resort', type: '度假村', price: '豪華', rating: '8.8/10' },
+                    { name: 'The Cliff Resort', type: '度假村', price: '豪華', rating: '9.0/10' },
+                    { name: 'Centara Mirage Resort', type: '度假村', price: '豪華', rating: '8.7/10' },
+                    { name: 'Sea Lion Beach Resort', type: '度假村', price: '中階', rating: '8.1/10' },
+                    { name: 'Apec Mandala Wyndham', type: '度假飯店/公寓', price: '中階', rating: '8.1/10' },
+                    { name: 'Pandanus Resort', type: '度假村', price: '中階', rating: 'N/A' }
+                ]
+            },
+            food: {
+                signature: [
+                    { name: '新鮮海產 (Boke海鮮街)', desc: '每日新鮮捕獲的龍蝦、扇貝，以奶油燒烤或啤酒清蒸最受歡迎。' },
+                    { name: '魚餅米粉湯 (Bánh Canh Chả Cá)', desc: '魚骨熬製的清甜湯頭，搭配手工魚餅，是在地標誌性湯品。' },
+                    { name: '鴨肉廣麵 (Mì Quảng Vịt)', desc: '越南中部名菜的在地變奏版，使用軟嫩鴨肉和濃郁湯頭，風味獨特。' }
+                ],
+                international: [
+                    { name: '日式料理', available: false },
+                    { name: '韓式料理', available: false },
+                    { name: '泰式料理', available: 'limited' },
+                    { name: '西式料理', available: 'limited' }
+                ]
+            },
+            attractions: [
+                { name: '白沙丘', icon: '🏜️' },
+                { name: '紅沙丘', icon: '🌅' },
+                { name: '仙女溪', icon: '🏞️' },
+                { name: '美奈漁村', icon: '🛶' },
+                { name: '萬水祠', icon: '🏛️' },
+                { name: 'Bikini Beach', icon: '👙' }
+            ],
+            verdicts: {
+                luxury: '潘切是更優越的選擇。這裡集中了全新、高端、設施全面的度假村，能提供更無縫、奢華的避世體驗。',
+                foodie: '如果您想在非都市環境中品嚐獨特的區域性美食（如鴨肉廣麵和占族料理），請選擇潘切。',
+                weekend: '路程較長，更適合安排較長的假期，而非短途週末旅行。',
+                family: '以度假村為主的餐飲可能選擇較少且價格更高，但一站式服務對帶小孩的家庭很方便。'
             }
-        };
+        },
+        vungtau: {
+            glance: {
+                title: '繁華便利的都會海灘',
+                description: '作為胡志明市的週末後花園，景觀更具都市氣息，服務多元分散，充滿活力。',
+                tags: ['#城市海灘', '#交通便利', '#美食多元']
+            },
+            accommodation: {
+                summary: '市場高度多元化，涵蓋國際酒店、服務式公寓和經濟型民宿，公寓選項普及，適合家庭與團體。',
+                mix: { labels: ['酒店/度假村', '公寓/民宿', '經濟型/其他'], values: [40, 40, 20] },
+                list: [
+                    { name: 'The Imperial Hotel', type: '酒店', price: '豪華', rating: '8.8/10' },
+                    { name: 'Pullman Vung Tau', type: '酒店/度假村', price: '豪華', rating: '8.6/10' },
+                    { name: 'The Malibu Hotel', type: '酒店', price: '豪華', rating: '9.0/10' },
+                    { name: 'The Sóng Apartment', type: '公寓/民宿', price: '中階', rating: '9.0+/10' },
+                    { name: 'SV Boutique Resort', type: '度假村', price: '中階', rating: '8.6/10' },
+                    { name: 'Joi Hospitality', type: '酒店', price: '經濟', rating: '8.3/10' },
+                    { name: 'Xoài Xanh Hostel', type: '青年旅館/別墅', price: '經濟', rating: '9.4/10' }
+                ]
+            },
+            food: {
+                signature: [
+                    { name: '越南小煎餅 (Bánh Khọt)', desc: '頭頓最具代表性美食，外酥內軟，蝦味鮮美，是必訪的味覺地標。' },
+                    { name: '小卷米粉湯 (Hủ Tiếu Mực)', desc: '備受推薦的早餐麵食，以新鮮爽脆的小卷和美味湯頭聞名。' },
+                    { name: '海鮮火鍋 (Lẩu Hải Sản)', desc: '在Gành Hào等海景餐廳享用，氛圍與美味兼具，是旅行體驗核心。' }
+                ],
+                international: [
+                    { name: '日式料理', available: true },
+                    { name: '韓式料理', available: false },
+                    { name: '泰式料理', available: false },
+                    { name: '西式料理', available: true }
+                ]
+            },
+            attractions: [
+                { name: '耶穌基督雕像', icon: '🗿' },
+                { name: '頭頓燈塔', icon: '💡' },
+                { name: '後灘', icon: '🏄' },
+                { name: '白宮', icon: '🏰' },
+                { name: 'Ho May Park', icon: '🎡' },
+                { name: '全球武器博物館', icon: '⚔️' }
+            ],
+            verdicts: {
+                luxury: '擁有The Imperial等地標性豪華酒店，提供經典的奢華體驗，但選擇不如潘切集中。',
+                foodie: '如果您希望在繁華的城市餐廳中打卡越南標誌性美食（如越南小煎餅），並有多元國際選擇，請選擇頭頓。',
+                weekend: '頭頓是明確的贏家。鄰近的地理位置、充滿活力的城市生活和多元美食，完美契合短途度假需求。',
+                family: '頭頓提供更大的靈活性。可自炊的公寓選項及更廣泛的餐飲選擇，更容易滿足不同家庭成員的需求。'
+            }
+        }
+    };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const langTCButton = document.getElementById('lang-tc');
-            const langSCButton = document.getElementById('lang-sc');
-            const translatableElements = document.querySelectorAll('[data-key]');
+    let currentCity = 'phanthiet';
+    let accommodationChart;
 
-            const setLanguage = (lang) => {
-                // Set body class for font-family
-                document.body.classList.remove('lang-tc', 'lang-sc');
-                if (lang === 'zh-TC') {
-                    document.body.classList.add('lang-tc');
-                    document.documentElement.lang = 'zh-Hant';
-                } else {
-                    document.body.classList.add('lang-sc');
-                    document.documentElement.lang = 'zh-Hans';
-                }
+    const navPhanThiet = document.getElementById('nav-phanthiet');
+    const navVungTau = document.getElementById('nav-vungtau');
+    const glanceContent = document.getElementById('glance-content');
+    const accommodationMarketSummary = document.getElementById('accommodation-market-summary');
+    const accommodationTableBody = document.getElementById('accommodation-table-body');
+    const foodSignature = document.getElementById('food-signature');
+    const foodInternational = document.getElementById('food-international');
+    const attractionsGrid = document.getElementById('attractions-grid');
+    const verdictResult = document.getElementById('verdict-result');
+    
+    function updateUI(city) {
+        const cityData = data[city];
 
-                translatableElements.forEach(el => {
-                    const key = el.dataset.key;
-                    if (translations[lang] && translations[lang][key]) {
-                        el.innerHTML = translations[lang][key];
+        // 1. At a Glance
+        glanceContent.innerHTML = `
+            <h3 class="text-2xl font-bold text-gray-800">${cityData.glance.title}</h3>
+            <p class="mt-2 max-w-2xl mx-auto text-gray-600">${cityData.glance.description}</p>
+            <div class="mt-4 flex justify-center gap-2 flex-wrap">
+                ${cityData.glance.tags.map(tag => `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${tag}</span>`).join('')}
+            </div>
+        `;
+        glanceContent.classList.add('fade-in');
+        setTimeout(() => glanceContent.classList.remove('fade-in'), 500);
+
+        // 2. Accommodation
+        accommodationMarketSummary.textContent = cityData.accommodation.summary;
+        accommodationMarketSummary.classList.add('fade-in');
+        setTimeout(() => accommodationMarketSummary.classList.remove('fade-in'), 500);
+        updateAccommodationChart(cityData.accommodation.mix);
+        renderAccommodationTable(cityData.accommodation.list);
+
+        // 3. Food Scene
+        foodSignature.innerHTML = cityData.food.signature.map(item => `
+            <div>
+                <h4 class="font-semibold">${item.name}</h4>
+                <p class="text-sm text-gray-600">${item.desc}</p>
+            </div>
+        `).join('');
+        foodSignature.classList.add('fade-in');
+        setTimeout(() => foodSignature.classList.remove('fade-in'), 500);
+
+        foodInternational.innerHTML = cityData.food.international.map(item => `
+            <div class="flex items-center justify-between">
+                <span class="font-medium">${item.name}</span>
+                <span class="text-xl">${item.available === true ? '✅' : (item.available === 'limited' ? '⚠️' : '❌')}</span>
+            </div>
+        `).join('') + '<p class="text-xs text-gray-500 mt-2">✅: 選擇多 ⚠️: 選擇有限 ❌: 資訊缺乏</p>';
+        foodInternational.classList.add('fade-in');
+        setTimeout(() => foodInternational.classList.remove('fade-in'), 500);
+
+        // 4. Attractions
+        attractionsGrid.innerHTML = cityData.attractions.map(item => `
+            <div class="card p-4 text-center">
+                <div class="text-4xl">${item.icon}</div>
+                <p class="mt-2 font-semibold text-sm">${item.name}</p>
+            </div>
+        `).join('');
+        attractionsGrid.classList.add('fade-in');
+        setTimeout(() => attractionsGrid.classList.remove('fade-in'), 500);
+
+        // 5. Verdict
+        resetVerdict();
+    }
+
+    function updateAccommodationChart(mixData) {
+        const chartCtx = document.getElementById('accommodationChart').getContext('2d');
+        if (accommodationChart) {
+            accommodationChart.destroy();
+        }
+        accommodationChart = new Chart(chartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: mixData.labels,
+                datasets: [{
+                    data: mixData.values,
+                    backgroundColor: ['#A8D5E2', '#F9A826', '#E57373'],
+                    borderColor: '#F8F7F4',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
                     }
-                });
-
-                // Update button styles
-                langTCButton.classList.toggle('active-lang', lang === 'zh-TC');
-                langTCButton.classList.toggle('inactive-lang', lang !== 'zh-TC');
-                langSCButton.classList.toggle('active-lang', lang === 'zh-CN');
-                langSCButton.classList.toggle('inactive-lang', lang !== 'zh-CN');
-                
-                // Save preference to localStorage
-                localStorage.setItem('preferredLanguage', lang);
-            };
-
-            langTCButton.addEventListener('click', () => setLanguage('zh-TC'));
-            langSCButton.addEventListener('click', () => setLanguage('zh-CN'));
-
-            // Get preferred language from localStorage or default to browser language
-            let preferredLanguage = localStorage.getItem('preferredLanguage');
-            if (!preferredLanguage) {
-                preferredLanguage = navigator.language.startsWith('zh-CN') ? 'zh-CN' : 'zh-TC';
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
             }
-            
-            setLanguage(preferredLanguage);
         });
-    </script>
+    }
+    
+    function renderAccommodationTable(list, priceFilter = 'all') {
+        const filteredList = list.filter(item => priceFilter === 'all' || item.price === priceFilter);
+        accommodationTableBody.innerHTML = filteredList.map(item => `
+            <tr class="bg-white border-b hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
+                <td class="px-4 py-3">${item.type}</td>
+                <td class="px-4 py-3">${item.rating}</td>
+            </tr>
+        `).join('');
+    }
+
+    function switchCity(city) {
+        currentCity = city;
+        navPhanThiet.classList.toggle('active', city === 'phanthiet');
+        navVungTau.classList.toggle('active', city === 'vungtau');
+        updateUI(city);
+    }
+
+    navPhanThiet.addEventListener('click', () => switchCity('phanthiet'));
+    navVungTau.addEventListener('click', () => switchCity('vungtau'));
+
+    // Filter logic
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const group = button.dataset.filterGroup;
+            const filterValue = button.dataset.filter;
+            
+            document.querySelectorAll(`.filter-btn[data-filter-group="${group}"]`).forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            renderAccommodationTable(data[currentCity].accommodation.list, filterValue);
+        });
+    });
+
+    // Verdict logic
+    const personaButtons = document.querySelectorAll('.persona-btn');
+    function resetVerdict() {
+        verdictResult.innerHTML = `<p class="text-gray-500">請選擇一種旅行風格以查看建議。</p>`;
+        personaButtons.forEach(btn => btn.classList.remove('active'));
+    }
+    personaButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            personaButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            const persona = button.dataset.persona;
+            const verdictText = data[currentCity].verdicts[persona];
+            verdictResult.innerHTML = `<p class="text-gray-800 font-medium fade-in">${verdictText}</p>`;
+        });
+    });
+
+    // Initial Load
+    switchCity('phanthiet');
+});
+</script>
 </body>
 </html>
