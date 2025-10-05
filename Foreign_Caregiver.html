@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外籍家庭看護申請全攻略</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -31px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: #EF5675;
+            border: 4px solid #FFA600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-12">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003F5C] mb-2">外籍家庭看護申請全攻略</h1>
+            <p class="text-lg text-gray-600">為您83歲的父親規劃最佳照護方案</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="eligibility" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-[#7A5195] mb-6 text-center">第一步：資格評估</h2>
+                <div class="text-center mb-8">
+                     <p class="text-xl bg-green-100 text-green-800 font-bold py-3 px-6 rounded-full inline-block">恭喜！您的父親符合申請資格</p>
+                </div>
+                <p class="text-center text-gray-700 max-w-3xl mx-auto mb-8">根據您提供的情況，您的父親因年齡超過80歲，且已持續使用長照服務，滿足了申請外籍家庭看護的條件，很可能無需再進行巴氏量表評估。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                        <div class="text-5xl font-bold text-[#003F5C] mb-2">83歲</div>
+                        <p class="font-semibold text-gray-700">年滿80歲以上</p>
+                        <p class="text-sm text-gray-500">符合高齡申請條件</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-xl border border-purple-200">
+                        <div class="text-5xl font-bold text-[#7A5195] mb-2">✓</div>
+                        <p class="font-semibold text-gray-700">使用長照2.0服務</p>
+                        <p class="text-sm text-gray-500">持續使用服務可免評估</p>
+                    </div>
+                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-200">
+                        <div class="text-5xl font-bold text-[#FFA600] mb-2">✓</div>
+                        <p class="font-semibold text-gray-700">領有身心障礙手冊</p>
+                        <p class="text-sm text-gray-500">符合特定身心障礙項目</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="process" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-[#BC5090] mb-8 text-center">第二步：申請流程</h2>
+                <div class="max-w-2xl mx-auto">
+                    <div class="relative border-l-4 border-gray-200 ml-4 pl-8 space-y-10">
+                        <div class="timeline-item">
+                            <h3 class="text-xl font-bold text-[#003F5C]">準備基本文件</h3>
+                            <p class="text-gray-600">準備申請人及被照顧者（父親）的身份證、戶口名簿影本，以及父親的身心障礙手冊影本。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h3 class="text-xl font-bold text-[#003F5C]">取得聘僱資格</h3>
+                            <p class="text-gray-600">向勞動部勞動力發展署申請「招募許可」。因已使用長照服務，可檢附相關證明，申請免除醫療評估。</p>
+                        </div>
+                         <div class="timeline-item">
+                            <h3 class="text-xl font-bold text-[#003F5C]">選擇聘僱方式</h3>
+                            <p class="text-gray-600">您可以選擇透過「人力仲介公司」代為辦理所有流程，或是透過「直接聘僱聯合服務中心」自行辦理。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h3 class="text-xl font-bold text-[#003F5C]">辦理引進手續</h3>
+                            <p class="text-gray-600">確認看護人選後，辦理簽證、入境、體檢、聘僱許可及居留證等相關手續。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="costs" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-[#EF5675] mb-8 text-center">第三步：費用分析</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-center text-gray-700 mb-4">預估每月固定支出</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlyCostChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-4">此圖表為估算值，實際費用可能因加班天數及保險級距而異。</p>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-700 mb-4">一次性及其他費用</h3>
+                             <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="p-3 font-semibold text-gray-600">項目</th>
+                                            <th class="p-3 font-semibold text-gray-600">預估金額 (新台幣)</th>
+                                            <th class="p-3 font-semibold text-gray-600">說明</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b">
+                                            <td class="p-3">仲介服務費</td>
+                                            <td class="p-3 font-mono">~ $20,000</td>
+                                            <td class="p-3 text-sm">法定上限為看護第一個月薪資</td>
+                                        </tr>
+                                        <tr class="border-b bg-gray-50">
+                                            <td class="p-3">規費</td>
+                                            <td class="p-3 font-mono">~ $2,500</td>
+                                            <td class="p-3 text-sm">包含招募、入國、聘僱許可等</td>
+                                        </tr>
+                                        <tr class="border-b">
+                                            <td class="p-3">健檢費用</td>
+                                            <td class="p-3 font-mono">~ $3,500</td>
+                                            <td class="p-3 text-sm">入境後體檢及定期體檢</td>
+                                        </tr>
+                                        <tr class="bg-gray-50">
+                                            <td class="p-3">機票與交通</td>
+                                            <td class="p-3 font-mono">浮動</td>
+                                            <td class="p-3 text-sm">期滿返鄉機票由雇主負擔</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ltc-integration" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-[#FF764A] mb-8 text-center">長照2.0與外籍看護可以並用嗎？</h2>
+                <p class="text-center text-gray-700 max-w-3xl mx-auto mb-8">是的，即使聘僱了外籍看護，您的家庭仍然可以使用部分的長照2.0服務，讓照護資源更靈活。主要是補助「照顧及專業服務」、「交通接送」與「喘息服務」三大項目。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg">
+                        <h3 class="text-xl font-bold text-green-800 mb-2">✓ 補助項目</h3>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>專業照護服務 (居家護理、復健)</li>
+                            <li>交通接送服務 (陪同就醫)</li>
+                            <li>輔具及居家無障礙環境改善</li>
+                            <li>喘息服務 (需符合特定條件)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+                        <h3 class="text-xl font-bold text-red-800 mb-2">✗ 不補助項目</h3>
+                         <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>居家照顧服務 (身體照顧、家務)</li>
+                            <li>日間照顧中心服務</li>
+                            <li>家庭托顧服務</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-6">請注意，補助額度會依身份（一般戶、中低收入戶）而有所不同，詳情可撥打1966長照專線諮詢。</p>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 pt-8 border-t">
+            <p class="text-gray-600">本資訊為根據現行法規整理之參考資料，最新及詳細資訊請洽詢長照專線1966或勞動部。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('monthlyCostChart').getContext('2d');
+            
+            const processLabel = (label) => {
+                if (label.length <= 16) {
+                    return label;
+                }
+                const words = label.split('');
+                let currentLine = '';
+                const lines = [];
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    if ((currentLine + word).length > 16) {
+                        lines.push(currentLine.trim());
+                        currentLine = '';
+                    }
+                    currentLine += word;
+                }
+                if (currentLine) {
+                    lines.push(currentLine.trim());
+                }
+                return lines;
+            };
+            
+            const chartData = {
+                labels: ['基本薪資', '加班費', '就業安定費', '健保費 (雇主負擔)'],
+                datasets: [{
+                    label: '每月費用分佈',
+                    data: [20000, 2668, 2000, 1285],
+                    backgroundColor: [
+                        '#003F5C',
+                        '#7A5195',
+                        '#EF5675',
+                        '#FFA600'
+                    ],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            };
+
+            const totalAmount = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+
+            const monthlyCostChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans TC', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', minimumFractionDigits: 0 }).format(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        title: {
+                             display: true,
+                             text: `總計約 NT$ ${totalAmount.toLocaleString('zh-TW')}`,
+                             position: 'top',
+                             align: 'center',
+                             padding: {
+                                 top: 10,
+                                 bottom: 10
+                             },
+                             font: {
+                                 size: 20,
+                                 weight: 'bold',
+                                 family: "'Noto Sans TC', sans-serif"
+                             },
+                             color: '#003F5C'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
