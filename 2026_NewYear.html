@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huge Bamboo New Year Card</title>
+    <!-- 已移除 html2canvas -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto+Slab:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #a00000, #4a0000);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Roboto Slab', serif;
+            color: #FFD700;
+            position: relative;
+        }
+
+        /* 紡織紋路背景 (Texture Overlay) */
+        .texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 4px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 8px 8px, 4px 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 竹子背景 (Bamboo Background) */
+        .bamboo-bg {
+            position: absolute;
+            bottom: 0;
+            height: 85%;
+            width: 250px;
+            z-index: 2;
+            opacity: 0.6;
+            pointer-events: none;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+        }
+        .bamboo-left { left: -20px; }
+        .bamboo-right { right: -20px; transform: scaleX(-1); }
+
+        /* 燈籠 (Lanterns) */
+        .lantern-container {
+            position: absolute;
+            top: 0;
+            z-index: 4;
+            transform-origin: top center;
+        }
+        .left-lantern { left: 15%; animation: swing 4s infinite ease-in-out; }
+        .right-lantern { right: 15%; animation: swing 4.5s infinite ease-in-out reverse; }
+        
+        .lantern-string { width: 2px; height: 60px; background: #FFD700; margin: 0 auto; }
+        .lantern-body {
+            width: 80px; height: 70px;
+            background: radial-gradient(circle at 30% 30%, #ff5e5e, #cc0000);
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(255, 69, 0, 0.6);
+            border-top: 6px solid #FFD700;
+            border-bottom: 6px solid #FFD700;
+            position: relative;
+        }
+        .lantern-tassel { width: 4px; height: 50px; background: #FFD700; margin: 0 auto; box-shadow: 0 0 10px #FFD700; }
+
+        @keyframes swing {
+            0% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+            100% { transform: rotate(-3deg); }
+        }
+
+        /* 祥雲 (Clouds) */
+        .cloud-decoration {
+            position: absolute;
+            bottom: -20px;
+            width: 300px;
+            z-index: 2;
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        .cloud-left { left: -50px; }
+        .cloud-right { right: -50px; transform: scaleX(-1); }
+
+        /* 主要內容區塊 */
+        .container {
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 15px;
+            animation: fadeIn 2s ease-in;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            perspective: 1000px; 
+        }
+
+        .greeting {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0;
+            background: linear-gradient(120deg, #FFD700 0%, #FDB931 20%, #fffdc7 40%, #FDB931 60%, #FFD700 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            line-height: 1.2;
+        }
+
+        @keyframes shimmer { to { background-position: 200% center; } }
+
+        /* --- Logo 容器設定 --- */
+        .logo-box {
+            background: #ffffff; /* 白色背景 */
+            padding: 0; 
+            border-radius: 50%;
+            width: 330px;
+            height: 330px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #FFD700, 0 0 50px rgba(255, 215, 0, 0.4);
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+            transition: transform 1s, border-color 0.3s;
+            transform-style: preserve-3d;
+        }
+
+        .logo-box:hover {
+            box-shadow: 0 0 0 4px #ffffff, 0 0 0 10px #FFD700, 0 0 60px rgba(255, 215, 0, 0.6);
+        }
+
+        .logo-box img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            display: block;
+            z-index: 5;
+            transition: 0.3s;
+        }
+
+        /* 旋轉動畫 */
+        .spinning {
+            animation: spin 8s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .year {
+            font-family: 'Playfair Display', serif;
+            font-size: 5.2rem;
+            margin: 0;
+            line-height: 1;
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            background: linear-gradient(to bottom, #FFD700, #FDB931);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slogan {
+            font-family: 'Roboto Slab', serif;
+            font-size: 2.4rem;
+            color: #FFD700;
+            letter-spacing: 2px;
+            font-style: italic;
+            margin-top: 15px;
+            font-weight: 700;
+            opacity: 1;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+        }
+
+        .btn-container {
+            position: fixed;
+            bottom: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #FFD700, #FDB931);
+            color: #8b0000;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Roboto Slab', serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .greeting { font-size: 2.2rem; }
+            .year { font-size: 3.5rem; }
+            .logo-box { width: 260px; height: 260px; margin: 15px 0; }
+            .logo-box img { width: 75%; height: 75%; }
+            .lantern-container { transform: scale(0.7); top: -10px; }
+            .left-lantern { left: 0px; }
+            .right-lantern { right: 0px; }
+            .cloud-decoration { width: 200px; bottom: -10px; }
+            .slogan { font-size: 1.6rem; margin-top: 10px; }
+            .bamboo-bg { width: 150px; opacity: 0.4; }
+            .btn-container { bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="texture"></div>
+
+    <!-- 左邊竹子 -->
+    <div class="bamboo-bg bamboo-left">
+        <svg viewBox="0 0 150 400" preserveAspectRatio="xMinYMax meet">
+            <path d="M40,400 Q45,350 40,300 Q35,250 40,200 Q45,150 40,100" stroke="url(#goldGradient)" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <line x1="33" y1="300" x2="47" y2="300" stroke="url(#goldGradient)" stroke-width="3" />
+            <line x1="33" y1="200" x2="47" y2="200" stroke="url(#goldGradient)" stroke-width="3" />
+            <path d="M40,280 Q70,260 80,290 Q60,290 40,280" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M40,220 Q10,200 0,230 Q20,230 40,220" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M40,150 Q75,130 85,160 Q65,160 40,150" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M90,400 Q95,360 90,320 Q85,280 90,240" stroke="url(#goldGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <line x1="85" y1="320" x2="95" y2="320" stroke="url(#goldGradient)" stroke-width="2" />
+            <path d="M90,300 Q120,280 130,310 Q110,310 90,300" fill="url(#goldGradient)" opacity="0.8"/>
+            <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#B8860B;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#FFD700;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
+
+    <!-- 右邊竹子 -->
+    <div class="bamboo-bg bamboo-right">
+        <svg viewBox="0 0 150 400" preserveAspectRatio="xMinYMax meet">
+            <path d="M40,400 Q45,350 40,300 Q35,250 40,200 Q45,150 40,100" stroke="url(#goldGradient)" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <line x1="33" y1="300" x2="47" y2="300" stroke="url(#goldGradient)" stroke-width="3" />
+            <line x1="33" y1="200" x2="47" y2="200" stroke="url(#goldGradient)" stroke-width="3" />
+            <path d="M40,280 Q70,260 80,290 Q60,290 40,280" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M40,220 Q10,200 0,230 Q20,230 40,220" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M40,150 Q75,130 85,160 Q65,160 40,150" fill="url(#goldGradient)" opacity="0.8"/>
+            <path d="M90,400 Q95,360 90,320 Q85,280 90,240" stroke="url(#goldGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <line x1="85" y1="320" x2="95" y2="320" stroke="url(#goldGradient)" stroke-width="2" />
+            <path d="M90,300 Q120,280 130,310 Q110,310 90,300" fill="url(#goldGradient)" opacity="0.8"/>
+        </svg>
+    </div>
+
+    <div class="lantern-container left-lantern">
+        <div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"></div>
+    </div>
+    <div class="lantern-container right-lantern">
+        <div class="lantern-string"></div><div class="lantern-body"></div><div class="lantern-tassel"></div>
+    </div>
+
+    <div class="cloud-decoration cloud-left">
+        <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10,80 Q30,60 50,80 T90,80 T130,80 T170,80" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.5"/>
+            <path d="M0,100 Q40,50 80,80 T160,80" fill="none" stroke="#FFD700" stroke-width="3"/>
+            <path d="M20,100 Q50,20 100,60 T180,90" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="5"/>
+        </svg>
+    </div>
+    <div class="cloud-decoration cloud-right">
+        <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10,80 Q30,60 50,80 T90,80 T130,80 T170,80" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.5"/>
+            <path d="M0,100 Q40,50 80,80 T160,80" fill="none" stroke="#FFD700" stroke-width="3"/>
+            <path d="M20,100 Q50,20 100,60 T180,90" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="5"/>
+        </svg>
+    </div>
+
+    <canvas id="fireworks"></canvas>
+
+    <div class="container">
+        <h1 class="greeting">Happy New Year</h1>
+        
+        <!-- Logo 區塊 -->
+        <div class="logo-box" id="drop-zone">
+            <img id="logo-img" src="logo.png" alt="Company Logo">
+        </div>
+        
+        <h2 class="year">2026</h2>
+        <div class="slogan">Weaving Success Together</div>
+    </div>
+
+    <!-- 按鈕區 -->
+    <div class="btn-container">
+        <!-- 旋轉按鈕 -->
+        <button class="action-btn" onclick="toggleSpin(event)">
+            <span>🔄</span> SPIN LOGO
+        </button>
+        <!-- 下載按鈕已移除 -->
+    </div>
+
+    <script>
+        // --- 旋轉控制 ---
+        function toggleSpin(event) {
+            if(event) event.stopPropagation();
+            const logoBox = document.querySelector('.logo-box');
+            logoBox.classList.toggle('spinning');
+        }
+
+        // --- 煙火動畫 ---
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 3; 
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.01 + 0.01;
+                this.gravity = 0.05;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity; 
+                this.vx *= 0.95; 
+                this.vy *= 0.95;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4.5, 0, Math.PI * 2); 
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFirework() {
+            const x = Math.random() * width;
+            const y = Math.random() * (height * 0.6); 
+            const colors = ['#FFD700', '#FF4500', '#FFFFFF', '#FFA500', '#FF69B4'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 70; i++) particles.push(new Particle(x, y, color));
+        }
+
+        function loop() {
+            requestAnimationFrame(loop);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.clearRect(0, 0, width, height); 
+            if (Math.random() < 0.04) createFirework();
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) particles.splice(i, 1);
+            }
+        }
+        loop();
+    </script>
+</body>
+</html>
