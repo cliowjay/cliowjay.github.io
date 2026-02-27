@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>歧路旅人2 終極攻略</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+
+  :root {
+    --bg-dark: #0a0e17;
+    --bg-card: #131a2b;
+    --bg-card-hover: #1a2540;
+    --accent-gold: #d4a44a;
+    --accent-gold-light: #f0c96e;
+    --accent-blue: #4a8fd4;
+    --accent-purple: #8b5fd4;
+    --accent-red: #d45a5a;
+    --accent-green: #5ad4a0;
+    --accent-cyan: #5ac8d4;
+    --text-primary: #e8e0d4;
+    --text-secondary: #9a8f80;
+    --border-color: #2a3450;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, #1a2a4a 0%, #0a0e17 70%);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.3), transparent);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold), #c8956e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 40px rgba(212,164,74,0.3);
+  }
+
+  .hero .subtitle {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    margin-bottom: 2rem;
+  }
+
+  /* Nav */
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+    max-width: 800px;
+  }
+
+  .toc a {
+    text-decoration: none;
+    color: var(--accent-gold);
+    border: 1px solid var(--accent-gold);
+    padding: 0.5rem 1.2rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    background: rgba(212,164,74,0.05);
+  }
+
+  .toc a:hover {
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+  }
+
+  /* Sections */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .section-title span {
+    background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+  }
+
+  .divider {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+    margin: 0 auto 3rem;
+  }
+
+  /* Cards */
+  .job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .job-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .job-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-gold);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(212,164,74,0.1);
+  }
+
+  .job-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .job-card.inventor::before { background: linear-gradient(90deg, #5ad4a0, #4a8fd4); }
+  .job-card.armsmaster::before { background: linear-gradient(90deg, #d45a5a, #d4a44a); }
+  .job-card.arcanist::before { background: linear-gradient(90deg, #8b5fd4, #d45ac8); }
+  .job-card.conjurer::before { background: linear-gradient(90deg, #4a8fd4, #5ad4a0); }
+
+  .job-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .job-name.inventor { color: var(--accent-green); }
+  .job-name.armsmaster { color: var(--accent-red); }
+  .job-name.arcanist { color: var(--accent-purple); }
+  .job-name.conjurer { color: var(--accent-cyan); }
+
+  .job-en {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .job-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .tag-weapon { background: rgba(212,164,74,0.15); color: var(--accent-gold); }
+  .tag-location { background: rgba(74,143,212,0.15); color: var(--accent-blue); }
+  .tag-level { background: rgba(212,90,90,0.15); color: var(--accent-red); }
+
+  /* Skill Tables */
+  .skill-table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  thead { background: rgba(212,164,74,0.1); }
+
+  th {
+    text-align: left;
+    padding: 0.8rem 1rem;
+    color: var(--accent-gold);
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(42,52,80,0.5);
+    vertical-align: top;
+  }
+
+  tr:hover { background: rgba(212,164,74,0.03); }
+
+  .highlight { color: var(--accent-gold-light); font-weight: 500; }
+
+  /* Unlock Steps */
+  .unlock-steps {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+  }
+
+  .unlock-steps h3 {
+    color: var(--accent-gold);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .step-text { color: var(--text-secondary); font-size: 0.9rem; }
+  .step-text strong { color: var(--text-primary); }
+
+  /* Weapon Cards */
+  .weapon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .weapon-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .weapon-card:hover {
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+  }
+
+  .weapon-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold-light);
+    margin-bottom: 0.3rem;
+  }
+
+  .weapon-type {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
+  }
+
+  .weapon-location {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Monster Cards */
+  .monster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .monster-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+  }
+
+  .monster-card:hover {
+    border-color: var(--accent-purple);
+    background: var(--bg-card-hover);
+  }
+
+  .monster-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    margin-bottom: 0.5rem;
+  }
+
+  .monster-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  /* Strategy */
+  .strat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .strat-card:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-card-hover);
+  }
+
+  .strat-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+  }
+
+  .strat-pair {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(74,143,212,0.1);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    margin: 0.3rem;
+    color: var(--accent-cyan);
+  }
+
+  .strat-pair .plus { color: var(--accent-gold); font-weight: 700; }
+
+  .tip-box {
+    background: rgba(212,164,74,0.08);
+    border-left: 3px solid var(--accent-gold);
+    padding: 1rem 1.5rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .tip-box strong { color: var(--accent-gold); }
+
+  /* Back to top */
+  .back-top {
+    display: block;
+    text-align: center;
+    padding: 2rem;
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+  }
+
+  .back-top:hover { color: var(--accent-gold-light); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .section { padding: 2.5rem 1rem; }
+    .job-grid, .weapon-grid, .monster-grid { grid-template-columns: 1fr; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 0.5rem 0.6rem; }
+  }
+
+  /* Support skill list */
+  .support-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 0.8rem;
+  }
+
+  .support-list li {
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(42,52,80,0.3);
+  }
+
+  .support-list li:last-child { border-bottom: none; }
+
+  .support-list li strong { color: var(--accent-gold-light); }
+
+  .section-anchor { scroll-margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<div class="hero" id="top">
+  <div class="hero-content">
+    <h1>歧路旅人 II</h1>
+    <p class="subtitle">OCTOPATH TRAVELER II &mdash; 終極攻略指南</p>
+    <nav class="toc">
+      <a href="#hidden-jobs">隱藏職業</a>
+      <a href="#job-skills">職業技能</a>
+      <a href="#unlock">解鎖條件</a>
+      <a href="#weapons">歷戰武器</a>
+      <a href="#monsters">最強魔物</a>
+      <a href="#strategy">職業搭配</a>
+      <a href="#battle">戰鬥實戰</a>
+      <a href="#hidden-boss">隱藏BOSS</a>
+    </nav>
+  </div>
+</div>
+
+<!-- ===================== HIDDEN JOBS ===================== -->
+<div class="section" id="hidden-jobs">
+  <h2 class="section-title section-anchor"><span>四大隱藏職業</span></h2>
+  <p class="section-subtitle">上級職業每張傳承之證同時僅限一人裝備</p>
+  <div class="divider"></div>
+
+  <div class="job-grid">
+    <!-- Inventor -->
+    <div class="job-card inventor">
+      <div class="job-name inventor">發明家</div>
+      <div class="job-en">Inventor</div>
+      <div>
+        <span class="tag tag-weapon">劍 / 斧</span>
+        <span class="tag tag-location">東新德斯塔街道</span>
+        <span class="tag tag-level">Lv.5 即可到達</span>
+      </div>
+      <p class="job-desc">
+        四個隱藏職業中最容易取得。技能不消耗 SP，但使用後需花費回合「修復」才能再次使用。技能無法透過 JP 學習，需收集指定道具交給發明家安卡完成發明才能開啟。
+      </p>
+    </div>
+
+    <!-- Armsmaster -->
+    <div class="job-card armsmaster">
+      <div class="job-name armsmaster">武器大師</div>
+      <div class="job-en">Armsmaster</div>
+      <div>
+        <span class="tag tag-weapon">全武器</span>
+        <span class="tag tag-location">古拉貝爾</span>
+        <span class="tag tag-level">Lv.45 街道</span>
+      </div>
+      <p class="job-desc">
+        可同時裝備六種武器（劍、槍、匕首、斧、弓、杖）。技能需透過收集「生鏽武器」並交給鍛造師打磨為神器後自動習得。集齊所有神器可額外獲得「堅王之盾」。
+      </p>
+    </div>
+
+    <!-- Arcanist -->
+    <div class="job-card arcanist">
+      <div class="job-name arcanist">魔導士</div>
+      <div class="job-en">Arcanist</div>
+      <div>
+        <span class="tag tag-weapon">杖</span>
+        <span class="tag tag-location">魔途之島</span>
+        <span class="tag tag-level">需要船隻</span>
+      </div>
+      <p class="job-desc">
+        以「印記」系技能為核心的強力輔助/攻擊職業。擁有擴散印記（將自身 Buff 擴散給全隊）、反轉印記（將 Debuff 反轉為 Buff）、不死印記、反射屏障等獨特機制。被動技能「魔力的代價」可提升魔法威力 50%。
+      </p>
+    </div>
+
+    <!-- Conjurer -->
+    <div class="job-card conjurer">
+      <div class="job-name conjurer">祈禱師</div>
+      <div class="job-en">Conjurer</div>
+      <div>
+        <span class="tag tag-weapon">弓 / 杖</span>
+        <span class="tag tag-location">庫國・五重塔</span>
+        <span class="tag tag-level">需劍士第五章</span>
+      </div>
+      <p class="job-desc">
+        類似前作魔劍士的定位，能為全隊武器附加火、冰、雷、風四種屬性追擊傷害。搭配物理輸出角色可大幅增加破盾效率與傷害輸出，是後期陣容的核心輔助之一。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== JOB SKILLS ===================== -->
+<div class="section" id="job-skills">
+  <h2 class="section-title section-anchor"><span>隱藏職業技能一覽</span></h2>
+  <p class="section-subtitle">包含職業技能、奧義與輔助技能</p>
+  <div class="divider"></div>
+
+  <!-- Inventor Skills -->
+  <h3 style="color:var(--accent-green); margin-bottom:1rem; font-size:1.3rem;">發明家 Inventor</h3>
+  <div class="tip-box"><strong>特殊機制：</strong>所有技能不消耗 SP，但使用後需花費回合修復（大多數需 3 回合，變形投射器僅需 1 回合）。技能透過交付道具解鎖。</div>
+  <div class="skill-table-wrap">
+    <table>
+      <thead><tr><th>技能名稱</th><th>效果</th><th>所需道具</th><th>道具來源</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">變形投射器</td><td>選擇一種武器類型，對敵方全體造成該武器屬性攻擊</td><td>尖銳的石頭、骨頭</td><td>初期素材，對話/拾取獲得</td></tr>
+        <tr><td class="highlight">彈簧靴</td><td>使單體我方角色在接下來 5 回合搶先行動</td><td>天然磁石、齒輪</td><td>探索各城鎮商店與寶箱</td></tr>
+        <tr><td class="highlight">暴擊瞄準器</td><td>3 回合內使單體我方角色必定暴擊</td><td>狙擊耳環、會心耳環</td><td>新德斯塔武器店、卡納布萊茵武器店</td></tr>
+        <tr><td class="highlight">屬性炸裂瓶</td><td>對敵方全體造成火冰雷風四屬性傷害</td><td>精靈石、七彩玻璃瓶</td><td>新德斯塔平原黑市、柯林奎克海岸</td></tr>
+        <tr><td class="highlight">馬口鐵號角</td><td>使我方全體 BP +1</td><td>馬口鐵玩具</td><td>威古羅布百貨商店（夜間 NPC）</td></tr>
+        <tr><td class="highlight">電擊護盾</td><td>使單體我方角色受物理攻擊時反擊雷屬性傷害</td><td>雷擊的魔石、天然磁石</td><td>各地寶箱與商人</td></tr>
+        <tr><td class="highlight">阿卡爾的線圈</td><td>恢復單體我方 40% HP/SP 並賦予 1 BP，可復活倒下角色</td><td>古代的石版、水晶</td><td>中後期迷宮寶箱</td></tr>
+        <tr><td class="highlight">元素炸彈瓶</td><td>對敵方全體造成無屬性大傷害</td><td>失落的族徽</td><td>中後期支線任務獎勵</td></tr>
+        <tr><td class="highlight">治療望遠鏡</td><td>恢復我方全體 HP 並解除異常狀態</td><td>望遠鏡、療傷結晶</td><td>各地寶箱與 NPC</td></tr>
+        <tr><td class="highlight">閃光魔導器</td><td>使全體敵人行動延後</td><td>閃光的石頭、魔導器殘片</td><td>中後期探索獲得</td></tr>
+        <tr><td class="highlight">全力驅動（奧義）</td><td>對敵方全體造成強力無屬性傷害，傷害極高</td><td>收集齊所有發明道具後解鎖</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-secondary);">輔助技能：<strong style="color:var(--accent-gold-light);">搶先行動</strong>（戰鬥開始時優先行動）、<strong style="color:var(--accent-gold-light);">強化配件</strong>（提升飾品屬性效果）、<strong style="color:var(--accent-gold-light);">發明復原加速</strong>（修復回合數 -1）、<strong style="color:var(--accent-gold-light);">消耗品增效</strong>（使用道具效果提升）</p>
+
+  <br><br>
+
+  <!-- Armsmaster Skills -->
+  <h3 style="color:var(--accent-red); margin-bottom:1rem; font-size:1.3rem;">武器大師 Armsmaster</h3>
+  <div class="tip-box"><strong>特殊機制：</strong>每個技能與一把神器綁定，裝備對應神器後自動習得。SP 消耗較高，建議搭配 SP 回復手段。</div>
+  <div class="skill-table-wrap">
+    <table>
+      <thead><tr><th>技能名稱</th><th>武器</th><th>SP</th><th>效果</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">破天一擊</td><td>霸王劍</td><td>35</td><td>蓄力至回合結束，對單體敵人造成強力劍擊</td></tr>
+        <tr><td class="highlight">暴風旋槍</td><td>戰王之槍</td><td>28</td><td>對敵方全體造成槍攻擊，敵人數量越多威力越大</td></tr>
+        <tr><td class="highlight">千刃亂舞</td><td>舞王短劍</td><td>22</td><td>對敵方全體造成匕首隨機 3~5 次攻擊</td></tr>
+        <tr><td class="highlight">裂地猛擊</td><td>勇王之斧</td><td>30</td><td>對敵方全體造成強力斧屬性攻擊，附帶物防降低</td></tr>
+        <tr><td class="highlight">貫穿射擊</td><td>狩王之弓</td><td>25</td><td>對單體敵人造成弓屬性 2 次攻擊，無視部分防禦</td></tr>
+        <tr><td class="highlight">天雷召喚</td><td>靈王之杖</td><td>32</td><td>對敵方全體造成雷屬性魔法攻擊</td></tr>
+        <tr><td class="highlight">六連擊（奧義）</td><td>全武器</td><td>50</td><td>以六種武器對敵方隨機目標造成 6 次強力攻擊</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-secondary);">輔助技能：<strong style="color:var(--accent-gold-light);">攻擊大師</strong>（對破盾敵人更易暴擊）、<strong style="color:var(--accent-gold-light);">全力以赴</strong>（HP 全滿時傷害提升）、<strong style="color:var(--accent-gold-light);">破盾回血</strong>（擊破護盾時回復 HP）、<strong style="color:var(--accent-gold-light);">武技磨練</strong>（命中弱點時潛力槽加速累積）</p>
+
+  <br><br>
+
+  <!-- Arcanist Skills -->
+  <h3 style="color:var(--accent-purple); margin-bottom:1rem; font-size:1.3rem;">魔導士 Arcanist</h3>
+  <div class="tip-box"><strong>特殊機制：</strong>「印記」系技能可改變隊伍的 Buff/Debuff 機制，「擴散印記」是核心技能，能將自身限定的 Buff 擴展至全隊。</div>
+  <div class="skill-table-wrap">
+    <table>
+      <thead><tr><th>技能名稱</th><th>SP</th><th>效果</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">暗夜閃光</td><td>30</td><td>對敵方全體造成光屬性攻擊，附帶吸收 HP 效果</td></tr>
+        <tr><td class="highlight">深淵之影</td><td>30</td><td>對敵方全體造成暗屬性攻擊，附帶吸收 HP 效果</td></tr>
+        <tr><td class="highlight">擴散印記</td><td>25</td><td>將對自身施加的 Buff 效果擴散給全體我方（核心技能）</td></tr>
+        <tr><td class="highlight">反轉印記</td><td>15</td><td>將自身的能力降低（Debuff）反轉為能力提升（Buff）</td></tr>
+        <tr><td class="highlight">不死印記</td><td>20</td><td>賦予目標不死狀態（HP 歸零時以 1 HP 存活一次）</td></tr>
+        <tr><td class="highlight">反射屏障</td><td>20</td><td>2 回合內反彈敵方的魔法攻擊</td></tr>
+        <tr><td class="highlight">無限印記</td><td>30</td><td>固定以「回合數」計算的 Buff 狀態，使其不會隨回合減少</td></tr>
+        <tr><td class="highlight">阿比斯之門（奧義）</td><td>60</td><td>對敵方全體造成極大光暗屬性傷害</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-secondary);">輔助技能：<strong style="color:var(--accent-gold-light);">賦予效果記憶</strong>（死亡復活後保留身上的 Buff/Debuff）、<strong style="color:var(--accent-gold-light);">魔力的代價</strong>（魔法威力 +50%，SP 消耗增加）、<strong style="color:var(--accent-gold-light);">印記強化</strong>（延長印記持續回合數）、<strong style="color:var(--accent-gold-light);">屬性複製</strong>（複製敵方的屬性強化效果）</p>
+
+  <br><br>
+
+  <!-- Conjurer Skills -->
+  <h3 style="color:var(--accent-cyan); margin-bottom:1rem; font-size:1.3rem;">祈禱師 Conjurer</h3>
+  <div class="tip-box"><strong>特殊機制：</strong>為全隊武器附加屬性追擊傷害，每次物理攻擊都會追加對應屬性的額外傷害，大幅提升破盾效率。</div>
+  <div class="skill-table-wrap">
+    <table>
+      <thead><tr><th>技能名稱</th><th>SP</th><th>效果</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">召喚火焰</td><td>20</td><td>2+ 回合內使全隊武器附加火屬性追擊</td></tr>
+        <tr><td class="highlight">召喚冰雪</td><td>20</td><td>2+ 回合內使全隊武器附加冰屬性追擊</td></tr>
+        <tr><td class="highlight">召喚暴風</td><td>20</td><td>2+ 回合內使全隊武器附加風屬性追擊</td></tr>
+        <tr><td class="highlight">召喚雷電</td><td>20</td><td>2+ 回合內使全隊武器附加雷屬性追擊</td></tr>
+        <tr><td class="highlight">祈雨之禱</td><td>20</td><td>2+ 回合內全隊行動後自動回復 SP</td></tr>
+        <tr><td class="highlight">免疫之舞</td><td>15</td><td>2+ 回合內使單體我方免疫所有異常狀態</td></tr>
+        <tr><td class="highlight">日輪之儀（復活奧義）</td><td>1</td><td>全體復活並完全回復 HP，提升物防/屬防 2 回合。使用後自身 6 回合無法行動</td></tr>
+        <tr><td class="highlight">BP 賜予（奧義）</td><td>30</td><td>使單體我方在 3 回合內每回合開始時獲得 2 BP</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-secondary);">輔助技能：<strong style="color:var(--accent-gold-light);">淨化</strong>（Debuff 持續時間減半）、<strong style="color:var(--accent-gold-light);">SP 節約</strong>（SP 消耗減半）、<strong style="color:var(--accent-gold-light);">BP 再生</strong>（每回合 25% 機率恢復已消耗的 BP）、<strong style="color:var(--accent-gold-light);">神之祝福</strong>（HP 低於一定比例時自動恢復）</p>
+</div>
+
+<!-- ===================== UNLOCK CONDITIONS ===================== -->
+<div class="section" id="unlock">
+  <h2 class="section-title section-anchor"><span>解鎖條件與關鍵道具</span></h2>
+  <p class="section-subtitle">四大隱藏職業的詳細取得流程</p>
+  <div class="divider"></div>
+
+  <div class="unlock-steps">
+    <h3 style="color:var(--accent-green);">發明家 &mdash; 最簡單，初期即可取得</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-text">完成盜賊索洛涅第一章劇情後，從其初始城鎮<strong>往東方前進</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">到達<strong>布萊蘭多地區・東新德斯塔街道</strong>（危險度 Lv.5）</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">找到發明家小屋，與屋內的<strong>發明家安卡</strong>對話即可取得傳承之證</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">之後收集各種道具交回此處，逐步解鎖 11 種發明技能</div></div>
+  </div>
+
+  <div class="unlock-steps">
+    <h3 style="color:var(--accent-red);">武器大師 &mdash; 需完成支線任務鏈</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-text">前往<strong>溫特蘭多地區・溫特布魯</strong>，找到「想拔劍的女性」開啟支線任務</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">前往<strong>外爾蘭多地區・瓦茲樂修</strong>武器店，找到退休的礦工</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">使用盜賊的「偷取」從退休礦工處獲得<strong>堅固的十字鎬</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">將十字鎬帶回溫特布魯交給想拔劍的女性，獲得<strong>生鏽的劍</strong></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">前往<strong>外爾蘭多地區・古拉貝爾</strong>（街道危險度 Lv.45），將生鏽的劍交給退休鍛造師<strong>波爾特</strong></div></div>
+    <div class="step"><div class="step-num">6</div><div class="step-text">對話後即可獲得傳承之證「武器大師」，後續收集生鏽武器交給波爾特打磨以解鎖技能</div></div>
+  </div>
+
+  <div class="unlock-steps">
+    <h3 style="color:var(--accent-purple);">魔導士 &mdash; 需要船隻，途中有 BOSS 戰</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-text">取得<strong>航海船</strong>（完成商人帕爾提歐第二章即可獲得）</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">航行至<strong>東大陸下方海域中心</strong>的大漩渦處，擊敗 BOSS <strong>海坊主</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">登上<strong>魔途之島</strong>，注意不要直接進入迷宮正門</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">從寫著「追求正道」木板的<strong>左側</strong>走，踏上隱藏道路到達高台</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">與高台上的<strong>魔導士的後裔</strong>對話，即可獲得傳承之證</div></div>
+  </div>
+
+  <div class="unlock-steps">
+    <h3 style="color:var(--accent-cyan);">祈禱師 &mdash; 需推進劍士主線至第五章</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-text">將<strong>劍士・光</strong>（光）的主線劇情推進至<strong>第五章</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">前往<strong>丙午地區・庫國</strong>的五重塔</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">逐層擊敗五層塔中的<strong>5 名守衛</strong>（每層一名，實力不弱）</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">登頂後與<strong>塔上的祈禱師</strong>對話，即可獲得傳承之證</div></div>
+  </div>
+</div>
+
+<!-- ===================== WEAPONS ===================== -->
+<div class="section" id="weapons">
+  <h2 class="section-title section-anchor"><span>歷戰武器 &amp; 生鏽神器</span></h2>
+  <p class="section-subtitle">全武器取得方式與位置一覽</p>
+  <div class="divider"></div>
+
+  <h3 style="color:var(--accent-gold); margin-bottom:0.5rem; font-size:1.2rem;">歷戰武器（各職業最強武器）</h3>
+  <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">歷戰武器可透過「戰鬥奪取」（約 2% 掉落率）、「商人購買」（95,000G）或「盜賊偷取」等方式取得。</p>
+
+  <div class="weapon-grid">
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之劍</div>
+      <div class="weapon-type">劍 &mdash; 劍士專用</div>
+      <div class="weapon-location">克拉克雷吉港口懸崖上的 NPC，或透過商人以 95,000G 購買。與劍士主線相關。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之槍</div>
+      <div class="weapon-type">槍 &mdash; 獵人/戰士專用</div>
+      <div class="weapon-location">庫國城內王座附近的臣子 NPC 持有。可透過商人購買或盜賊偷取獲得。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之匕首</div>
+      <div class="weapon-type">匕首 &mdash; 盜賊/舞孃專用</div>
+      <div class="weapon-location">新德斯塔城鎮右側保鏢 NPC 持有。與舞孃主線相關。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之斧</div>
+      <div class="weapon-type">斧 &mdash; 藥師專用</div>
+      <div class="weapon-location">妥妥哈哈島無名之鄉的守護人西魯魯特持有。與神官主線相關。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之弓</div>
+      <div class="weapon-type">弓 &mdash; 獵人專用</div>
+      <div class="weapon-location">托托哈哈島獸人村的村長甲馳持有。與獵人主線相關。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">歷戰之杖</div>
+      <div class="weapon-type">杖 &mdash; 學者/神官專用</div>
+      <div class="weapon-location">透過商人購買（95,000G）或在後期城鎮的學者 NPC 處取得。</div>
+    </div>
+  </div>
+
+  <br>
+  <h3 style="color:var(--accent-red); margin-bottom:0.5rem; font-size:1.2rem;">生鏽武器 → 神器（武器大師專用）</h3>
+  <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">生鏽武器需交給古拉貝爾的鍛造師波爾特打磨，才會變為神器並解鎖對應的武器大師技能。</p>
+
+  <div class="weapon-grid">
+    <div class="weapon-card">
+      <div class="weapon-name">霸王劍</div>
+      <div class="weapon-type">生鏽的劍 → 神器</div>
+      <div class="weapon-location">溫特蘭多・溫特布魯，完成「石中劍」支線任務後取得。（即解鎖武器大師的初始任務劍）</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">戰王之槍</div>
+      <div class="weapon-type">生鏽的槍 → 神器</div>
+      <div class="weapon-location">利夫蘭多・汀巴雷因城前廣場，放倒門口的老兵後，盡頭紅色寶箱中取得。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">舞王短劍</div>
+      <div class="weapon-type">生鏽的匕首 → 神器</div>
+      <div class="weapon-location">被分割的大海・女帝的船骸，場景最深處的紅色寶箱中取得。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">勇王之斧</div>
+      <div class="weapon-type">生鏽的斧 → 神器</div>
+      <div class="weapon-location">丙午地區・西塞伊沙路流沙監牢，擊敗深處沙蟲 BOSS 後紅色寶箱取得。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">狩王之弓</div>
+      <div class="weapon-type">生鏽的弓 → 神器</div>
+      <div class="weapon-location">托托哈哈島・隕落的遺跡，擊敗深處 BOSS 貝希摩斯後紅色寶箱取得。</div>
+    </div>
+    <div class="weapon-card">
+      <div class="weapon-name">靈王之杖</div>
+      <div class="weapon-type">生鏽的杖 → 神器</div>
+      <div class="weapon-location">克里斯特蘭多・國境大瀑布水靈之座，場景中心的紅色寶箱取得。</div>
+    </div>
+  </div>
+
+  <div class="tip-box" style="margin-top:1.5rem;">
+    <strong>收集獎勵：</strong>將全部 6 把生鏽武器打磨為神器後，鍛造師波爾特會額外贈送<strong>堅王之盾</strong>，是遊戲中最強盾牌之一。
+  </div>
+</div>
+
+<!-- ===================== MONSTERS ===================== -->
+<div class="section" id="monsters">
+  <h2 class="section-title section-anchor"><span>後期最強魔物</span></h2>
+  <p class="section-subtitle">獵人可捕獲的十星魔物與隱藏 BOSS 介紹</p>
+  <div class="divider"></div>
+
+  <h3 style="color:var(--accent-purple); margin-bottom:0.5rem; font-size:1.2rem;">十星捕獲魔物（獵人歐修忒專用）</h3>
+  <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">強度十星的魔物每場戰鬥僅能施放一次，需消耗 3 BP 才能召喚。以下為推薦的最強魔物：</p>
+
+  <div class="monster-grid">
+    <div class="monster-card">
+      <div class="monster-name">巨鯊</div>
+      <div class="monster-info">
+        <strong>效果：</strong>對敵方全體造成攻擊，同時恢復我方全體大量 HP/SP 並回復 1 BP。被玩家稱為「行動補給站」，是最實用的十星魔物之一。<br>
+        <strong>位置：</strong>海域隨機遭遇（需船隻探索深海區域）
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">恐狼</div>
+      <div class="monster-info">
+        <strong>效果：</strong>以短劍對敵方全體造成 4 次傷害，並降低敵方全體物防/行動速度 8 回合。攻防一體的強力魔物。<br>
+        <strong>位置：</strong>奈落之城（危險程度 Lv.55）的 BOSS
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">大蜥蜴</div>
+      <div class="monster-info">
+        <strong>效果：</strong>對敵方全體造成強力屬性攻擊，傷害極高。<br>
+        <strong>位置：</strong>海上無名孤島（世界地圖正中心偏下方位置）
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">魔犬</div>
+      <div class="monster-info">
+        <strong>效果：</strong>對敵方全體造成物理攻擊並降低多項屬性。<br>
+        <strong>位置：</strong>史東海爾外的巨壁地洞深處
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">神鳥</div>
+      <div class="monster-info">
+        <strong>效果：</strong>對敵方全體攻擊並賦予我方全體增益效果。<br>
+        <strong>位置：</strong>克羅班克的鐘塔頂端
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <h3 style="color:var(--accent-red); margin-bottom:0.5rem; font-size:1.2rem;">隱藏 BOSS</h3>
+
+  <div class="monster-grid">
+    <div class="monster-card">
+      <div class="monster-name">海坊主</div>
+      <div class="monster-info">
+        <strong>弱點：</strong>初始弱雷/風屬性，破盾後轉為弱火/光屬性。擁有強力全體水屬性攻擊與回復能力。<br>
+        <strong>位置：</strong>被分割的大海中心漩渦（前往魔途之島途中的必戰 BOSS）<br>
+        <strong>建議等級：</strong>Lv.40+
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">魔神加爾戴拉</div>
+      <div class="monster-info">
+        <strong>弱點：</strong>多階段戰鬥，每階段弱點不同。最終形態擁有「黑咒」系列超強攻擊。<br>
+        <strong>位置：</strong>完成全部八位主角故事後開啟的最終隱藏迷宮<br>
+        <strong>建議等級：</strong>Lv.60+ ，遊戲最終挑戰
+      </div>
+    </div>
+    <div class="monster-card">
+      <div class="monster-name">異界之門 BOSS 群</div>
+      <div class="monster-info">
+        <strong>特點：</strong>分為多個挑戰，每個門後有不同的強力 BOSS，擁有獨特的攻擊模式與弱點機制。<br>
+        <strong>位置：</strong>後期各地異界之門入口<br>
+        <strong>建議等級：</strong>Lv.55+ ，高難度挑戰
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STRATEGY ===================== -->
+<div class="section" id="strategy">
+  <h2 class="section-title section-anchor"><span>職業搭配推薦</span></h2>
+  <p class="section-subtitle">玩家社群公認的強力組合與搭配思路</p>
+  <div class="divider"></div>
+
+  <div class="strat-card">
+    <div class="strat-title">核心搭配原則</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;">
+      副職業不會繼承主職業的 EX 技能與潛力技能。四個隱藏職業各只有一張傳承之證，搭配時需優先分配。每個隊伍建議配置：一個舞孃（全體化）、一個奶媽（藥師或神官）、一個免傷/減傷角色、一個 BP 回復角色。
+    </p>
+    <div class="tip-box">
+      <strong>常見陣型：「3 保 1」</strong> &mdash; 1 名主 C（核心輸出）+ 1 名副 C（半輸出半輔助）+ 2 名純輔助。輔助負責破盾、回復、Buff，確保主 C 有最佳輸出環境。
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">隱藏職業最佳人選</div>
+    <div style="margin-bottom:1rem;">
+      <div class="strat-pair">舞孃 阿妮兒 <span class="plus">+</span> 發明家</div>
+      <div class="strat-pair">劍士 光 <span class="plus">+</span> 武器大師</div>
+      <div class="strat-pair">學者 奧茲華爾德 <span class="plus">+</span> 魔導士</div>
+      <div class="strat-pair">神官 提米諾斯 <span class="plus">+</span> 祈禱師</div>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      <strong style="color:var(--accent-green);">舞孃+發明家：</strong>舞孃的潛力技能「單體技能全體化」與發明家的強力道具技能搭配，能將發明家的單體效果擴展至全隊，例如將阿卡爾的線圈全體化可同時回復全隊 HP/SP/BP。
+    </p>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.5rem;">
+      <strong style="color:var(--accent-red);">劍士+武器大師：</strong>劍士本身物攻高，搭配武器大師可裝備全武器，大幅增加弱點覆蓋範圍。六連擊搭配 BP 全開可造成毀滅性傷害。
+    </p>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.5rem;">
+      <strong style="color:var(--accent-purple);">學者+魔導士：</strong>學者高屬攻配合魔導士的「魔力的代價」可達到最高魔法傷害。擴散印記讓學者的屬性 Buff 惠及全隊。
+    </p>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.5rem;">
+      <strong style="color:var(--accent-cyan);">神官+祈禱師：</strong>神官具備回復與光屬性攻擊，祈禱師的四屬性附魔讓神官同時具備輔助與破盾能力，「日輪之儀」更是全隊的保險。
+    </p>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">其他熱門副職業搭配</div>
+    <div style="margin-bottom:1rem;">
+      <div class="strat-pair">商人 帕爾提歐 <span class="plus">+</span> 盜賊</div>
+      <div class="strat-pair">藥師 乙希琪 <span class="plus">+</span> 學者</div>
+      <div class="strat-pair">獵人 歐修忒 <span class="plus">+</span> 藥師</div>
+      <div class="strat-pair">盜賊 索洛涅 <span class="plus">+</span> 舞孃</div>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      <strong>商人+盜賊：</strong>商人 BP 共享技能搭配盜賊的速度優勢，可快速積累資源。<br>
+      <strong>藥師+學者：</strong>藥師高 HP 配合學者的屬性攻擊，攻守兼備。輔助技能「戰鬥後恢復」（130 JP）回復 30% HP/SP，全員必學。<br>
+      <strong>獵人+藥師：</strong>獵人擁有捕獲魔物與多段物理攻擊，搭配藥師提升生存力。<br>
+      <strong>盜賊+舞孃：</strong>高速度角色搭配舞孃的 Buff 技能，可兼任破盾與增益雙職。
+    </p>
+  </div>
+</div>
+
+<!-- ===================== BATTLE TACTICS ===================== -->
+<div class="section" id="battle">
+  <h2 class="section-title section-anchor"><span>戰場實戰技巧</span></h2>
+  <p class="section-subtitle">玩家社群分享的進階戰鬥策略</p>
+  <div class="divider"></div>
+
+  <div class="strat-card">
+    <div class="strat-title">破盾優先策略</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      破盾（Break）是本作戰鬥的核心。敵人被破盾後會失去一回合行動，且受到的傷害大幅增加。因此，戰鬥的基本節奏是：第一輪集中攻擊弱點破盾 → 破盾回合全力輸出 → 循環。祈禱師的四屬性附魔可以讓物理角色在打物理弱點的同時額外打屬性弱點，大幅加速破盾。
+    </p>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">BP 管理與爆發</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      BP 是決定爆發傷害的關鍵資源。每回合自動回復 1 BP（最多儲存 5 點）。推薦策略：前幾回合用 1 BP 普攻破盾，等到敵人被破盾後再一次性投入全部 BP 進行爆發輸出。發明家的馬口鐵號角（全體 +1 BP）和祈禱師的 BP 賜予（每回合 +2 BP）是 BP 管理的核心技能。商人的「BP 傳遞」也能將自己的 BP 轉給主力輸出。
+    </p>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">魔導士擴散印記組合技</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      魔導士的「擴散印記」是遊戲中最強的輔助機制之一，可以搭配多種強力 Buff 使用：<br><br>
+      <strong style="color:var(--accent-gold-light);">擴散 + 舞孃全體化：</strong>先對自身施加舞孃的「單體招式群體化」，再用擴散印記將此效果分享給全隊，讓所有人的單體技能都變成全體技能。<br><br>
+      <strong style="color:var(--accent-gold-light);">擴散 + 不死印記：</strong>先對自身施加不死印記（HP 歸零以 1 HP 存活），再擴散給全隊，形成全隊保險。<br><br>
+      <strong style="color:var(--accent-gold-light);">無限印記 + 任意回合制 Buff：</strong>無限印記可固定回合制 Buff 使其永不消失。先施加 Buff，再用無限印記鎖定，即可永久維持。
+    </p>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">日夜切換戰術</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      《歧路旅人2》新增了日夜系統，不同角色在白天和夜晚有不同的地圖指令。善用日夜切換可以在城鎮中獲得不同的 NPC 互動效果。例如夜間可以使用盜賊的偷取、舞孃的誘惑等指令取得白天無法獲得的道具和情報。部分 BOSS 在不同時段也有不同的弱點配置。
+    </p>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-title">最終 BOSS 推薦陣容</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;">
+      面對最終隱藏 BOSS 魔神加爾戴拉，推薦以下陣容配置：
+    </p>
+    <div style="margin-bottom:1rem;">
+      <div class="strat-pair">光（武器大師）</div>
+      <div class="strat-pair">阿妮兒（發明家）</div>
+      <div class="strat-pair">提米諾斯（祈禱師）</div>
+      <div class="strat-pair">奧茲華爾德（魔導士）</div>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      <strong>戰術：</strong>提米諾斯使用祈禱師的召喚屬性為全隊附魔 → 奧茲華爾德使用擴散印記將 Buff 全體化 → 阿妮兒使用發明家道具提供 BP 與回復 → 光使用武器大師六連擊造成核心傷害。全體保持不死印記作為保險，祈禱師的日輪之儀作為最後手段。藥師的「戰鬥後恢復」輔助技能建議全員裝備。
+    </p>
+  </div>
+</div>
+
+<!-- ===================== HIDDEN BOSS ===================== -->
+<div class="section" id="hidden-boss">
+  <h2 class="section-title section-anchor"><span>隱藏 BOSS 介紹及打法</span></h2>
+  <p class="section-subtitle">完成全部八位主角故事後開啟的終極挑戰</p>
+  <div class="divider"></div>
+
+  <!-- Unlock Prerequisite -->
+  <div class="unlock-steps">
+    <h3>解鎖條件：異界之門</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-text">完成<strong>全部八位主角</strong>的主線故事</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">完成「世界三大奇書」支線任務，取得<strong>邊獄之書</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">前往<strong>托托哈哈島</strong>的「異界之門」與 NPC 阿爾對話</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">戰鬥分為<strong>兩場連續戰鬥</strong>，使用<strong>兩支不同隊伍</strong>（各 4 人），無法中途切換</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">推薦等級：<strong>Lv.80+</strong>，理想為 Lv.90。全員裝備歷戰武器與「突破傷害上限」飾品</div></div>
+  </div>
+
+  <br>
+
+  <!-- ===== Phase 1: Omniscient Eye ===== -->
+  <div class="strat-card" style="border-left: 3px solid var(--accent-purple);">
+    <div class="strat-title" style="color:var(--accent-purple); font-size:1.4rem;">第一戰：全知之眼（A 隊）</div>
+
+    <div class="skill-table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead><tr><th>部位</th><th>HP</th><th>盾值</th><th>弱點</th><th>特殊能力</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="highlight">全知之眼（本體）</td>
+            <td>約 600,000</td>
+            <td>10→16</td>
+            <td>短劍 / 斧 / 杖 / 雷 / 光</td>
+            <td>召喚亡者、全體強力魔法攻擊、吸收亡者回復自身</td>
+          </tr>
+          <tr>
+            <td class="highlight">亡者 × 3</td>
+            <td>約 30,000~50,000</td>
+            <td>5~8</td>
+            <td>每回合隨機變化<br>（僅開放一種弱點）</td>
+            <td>受非弱點攻擊時反擊；同回合全滅會立即復活</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="color:var(--accent-gold-light); margin: 1.2rem 0 0.6rem;">階段機制</h4>
+
+    <div class="tip-box">
+      <strong>第一階段：</strong>全知之眼召喚 3 名亡者。亡者受到非弱點攻擊會反擊約 1,000~2,000 傷害。若同回合內將 3 名亡者全部擊倒，它們會立即復活。需在<strong>不同回合</strong>分批擊殺。
+    </div>
+    <div class="tip-box">
+      <strong>第二階段：</strong>亡者弱點全部變為魔法屬性（火/冰/雷/風/光之一），且一次只開放一個弱點。需要用<strong>單體屬性攻擊</strong>逐一擊破，使用全體攻擊會觸發反擊。
+    </div>
+    <div class="tip-box">
+      <strong>第三階段：</strong>全知之眼對隨機 3 名角色施加<strong>死亡倒數</strong>（2/3/4 回合）。倒數歸零的角色會<strong>永久退場</strong>（無法復活）。此階段亡者取消反擊與同回合擊破限制，應全力加速輸出。
+    </div>
+    <div class="tip-box">
+      <strong>第四階段（HP 約 20% 以下）：</strong>全知之眼吸收所有亡者，盾值從 8 暴增至 <strong>16</strong>，每回合行動 4 次。進入最終狂暴狀態，需在被團滅前盡快擊破。
+    </div>
+
+    <h4 style="color:var(--accent-gold-light); margin: 1.2rem 0 0.6rem;">A 隊推薦配置</h4>
+    <div style="margin-bottom:0.8rem;">
+      <div class="strat-pair">阿妮兒 舞孃（發明家）</div>
+      <div class="strat-pair">光 劍士（武器大師）</div>
+      <div class="strat-pair">提米諾斯 神官（學者）</div>
+      <div class="strat-pair">乙希琪 藥師（祈禱師）</div>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      <strong>打法要點：</strong><br>
+      ① 阿妮兒使用「喚風之歌」控制行動順序，確保我方先於亡者行動<br>
+      ② 光裝備武器大師，利用多武器弱點覆蓋快速破盾亡者<br>
+      ③ 提米諾斯負責回復與光屬性攻擊（全知之眼弱光）<br>
+      ④ 乙希琪搭配祈禱師提供屬性附魔與緊急回復<br>
+      ⑤ 第三階段時全力使用奧義輸出，不要再拖延回合
+    </p>
+  </div>
+
+  <br>
+
+  <!-- ===== Phase 2: Galdera ===== -->
+  <div class="strat-card" style="border-left: 3px solid var(--accent-red);">
+    <div class="strat-title" style="color:var(--accent-red); font-size:1.4rem;">第二戰：黑咒帝・加爾戴拉（B 隊）</div>
+
+    <div class="skill-table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead><tr><th>部位</th><th>HP</th><th>盾值</th><th>弱點</th><th>特殊能力</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="highlight">加爾戴拉（本體）</td>
+            <td>約 250,000</td>
+            <td>12→20</td>
+            <td>槍 / 短劍 / 弓 / 冰</td>
+            <td>反射屏障（反彈魔法）、四回合行動、持續回盾</td>
+          </tr>
+          <tr>
+            <td class="highlight">咒眼大劍</td>
+            <td>約 150,000</td>
+            <td>8</td>
+            <td>火 / 冰 / 雷 / 風 / 光</td>
+            <td>HP 強制歸 1、降低 HP 上限、強力物理斬擊</td>
+          </tr>
+          <tr>
+            <td class="highlight">黑頭盔</td>
+            <td>約 150,000</td>
+            <td>8</td>
+            <td>劍 / 槍 / 斧 / 弓</td>
+            <td>三連魔法攻擊、全體屬性降低、暗屬性範圍攻擊</td>
+          </tr>
+          <tr>
+            <td class="highlight">割裂大地之手</td>
+            <td>約 150,000</td>
+            <td>8</td>
+            <td>劍 / 短劍 / 斧 / 火 / 光</td>
+            <td><strong>封印回復能力</strong>（最危險）、物理連擊</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="color:var(--accent-gold-light); margin: 1.2rem 0 0.6rem;">戰鬥機制</h4>
+
+    <div class="tip-box">
+      <strong>三部件同時存在：</strong>加爾戴拉本體由三個部件守護。在三個部件全部被擊敗前，<strong>無法對本體造成傷害</strong>。每個部件各有獨立的 HP 與弱點。
+    </div>
+    <div class="tip-box" style="border-left-color: var(--accent-red);">
+      <strong style="color:var(--accent-red);">最優先處理：割裂大地之手</strong> &mdash; 此部件會施放「封印回復」，讓全隊無法使用任何回復技能（包括道具回血）。一旦被封印回復，隊伍會在數回合內崩潰。務必第一個擊破。
+    </div>
+    <div class="tip-box">
+      <strong>次優先：咒眼大劍</strong> &mdash; 會施放「HP 上限降低」和「HP 強制歸 1」，讓角色變得極其脆弱。這兩個能力會讓後續回復變得極為困難。
+    </div>
+    <div class="tip-box">
+      <strong>最後處理：黑頭盔</strong> &mdash; 雖然三連魔法攻擊傷害不低，但相比另外兩個部件威脅較小。
+    </div>
+    <div class="tip-box" style="border-left-color: var(--accent-purple);">
+      <strong>本體階段：</strong>三部件全滅後，加爾戴拉本體解鎖。盾值暴增至 <strong>20</strong>，每回合行動 <strong>4 次</strong>。會施放反射屏障反彈魔法攻擊，因此<strong>以物理攻擊為主</strong>。不保持高輸出的話，本體會持續回復盾值，越拖越難打。
+    </div>
+
+    <h4 style="color:var(--accent-gold-light); margin: 1.2rem 0 0.6rem;">B 隊推薦配置</h4>
+    <div style="margin-bottom:0.8rem;">
+      <div class="strat-pair">帕爾提歐 商人（盜賊）</div>
+      <div class="strat-pair">索洛涅 盜賊（舞孃）</div>
+      <div class="strat-pair">歐修忒 獵人（藥師）</div>
+      <div class="strat-pair">奧茲華爾德 學者（魔導士）</div>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem;">
+      <strong>打法要點：</strong><br>
+      ① 帕爾提歐使用「BP 傳遞」將 BP 集中給主力輸出<br>
+      ② 索洛涅搭配舞孃「全體化」Buff，同時用高速度搶先行動破盾<br>
+      ③ 歐修忒搭配藥師負責回復，「戰鬥後恢復」輔助技能必備<br>
+      ④ 奧茲華爾德搭配魔導士，對部件階段使用屬性攻擊；本體階段改用擴散印記+不死印記保全隊<br>
+      ⑤ 擊敗三部件後<strong>立刻全力爆發</strong>，不給本體回盾的機會
+    </p>
+  </div>
+
+  <br>
+
+  <!-- ===== Pre-boss: Sea Monster ===== -->
+  <div class="strat-card" style="border-left: 3px solid var(--accent-cyan);">
+    <div class="strat-title" style="color:var(--accent-cyan); font-size:1.3rem;">前哨戰：海坊主</div>
+
+    <div class="skill-table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead><tr><th>階段</th><th>HP</th><th>盾值</th><th>弱點</th><th>招式</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="highlight">第一階段</td>
+            <td>約 80,000</td>
+            <td>6</td>
+            <td>雷 / 風</td>
+            <td>全體水屬性攻擊、自我回復、物理連擊</td>
+          </tr>
+          <tr>
+            <td class="highlight">第二階段（破盾後）</td>
+            <td>—</td>
+            <td>8</td>
+            <td>火 / 光</td>
+            <td>弱點切換、強化全體水攻、濁流（全體降速+傷害）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:1rem;">
+      <strong>位置：</strong>被分割的大海中心漩渦處，前往魔途之島（解鎖魔導士）途中必戰。<br>
+      <strong>建議等級：</strong>Lv.40+<br>
+      <strong>打法：</strong>第一階段用雷/風屬性攻擊破盾，注意每次破盾後弱點會切換為火/光。攜帶大量 SP 回復道具，學者的大魔法是主要輸出手段。海坊主的自我回復量不低，建議集中火力一波帶走。
+    </p>
+  </div>
+
+  <br>
+
+  <!-- ===== Overall Tips ===== -->
+  <div class="strat-card" style="border-left: 3px solid var(--accent-gold);">
+    <div class="strat-title" style="color:var(--accent-gold);">隱藏 BOSS 戰通用備戰清單</div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem;">
+      <div style="background: rgba(212,164,74,0.05); border-radius: 12px; padding: 1.2rem;">
+        <h5 style="color:var(--accent-gold-light); margin-bottom:0.5rem;">裝備準備</h5>
+        <ul class="support-list">
+          <li><strong>歷戰武器</strong> &mdash; 全員裝備對應職業的歷戰武器</li>
+          <li><strong>冠軍腰帶</strong> &mdash; 突破 9,999 傷害上限（必備）</li>
+          <li><strong>堅王之盾</strong> &mdash; 最強盾牌，給主坦使用</li>
+          <li><strong>元素增幅器</strong> &mdash; 魔法輸出角色必備</li>
+        </ul>
+      </div>
+      <div style="background: rgba(212,164,74,0.05); border-radius: 12px; padding: 1.2rem;">
+        <h5 style="color:var(--accent-gold-light); margin-bottom:0.5rem;">道具準備</h5>
+        <ul class="support-list">
+          <li><strong>復活橄欖（大）</strong> × 20+ &mdash; 緊急復活</li>
+          <li><strong>SP 回復果汁（大）</strong> × 30+ &mdash; 長期戰必備</li>
+          <li><strong>BP 恢復石榴</strong> × 10+ &mdash; 爆發時使用</li>
+          <li><strong>萬靈藥</strong> × 10+ &mdash; 解除全異常狀態</li>
+        </ul>
+      </div>
+      <div style="background: rgba(212,164,74,0.05); border-radius: 12px; padding: 1.2rem;">
+        <h5 style="color:var(--accent-gold-light); margin-bottom:0.5rem;">必備輔助技能</h5>
+        <ul class="support-list">
+          <li><strong>戰鬥後恢復</strong>（藥師）&mdash; 全員裝備</li>
+          <li><strong>SP 節約</strong>（祈禱師）&mdash; 減半 SP 消耗</li>
+          <li><strong>搶先行動</strong>（發明家）&mdash; 回復角色必帶</li>
+          <li><strong>全力以赴</strong>（武器大師）&mdash; 輸出角色必帶</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<a href="#top" class="back-top">↑ 回到頂部</a>
+
+<footer>
+  <p>攻略資訊整理自各大遊戲社群與攻略網站，僅供參考。</p>
+  <p style="margin-top:0.5rem;">OCTOPATH TRAVELER II &copy; SQUARE ENIX</p>
+</footer>
+
+</body>
+</html>
