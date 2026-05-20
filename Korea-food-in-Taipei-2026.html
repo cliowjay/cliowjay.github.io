@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍖 台北韓式料理精選指南</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FF3B47;
+    --orange: #FF6B2B;
+    --yellow: #FFD93D;
+    --green: #06D6A0;
+    --teal: #0CB4A8;
+    --blue: #4361EE;
+    --purple: #7B2FBE;
+    --pink: #FF6EB4;
+    --white: #FFFEF5;
+    --dark: #1A1A2E;
+    --card-bg: #FFFFFF;
+    --shadow: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-hover: 0 16px 48px rgba(0,0,0,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--white);
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #FF3B47 0%, #FF6B2B 40%, #FFD93D 100%);
+    padding: 60px 20px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-emoji { font-size: 72px; display: block; margin-bottom: 16px; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .hero h1 {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    margin-bottom: 12px;
+  }
+  .hero p {
+    font-size: 18px; color: rgba(255,255,255,0.92);
+    font-weight: 600; max-width: 500px; margin: 0 auto;
+  }
+  .hero-badges {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; margin-top: 24px;
+  }
+  .hero-badge {
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    color: white; padding: 6px 16px;
+    border-radius: 999px; font-size: 14px; font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── PRICE TABS ── */
+  .tabs-wrap {
+    background: white;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 0 20px;
+  }
+  .tabs {
+    display: flex; overflow-x: auto; gap: 4px;
+    max-width: 1100px; margin: 0 auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 14px 20px;
+    border: none; background: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 800;
+    color: #999; border-bottom: 3px solid transparent;
+    transition: all .25s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--dark); }
+  .tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .tab .tab-price { font-size: 11px; font-weight: 600; display: block; opacity: .7; }
+
+  /* ── SECTION ── */
+  .section {
+    display: none; padding: 48px 20px 80px;
+    max-width: 1100px; margin: 0 auto;
+    animation: fadeUp .4s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px; font-weight: 900;
+    color: white;
+  }
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900;
+  }
+
+  /* ── RESTAURANT CARD ── */
+  .restaurant-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+    transition: transform .3s, box-shadow .3s;
+    border: 2px solid transparent;
+  }
+  .restaurant-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .card-top {
+    display: grid; grid-template-columns: 340px 1fr;
+    min-height: 280px;
+  }
+  @media(max-width:768px) {
+    .card-top { grid-template-columns: 1fr; }
+  }
+
+  .card-img-wrap {
+    position: relative; overflow: hidden;
+    background: #f0f0f0;
+  }
+  .card-img {
+    width: 100%; height: 100%; min-height: 260px;
+    object-fit: cover;
+    transition: transform .4s;
+  }
+  .restaurant-card:hover .card-img { transform: scale(1.05); }
+  .card-img-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    padding: 40px 16px 14px;
+  }
+  .rating-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #FFD93D; color: #1A1A2E;
+    padding: 6px 14px; border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 900;
+  }
+
+  .card-body {
+    padding: 28px 28px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .card-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-weight: 900; line-height: 1.2;
+  }
+  .card-korean { font-size: 14px; color: #888; font-weight: 500; margin-top: 2px; }
+
+  .card-links {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 700;
+    text-decoration: none;
+    transition: all .2s;
+    border: 2px solid;
+  }
+  .chip:hover { transform: scale(1.05); }
+  .chip-ig { color: #E1306C; border-color: #E1306C; background: #fff0f5; }
+  .chip-web { color: var(--blue); border-color: var(--blue); background: #f0f4ff; }
+  .chip-book { color: white; border-color: transparent; }
+
+  .card-feature {
+    background: linear-gradient(135deg, #fff9f0, #fff0f5);
+    border-left: 4px solid var(--orange);
+    padding: 12px 16px;
+    border-radius: 0 12px 12px 0;
+    font-size: 14px; line-height: 1.8;
+  }
+
+  /* ── TABS inside card ── */
+  .inner-tabs {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0;
+  }
+  .inner-tab {
+    padding: 8px 16px;
+    border: none; background: none;
+    cursor: pointer; font-size: 13px; font-weight: 700;
+    color: #aaa; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all .2s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .inner-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .inner-tab:hover { color: var(--dark); }
+
+  .inner-panel { display: none; padding-top: 16px; }
+  .inner-panel.active { display: block; }
+
+  /* ── MENU items ── */
+  .menu-grid {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .menu-item {
+    background: #fff9f0;
+    border: 2px solid #ffe0b0;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .menu-item .price { color: var(--red); font-size: 12px; }
+
+  /* ── REVIEWS ── */
+  .review-item {
+    background: #f8f9ff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 13px; line-height: 1.7;
+    border-left: 3px solid var(--blue);
+  }
+  .review-meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .review-author { font-weight: 700; font-size: 13px; color: var(--blue); }
+  .review-date { font-size: 11px; color: #aaa; }
+  .review-stars { color: #FFD93D; font-size: 13px; }
+
+  /* ── MAP ── */
+  .map-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); color: white;
+    padding: 10px 20px; border-radius: 12px;
+    text-decoration: none; font-weight: 700; font-size: 14px;
+    transition: all .2s;
+  }
+  .map-link:hover { background: var(--teal); transform: scale(1.03); }
+
+  .address-text {
+    font-size: 14px; color: #666;
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* ── BOOK ── */
+  .book-section {
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+    border: 2px dashed #667eea50;
+    border-radius: 16px;
+    padding: 16px 20px;
+  }
+  .book-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; }
+  .book-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border-radius: 999px;
+    font-weight: 800; font-size: 14px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all .25s;
+  }
+  .book-btn-online {
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    color: white;
+  }
+  .book-btn-phone {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: white;
+  }
+  .book-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); color: rgba(255,255,255,0.6);
+    text-align: center; padding: 32px 20px;
+    font-size: 13px;
+  }
+  footer strong { color: white; }
+
+  /* card color accents per tier */
+  .tier-budget .restaurant-card { border-color: #a8e6cf40; }
+  .tier-budget .section-badge { background: linear-gradient(135deg, #06D6A0, #0CB4A8); }
+  .tier-budget .inner-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+  .tier-budget .card-feature { border-left-color: var(--teal); background: linear-gradient(135deg, #f0fff9, #e8feff); }
+
+  .tier-mid .restaurant-card { border-color: #ffd93d40; }
+  .tier-mid .section-badge { background: linear-gradient(135deg, #FFD93D, #FF6B2B); }
+  .tier-mid .inner-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .tier-mid .card-feature { border-left-color: var(--orange); }
+
+  .tier-upper .restaurant-card { border-color: #4361ee40; }
+  .tier-upper .section-badge { background: linear-gradient(135deg, #4361EE, #7B2FBE); }
+  .tier-upper .inner-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+  .tier-upper .card-feature { border-left-color: var(--purple); background: linear-gradient(135deg, #f8f0ff, #eff3ff); }
+
+  .tier-premium .restaurant-card { border-color: #ff6eb440; }
+  .tier-premium .section-badge { background: linear-gradient(135deg, #FF6EB4, #FF3B47); }
+  .tier-premium .inner-tab.active { color: var(--pink); border-bottom-color: var(--pink); }
+  .tier-premium .card-feature { border-left-color: var(--pink); background: linear-gradient(135deg, #fff0f8, #fff5f0); }
+
+  .no-data { color: #bbb; font-style: italic; font-size: 13px; padding: 8px 0; }
+
+  /* loading placeholder */
+  .img-placeholder {
+    width: 100%; min-height: 260px;
+    background: linear-gradient(135deg, #f5e6d3, #fce4ec);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+
+  .hours-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #e8f5e9; color: #2e7d32;
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+  .price-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #fff3e0; color: #e65100;
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+
+  .scroll-hint {
+    text-align: center; padding: 16px;
+    color: #ccc; font-size: 13px;
+    display: none;
+  }
+  @media(max-width: 600px) { .scroll-hint { display: block; } }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-emoji">🍖</span>
+  <h1>台北韓式料理精選指南</h1>
+  <p>台北 × 新北 精心挑選的美味韓食，依預算分類一目了然</p>
+  <div class="hero-badges">
+    <span class="hero-badge">🗓 適合週日午餐</span>
+    <span class="hero-badge">📍 台北＋新北</span>
+    <span class="hero-badge">⭐ Google 高評分</span>
+    <span class="hero-badge">🔥 烤肉 ✦ 鍋物 ✦ 定食</span>
+  </div>
+</div>
+
+<!-- PRICE TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('budget', this)">
+      💚 超值平價
+      <span class="tab-price">兩人 500–800元</span>
+    </button>
+    <button class="tab" onclick="switchTab('mid', this)">
+      🧡 平價中等
+      <span class="tab-price">兩人 700–1,200元</span>
+    </button>
+    <button class="tab" onclick="switchTab('upper', this)">
+      💙 中等
+      <span class="tab-price">兩人 1,000–1,600元</span>
+    </button>
+    <button class="tab" onclick="switchTab('premium', this)">
+      💜 中高級
+      <span class="tab-price">兩人 1,200–2,200元</span>
+    </button>
+    <button class="tab" onclick="switchTab('luxury', this)">
+      ❤️ 高級
+      <span class="tab-price">兩人 2,000元以上</span>
+    </button>
+  </div>
+  <div class="scroll-hint">← 左右滑動查看更多價位 →</div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--  💚 TIER 1: 超值平價               -->
+<!-- ══════════════════════════════════ -->
+<div class="section tier-budget active" id="section-budget">
+  <div class="section-header">
+    <span class="section-badge">💚 超值平價</span>
+    <span class="section-title">兩人預算 500–800元，吃飽飽不傷荷包！</span>
+  </div>
+
+  <!-- 1. 永和韓屋村 -->
+  <!-- prettier-ignore -->
+  <!-- CARD 1 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPwpxtMCdsZdrV5vSkerl5S7uFsNgwvvdnfimC22Dynku1FXroJFYgxQC-eeT0BrHz_S14jnGmLvd0z6chDsQwj7I4fyZ6HtntBNAbaHw-8EuVOfjSbToGflTzuQa5rVWOw0XXzQ9EMpWiUTg=s800-w800-h600" alt="永和韓屋村" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥘</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(3,689則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">永和韓屋村</div>
+          <div class="card-korean">한국음식 · 新北永和</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日午餐 需電話確認</span>
+          <span class="price-pill">💰 兩人 500–700元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/profile.php?id=100063732438588" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book book-btn-phone" href="tel:0289258585" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-8925-8585</a>
+        </div>
+        <div class="card-feature">
+          🇰🇷 韓國人開設的道地家常菜館，以<strong>三種自製泡菜小菜</strong>聞名，口味最接近韓國在地滋味。豬肉石鍋拌飯、牛骨湯備受好評，CP值極高。店內有可愛黑貓，氛圍溫馨。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'ku1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'ku2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'ku3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="ku1">
+            <div class="menu-grid">
+              <div class="menu-item">🥘 豬肉石鍋拌飯 <span class="price">~$200</span></div>
+              <div class="menu-item">🦴 牛骨湯 <span class="price">~$250</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$280</span></div>
+              <div class="menu-item">🌶 辣豆腐鍋 <span class="price">~$230</span></div>
+              <div class="menu-item">🥗 自製泡菜小菜 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="ku2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              三種口味泡菜都好好吃！牛骨湯超級濃郁，喝了一碗又一碗，完全是韓國媽媽的家常味道。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              海鮮煎餅外脆內Q，小菜種類豐富還可以無限續，這個價格真的太划算了！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              豬肉石鍋拌飯份量很紮實，底部鍋巴超香！服務員很熱情，還主動問需不需要續小菜。
+            </div>
+          </div>
+          <div class="inner-panel" id="ku3">
+            <a class="map-link" href="https://maps.google.com/?q=永和韓屋村+新北市永和區竹林路39巷7號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市永和區竹林路39巷7號1樓（近捷運頂溪站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 暖韓韓式定食 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqH43vmvZDZq-ASuzbH5UeVPOgHQ2MyPRjiEpBNHpR81Mi1lkpj4sjFTLdtk8UxB5GfOntrxXlFG3p4xKKYDNPbdY23-NqvAUyk=s800-w800-h600" alt="暖韓" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍱</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.6 <small>(1,365則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">暖韓韓式定食專賣店</div>
+          <div class="card-korean">한식 정식 · 新北永和</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–20:30 全天</span>
+          <span class="price-pill">💰 兩人 500–700元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/profile.php?id=100090287331317" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0986801773" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：0986-801-773</a>
+        </div>
+        <div class="card-feature">
+          🍦 超值定食館，每份套餐附多樣<strong>小菜無限續</strong>，吃完還有<strong>免費冰淇淋</strong>！份量大又實惠，服務熱情，是永和在地人激推的好去處。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'nk1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'nk2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'nk3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="nk1">
+            <div class="menu-grid">
+              <div class="menu-item">🥘 韓式定食套餐 <span class="price">~$200–280</span></div>
+              <div class="menu-item">🌶 辣豆腐鍋 <span class="price">~$220</span></div>
+              <div class="menu-item">🍲 泡菜豬肉鍋 <span class="price">~$250</span></div>
+              <div class="menu-item">🥗 多樣小菜 <span class="price">無限續</span></div>
+              <div class="menu-item">🍦 冰淇淋 <span class="price">免費附贈</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="nk2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              這家超推！小菜種類多又可以一直續，最後還有免費冰淇淋，吃完超滿足，CP值破表！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              服務員非常親切，主動詢問還需不需要補小菜。辣豆腐鍋湯頭夠味，配飯一碗接一碗。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              這個價格在新北找不到第二家了！份量讓大男生也吃得很飽，超推薦！
+            </div>
+          </div>
+          <div class="inner-panel" id="nk3">
+            <a class="map-link" href="https://maps.google.com/?q=暖韓韓式定食+新北市永和區中和路401號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市永和區中和路401號（近捷運頂溪站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Miso -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZOlhChRiBMPobpr78CBamKcErxZQPbtLTHtAtVQXQ3nKiJTtCIVZoqK0CrimM3DXLxissW98dEOD0URYN5FxC5OP7Etda4UebLWh0J1-BG1iwj5fNIjJvC2CHkec3o6krhXz1H3mgXEXgc62AwR6IaZ=s800-w800-h600" alt="Miso" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍚</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.5 <small>(955則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Miso 韓式料理</div>
+          <div class="card-korean">미소 · 台北大安區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–14:30 / 17:00–22:00</span>
+          <span class="price-pill">💰 兩人 500–700元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0223670281" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2367-0281</a>
+        </div>
+        <div class="card-feature">
+          🔥 招牌石鍋拌飯底部焦脆香氣迷人，<strong>白飯免費無限續</strong>，半自助式服務輕鬆自在。單人消費僅約300元起，大安區最超值的韓式選擇之一。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'ms1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'ms2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'ms3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="ms1">
+            <div class="menu-grid">
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$280</span></div>
+              <div class="menu-item">🍚 白飯 <span class="price">免費續</span></div>
+              <div class="menu-item">🌶 辣豆腐湯 <span class="price">~$220</span></div>
+              <div class="menu-item">🥞 韓式煎餅 <span class="price">~$200</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="ms2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              石鍋拌飯底部的焦脆鍋巴超好吃！白飯可以免費續，這個價格在大安區已經很不錯了。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              半自助式用餐很方便，環境乾淨，價格實惠，很適合平日輕鬆用餐。
+            </div>
+          </div>
+          <div class="inner-panel" id="ms3">
+            <a class="map-link" href="https://maps.google.com/?q=Miso+台北市大安區金山南路二段6號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區金山南路二段6號（近捷運古亭站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 朝鮮味新莊 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZMVxWySKX4jZJ8cJcPBtgkwJ6rL31abws2e3isbaqiYnwb6ewOhIIuOpYgbFYqxLBJAnXHMp9kFUpy3HTG5sVzLvEDFkF1f4Q-iHfng4ULbNqXhD82b3MgoxqopYYtLPRYpCIYoG6ZLutFX7PE=s800-w800-h600" alt="朝鮮味" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍜</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.4 <small>(8,227則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">朝鮮味（新莊店）</div>
+          <div class="card-korean">조선맛 · 新北新莊</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–21:30 全天</span>
+          <span class="price-pill">💰 兩人 500–700元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0222037236" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2203-7236</a>
+        </div>
+        <div class="card-feature">
+          📊 評論數高達 <strong>8,000+ 則</strong>的高人氣平價韓食！鍋物、石鍋拌飯選擇多，全天不休，彈性高，適合隨興前往用餐。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'cs1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'cs2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'cs3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="cs1">
+            <div class="menu-grid">
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$250</span></div>
+              <div class="menu-item">🍲 部隊鍋 <span class="price">~$280</span></div>
+              <div class="menu-item">🌶 泡菜豬肉鍋 <span class="price">~$260</span></div>
+              <div class="menu-item">🥗 小菜 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="cs2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The food was good! Brought me back in Korea! 食物很正宗，讓我想起在韓國的日子。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              評論數這麼多還維持4.4分真的很厲害，平價好吃，適合日常解饞。
+            </div>
+          </div>
+          <div class="inner-panel" id="cs3">
+            <a class="map-link" href="https://maps.google.com/?q=朝鮮味+新北市新莊區龍安路438-3號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市新莊區龍安路438-3號（近捷運新莊站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 韓奶奶豆腐鍋 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPJjtF-ToxWahCkHYCgJYsV_jTFoqtsSXTC6LrqQz1olpEOOtbbYmEKpNmJwN0l67f49Jddp_YoO1Tbg9u6hoY00q5VOcL2UkaSX1wo3YmyS4Gll36-kUXSxsknDgQ_YYc3bi2044Vp44Z_n7lZyUHv3A=s800-w800-h600" alt="韓奶奶豆腐鍋" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🫕</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(449則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">韓奶奶豆腐鍋（泰山代表店）</div>
+          <div class="card-korean">한국 두부찌개 · 新北泰山</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–21:00</span>
+          <span class="price-pill">💰 兩人 500–700元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0229009516" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2900-9516</a>
+        </div>
+        <div class="card-feature">
+          🫕 新北泰山高評分豆腐鍋專門店，海鮮新鮮豐盛，<strong>小菜與白飯無限續</strong>，還有免費冰淇淋！食材實在，CP值超高，是新北西北區的隱藏版美食。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'hn1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'hn2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'hn3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="hn1">
+            <div class="menu-grid">
+              <div class="menu-item">🫕 海鮮豆腐鍋 <span class="price">~$230</span></div>
+              <div class="menu-item">🦐 泡菜海鮮鍋 <span class="price">~$260</span></div>
+              <div class="menu-item">🥗 韓式小菜 <span class="price">無限續</span></div>
+              <div class="menu-item">🍚 白飯 <span class="price">免費續</span></div>
+              <div class="menu-item">🍦 冰淇淋 <span class="price">免費附贈</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="hn2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              海鮮很新鮮，份量超大！小菜種類豐富，全部都可以無限續，這個價格太划算了！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              最愛他們的海帶芽和柚子蘿蔔，還有最後的冰淇淋甜點！用餐體驗超棒。
+            </div>
+          </div>
+          <div class="inner-panel" id="hn3">
+            <a class="map-link" href="https://maps.google.com/?q=韓奶奶豆腐鍋+新北市泰山區復興街40號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市泰山區復興街40號（近捷運泰山貴和站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--  🧡 TIER 2: 平價中等               -->
+<!-- ══════════════════════════════════ -->
+<div class="section tier-mid" id="section-mid">
+  <div class="section-header">
+    <span class="section-badge">🧡 平價中等</span>
+    <span class="section-title">兩人預算 700–1,200元，好吃又不貴！</span>
+  </div>
+
+  <!-- 1. 韓膳 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqHWQKkJ-UiRdUhLoH4CVHiT8S82ZfTunBO0fOamEXmPfR5qYMDFlpOdg7a7iVzpTlBdpxXCjHYiw2Zb3G7QKMdzdxl232GnmoU=s800-w800-h600" alt="韓膳" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍽</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.6 <small>(1,057則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">韓膳 HAN SHIH</div>
+          <div class="card-korean">한식 · 台北大安區四維路</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–14:00 / 17:30–20:30</span>
+          <span class="price-pill">💰 兩人 700–1,100元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0227080202" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2708-0202</a>
+        </div>
+        <div class="card-feature">
+          🌿 大安區巷弄中的精緻韓式定食館，空間<strong>明亮乾淨、安靜舒適</strong>，適合慢慢用餐聊天。蔘雞湯、海鮮煎餅（外皮超酥脆！）是必點招牌，服務員親切友善。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'hs1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'hs2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'hs3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="hs1">
+            <div class="menu-grid">
+              <div class="menu-item">🍲 蔘雞湯 <span class="price">~$380</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$320</span></div>
+              <div class="menu-item">🌶 辣炒豬肉 <span class="price">~$280</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$300</span></div>
+              <div class="menu-item">🦀 鮑魚蔘雞湯 <span class="price">~$450</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="hs2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              蔘雞湯喝起來滋補暖胃，鮑魚版更是升級！海鮮煎餅外皮超酥脆，是我吃過最好吃的版本之一。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The seafood pancake was very crispy! Staff is very friendly. Perfect spot for a nice quiet meal.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              環境乾淨舒適，位子不會太擠，適合想好好用餐聊天的場合。辣炒豬肉配飯超下飯！
+            </div>
+          </div>
+          <div class="inner-panel" id="hs3">
+            <a class="map-link" href="https://maps.google.com/?cid=313346471130288190" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區四維路180號（近捷運科技大樓站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 金春姬 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqEg3wtTP1GHERLnnS5lDiPwdUk-Vai8jOne7yVuQ2W0qCN4gtO_XjIUypPXmQkKw6AkYnwI4cDoyUE8mlx1qFxpEMRfmYthO8Y=s800-w800-h600" alt="金春姬" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥗</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.9 <small>(4,840則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">金春姬韓廚（板橋店）</div>
+          <div class="card-korean">김춘희 한국음식 · 新北板橋</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–22:00 全天</span>
+          <span class="price-pill">💰 兩人 700–1,100元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/kimchunhee.korea" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0229588996" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2958-8996</a>
+        </div>
+        <div class="card-feature">
+          🏆 近5,000則評論維持 <strong>4.9分</strong>，新北板橋口碑最強韓食！道地家常韓式料理風格，服務親切，週日全天營業超方便。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'kj1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'kj2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'kj3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="kj1">
+            <div class="menu-grid">
+              <div class="menu-item">🥘 烤肉套餐 <span class="price">~$350–450</span></div>
+              <div class="menu-item">🍲 泡菜鍋 <span class="price">~$300</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$280</span></div>
+              <div class="menu-item">☕ 味噌湯 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="kj2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Great food! Staff were super friendly. 食物好吃，服務員超親切，是板橋我最愛的韓式餐廳！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              週日午餐來這裡最方便！味噌湯可以無限續，每道菜都很正宗，讓人想一直回訪。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              環境整潔，服務快速，食物份量足。烤肉套餐料多實在，很適合好好吃一頓。
+            </div>
+          </div>
+          <div class="inner-panel" id="kj3">
+            <a class="map-link" href="https://maps.google.com/?cid=15880277202938004492" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市板橋區中山路一段46號5樓（近捷運板橋站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 朝鮮味新店 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZMVxWySKX4jZJ8cJcPBtgkwJ6rL31abws2e3isbaqiYnwb6ewOhIIuOpYgbFYqxLBJAnXHMp9kFUpy3HTG5sVzLvEDFkF1f4Q-iHfng4ULbNqXhD82b3MgoxqopYYtLPRYpCIYoG6ZLutFX7PE=s800-w800-h600" alt="朝鮮味新店" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍲</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(4,596則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">朝鮮味（新店店）</div>
+          <div class="card-korean">조선맛 신뎬점 · 新北新店</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–21:30 全天</span>
+          <span class="price-pill">💰 兩人 700–1,000元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/koreafood8/" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0288671973" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-8867-1973</a>
+        </div>
+        <div class="card-feature">
+          🛋 <strong>空間寬敞、燈光不過亮</strong>，評論特別強調不吵雜、適合悠閒用餐聊天。小菜種類多且無限續，全天不間斷營業，烤肉與鍋物皆有，菜單選擇豐富。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'cs4')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'cs5')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'cs6')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="cs4">
+            <div class="menu-grid">
+              <div class="menu-item">🔥 烤豬五花 <span class="price">~$320</span></div>
+              <div class="menu-item">🌶 泡菜豆腐鍋 <span class="price">~$280</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$300</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$260</span></div>
+              <div class="menu-item">🥗 小菜 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="cs5">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              環境很舒服，空間大不會擠，食物好吃，小菜種類多，很適合好好用餐。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Atmosphere is cozy. A solid choice for a casual meal. Food was moderate with reasonable price.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              全天都可以來，不需要特別配合用餐時間，非常方便！小菜新鮮好吃。
+            </div>
+          </div>
+          <div class="inner-panel" id="cs6">
+            <a class="map-link" href="https://maps.google.com/?cid=15493184089773785465" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市新店區中正路542之3號（近捷運新店站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Ma C So Yo 築夢韓食 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZOMItP_qiCy7gzAXDAGFgwXP0x_SsvRDIkiOQ4ARLkzKtvoVnGwLMgr6Mu-Jck5HUl0Ftu3YYxk0adyCKTjcBuASgS9sVzy97E3dV3w6sxmQ62N14VS0F-J-aAnPo_ayh71BrgFcCKlvxtpWz3P8kBOrg=s800-w800-h600" alt="築夢韓食" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍗</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.6 <small>(3,227則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Ma C So Yo 築夢韓食</div>
+          <div class="card-korean">마크소요 · 台北中山區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–22:00</span>
+          <span class="price-pill">💰 兩人 700–1,100元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0225375068" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2537-5068</a>
+        </div>
+        <div class="card-feature">
+          🍗 中山區深受喜愛的韓式小館，招牌<strong>韓式炸雞酥脆多汁</strong>、辣炒年糕滋味道地。週日有開午餐，入座免費提供涼爽側菜，服務親切。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'mc1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'mc2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'mc3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="mc1">
+            <div class="menu-grid">
+              <div class="menu-item">🍗 韓式炸雞 <span class="price">~$320</span></div>
+              <div class="menu-item">🌶 辣炒年糕 <span class="price">~$220</span></div>
+              <div class="menu-item">🍜 炸醬麵 <span class="price">~$260</span></div>
+              <div class="menu-item">🍲 雪濃牛肉湯 <span class="price">~$320</span></div>
+              <div class="menu-item">🥘 韓式拌飯 <span class="price">~$288</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="mc2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Great option if you are looking for authentic Korean restaurant. Jjajangmyeon and ramyeon both delicious!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              韓式拌飯底部焦脆鍋巴非常香，豬肉片醬味濃厚，入座就有免費涼拌豆腐，很有誠意！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              炸雞超脆，年糕辣度剛好，整體評價很不錯！中山區想吃韓食的首選。
+            </div>
+          </div>
+          <div class="inner-panel" id="mc3">
+            <a class="map-link" href="https://maps.google.com/?q=Ma+C+So+Yo+築夢韓食+台北市中山區中山北路一段121巷15號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市中山區中山北路一段121巷15號（近捷運中山站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Zihmujin 紫木槿 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPdoxmA0yAwI8GWtSzgtlJtSbm4tGGE9XFu4JHlddTagYHIc1ociLKvC-leetaHyOva7Ek_Uuz0tjJ0XUJxXrsWycNHWj1fbBcYEDWXeOfqKDpbn9vC2QKbpZMWRdYKsqc8WXOF-Wrr3qGwX2w=s800-w800-h600" alt="紫木槿" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🌺</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(9,045則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Zihmujin 紫木槿（台北巨蛋店）</div>
+          <div class="card-korean">자목진 · 台北信義區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–22:00</span>
+          <span class="price-pill">💰 兩人 800–1,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-ig" href="https://www.instagram.com/zihmujin_koreabbq/" target="_blank">📸 Instagram</a>
+          <a class="chip chip-book" href="tel:0227669905" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2766-9905</a>
+        </div>
+        <div class="card-feature">
+          🌺 近萬則評論維持 <strong>4.8高分</strong>，台北巨蛋旁知名韓餐酒館。招牌<strong>熔岩石鍋飯</strong>視覺感十足，厚切牛小排、起司麵包蝦都是人氣菜色，結合創意韓式調酒，氣氛活潑又時尚。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'zm1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'zm2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'zm3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="zm1">
+            <div class="menu-grid">
+              <div class="menu-item">🔥 熔岩石鍋飯 <span class="price">招牌必點</span></div>
+              <div class="menu-item">🥩 厚切牛小排 <span class="price">~$580</span></div>
+              <div class="menu-item">🍤 起司麵包蝦 <span class="price">~$320</span></div>
+              <div class="menu-item">🥚 韓式蒸蛋 <span class="price">~$180</span></div>
+              <div class="menu-item">🫕 生菜包肉套餐 <span class="price">~$450</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 每月推出特色連動菜單，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="zm2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Possibly the best Korean food for the price in downtown Taipei. The lava rice is unique. Would highly recommend!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              服務非常好，即使午餐時段只有一位服務員也非常迅速！料理美味又有特色，值得專程前往。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              熔岩石鍋飯真的太有創意了！搭配生菜一起吃很清爽，起司蒸蛋和螃蟹醬汁是亮點。
+            </div>
+          </div>
+          <div class="inner-panel" id="zm3">
+            <a class="map-link" href="https://maps.google.com/?cid=1517114121619177222" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市信義區忠孝東路四段515號（近捷運台北小巨蛋站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--  💙 TIER 3: 中等                   -->
+<!-- ══════════════════════════════════ -->
+<div class="section tier-upper" id="section-upper">
+  <div class="section-header">
+    <span class="section-badge">💙 中等價位</span>
+    <span class="section-title">兩人預算 1,000–1,600元，品質與氣氛兼顧！</span>
+  </div>
+
+  <!-- 1. 漢陽 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPmm2Bw3TBSL8VQPYhcE9TtGfNTHbhyldUPZXQvQGNPuk6INDHuxfagmia6j5DaFjkjraYE5wUwGcpas1M9Bmug9tH6_IqZWv8Xw0AWvvfmp2Wc5AeeCxxJIUUUx935Eqnm-SrAxtKU659M5Tljd8QS=s800-w800-h600" alt="漢陽烤肉" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🔥</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.9 <small>(354則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">漢陽韓式陶盤烤肉</div>
+          <div class="card-korean">한양불고기 · 台北大安區 ｜ 🏆 情境首選</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–14:00 / 17:30–21:00</span>
+          <span class="price-pill">💰 兩人 1,000–1,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/Hanyang1996" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0227711220" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none">📞 訂位（包廂需電話）：02-2771-1220</a>
+        </div>
+        <div class="card-feature">
+          🏆 來自韓國30年家傳陶盤烤肉，使用<strong>美國Prime牛肉 × 西班牙伊比利豬</strong>，陶盤均勻受熱鎖住肉汁，獨家水梨蔬菜高湯清甜可口。有<strong>包廂私房菜</strong>服務，桌邊全程代烤，可加點獨家辣炒雞湯、牛肉蘿蔔湯。套餐附小菜、蔬菜煎餅、餐後茶飲，十分細緻。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'hy1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'hy2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'hy3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="hy1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 美國Prime牛肉套餐 <span class="price">~$550/人</span></div>
+              <div class="menu-item">🐷 西班牙伊比利豬套餐 <span class="price">~$500/人</span></div>
+              <div class="menu-item">🍲 牛肉蘿蔔湯（包廂限定）<span class="price">~$300</span></div>
+              <div class="menu-item">🌶 辣炒雞湯（包廂限定）<span class="price">~$350</span></div>
+              <div class="menu-item">🥞 蔬菜煎餅 <span class="price">套餐附贈</span></div>
+              <div class="menu-item">☕ 餐後茶飲 <span class="price">套餐附贈</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 每人需點一份套餐，加收10%服務費；資料來源：2025年8月部落客食記</p>
+          </div>
+          <div class="inner-panel" id="hy2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Alina 愛琳娜</span><span class="review-stars">★★★★★</span><span class="review-date">2025年8月</span></div>
+              陶盤烤肉受熱均勻，肉完全不會烤焦！最愛的是蔬菜煎餅，現點現煎外酥內軟，配啤酒超級配。整個套餐吃下來超級飽足！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">艾斯的美食視界</span><span class="review-stars">★★★★★</span><span class="review-date">2025年7月</span></div>
+              30年家傳口味完整傳承，高湯清甜順口，喝了一碗又一碗！包廂服務非常貼心，環境相當舒適。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Trip.com 評論</span><span class="review-stars">★★★★★</span><span class="review-date">2025年9月</span></div>
+              小菜吃到飽的品質很高，不是商業批發那種，泡菜味道濃郁，光小菜就可以扒完一碗飯！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">愛食記用戶</span><span class="review-stars">★★★★★</span><span class="review-date">2025年11月</span></div>
+              道地韓味，專人桌邊烤肉服務，不會烤肉也沒關係，完全交給店員就好，輕鬆享受美食！
+            </div>
+          </div>
+          <div class="inner-panel" id="hy3">
+            <a class="map-link" href="https://maps.google.com/?cid=6314684348301935288" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區仁愛路四段345巷4弄23號（近捷運忠孝敦化站，步行約8分鐘）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 이집延吉 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZOirQfePzDbFhFvH3HdM3ISSejg4AATuK8C-Go7KYbp7WNmZLg30l_FTZNMFPotpDuB0QPeC24fPRuFv9MqtxQW3pQFutDnf3SDtCR00bF96I4MFfjEiDXRy7BDbUdcMELILsYOn2YaeIsQIvPR_4g=s800-w800-h600" alt="이집烤肉" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🐷</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(1,930則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">이집 這家韓式烤肉（延吉店）</div>
+          <div class="card-korean">이집 한국 구이 · 台北大安區延吉街</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 12:00–15:00 / 17:00–22:00</span>
+          <span class="price-pill">💰 兩人 800–1,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0288726765" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-8872-6765</a>
+        </div>
+        <div class="card-feature">
+          🏘 藏在延吉街小巷弄的<strong>溫馨私密小店</strong>，天花板低、燈光暖黃，自然形成親密的聊天空間。豬五花肉脂比例絕佳，<strong>無服務費</strong>，CP值高。不會有大餐廳的嘈雜感，安靜舒適。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'ij1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'ij2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'ij3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="ij1">
+            <div class="menu-grid">
+              <div class="menu-item">🔥 豬五花（360g/2人）<span class="price">~$580</span></div>
+              <div class="menu-item">🥩 韓式烤牛肉 <span class="price">~$480</span></div>
+              <div class="menu-item">🌶 泡菜鍋 <span class="price">~$300</span></div>
+              <div class="menu-item">🥗 小菜3種 <span class="price">免費附贈</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 無服務費；價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="ij2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Pork belly was sooooo good with a perfect meat to fat ratio. Side dishes were delicious too!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              新開的韓式料理，CP值很不錯，食物味道也不錯，無服務費這點加分！附近停車也方便。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              巷弄裡的隱密小店，氣氛溫馨，烤肉品質很好，不用擔心有油煙，輕鬆享受美食！
+            </div>
+          </div>
+          <div class="inner-panel" id="ij3">
+            <a class="map-link" href="https://maps.google.com/?q=이집韓式烤肉+台北市大安區延吉街131巷18號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區延吉街131巷18號1樓（近捷運忠孝敦化站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Uncle Kamjatang -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqEk6KaSbCDLEzrpuZyC_-RcRuSZDKIpBhCoBfFjpbJCNii6PTGJTyXLE8b9j7HQRbpItr4hx4Jo9-AyPJt0TNEOkNgFsDCyCss=s800-w800-h600" alt="Uncle Kamjatang" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🦴</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(5,073則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Uncle Kamjatang 排骨火鍋</div>
+          <div class="card-korean">감자탕 전문 · 台北中山區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–22:30</span>
+          <span class="price-pill">💰 兩人 800–1,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/uncle.kamjatang/" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0225020622" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2502-0622</a>
+        </div>
+        <div class="card-feature">
+          🦴 台北最知名的<strong>馬鈴薯豬骨鍋（감자탕）</strong>專門店！超大塊骨頭入鍋，湯底濃郁鮮美，附搜豆腐、炒年糕等，韓式炒年糕酸甜下飯。服務細心貼心，頗受到評論一致好評。強烈建議提前訂位。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'uk1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'uk2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'uk3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="uk1">
+            <div class="menu-grid">
+              <div class="menu-item">🦴 豬骨馬鈴薯火鍋 <span class="price">~$550–750</span></div>
+              <div class="menu-item">🌶 韓式辣牛肉湯 <span class="price">~$350</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$350</span></div>
+              <div class="menu-item">🍡 搜豆腐炒年糕 <span class="price">~$280</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="uk2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Been looking for good kamjatang in Taipei for a long time and finally found it. Sooo good. The seafood pancake was amazing, super crispy!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The food was so good we came twice in 3 days! Service was top notch. 食物好到我們3天內來了兩次！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              豬骨馬鈴薯鍋湯頭真的超濃郁！骨頭很大塊，肉也很入味，一秒飛到首爾的感覺。
+            </div>
+          </div>
+          <div class="inner-panel" id="uk3">
+            <a class="map-link" href="https://maps.google.com/?cid=8945578524530423166" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市中山區合江街188巷1號（近捷運行天宮站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Igok 忠孝東路 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPdoxmA0yAwI8GWtSzgtlJtSbm4tGGE9XFu4JHlddTagYHIc1ociLKvC-leetaHyOva7Ek_Uuz0tjJ0XUJxXrsWycNHWj1fbBcYEDWXeOfqKDpbn9vC2QKbpZMWRdYKsqc8WXOF-Wrr3qGwX2w=s800-w800-h600" alt="Igok" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥩</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.8 <small>(5,754則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Igok 이곡 韓式燒肉（忠孝總店）</div>
+          <div class="card-korean">이곡 · 台北信義區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–24:00 全天</span>
+          <span class="price-pill">💰 兩人 900–1,400元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/IgokBBQ" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="https://inline.app/booking/igok" target="_blank" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none">🌐 線上訂位</a>
+          <a class="chip chip-book" href="tel:0287851014" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 02-8785-1014</a>
+        </div>
+        <div class="card-feature">
+          🔥 近6,000則評論仍維持 <strong>4.8高分</strong>！全天候營業至深夜，小菜豐盛可無限續，烤肉部位選擇多元。有提供<strong>線上訂位系統</strong>，預約非常方便，是東區口碑最佳的韓式燒肉之一。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'ig1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'ig2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'ig3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="ig1">
+            <div class="menu-grid">
+              <div class="menu-item">🔥 烤豬五花套餐 <span class="price">~$480–580</span></div>
+              <div class="menu-item">🥩 韓式醬烤牛肉 <span class="price">~$520</span></div>
+              <div class="menu-item">🍜 蔘雞湯 <span class="price">~$350</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$320</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$260</span></div>
+              <div class="menu-item">🥗 小菜 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 線上訂位連結：inline.app/booking/igok；價格為參考值</p>
+          </div>
+          <div class="inner-panel" id="ig2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Best Korean restaurant in Taipei! Food is great and affordable, the staff is very kind and helpful!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Really good Korean food. The Kimchi is the best I've ever had. The sides and veggies are good and fresh.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              小菜無限續、肉質新鮮，服務員幫忙烤肉輕鬆享用，週日全天都可以來，非常方便！
+            </div>
+          </div>
+          <div class="inner-panel" id="ig3">
+            <a class="map-link" href="https://maps.google.com/?cid=1517114121619177222" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市信義區忠孝東路五段699號（近捷運永春站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 海雲新莊 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZMVxWySKX4jZJ8cJcPBtgkwJ6rL31abws2e3isbaqiYnwb6ewOhIIuOpYgbFYqxLBJAnXHMp9kFUpy3HTG5sVzLvEDFkF1f4Q-iHfng4ULbNqXhD82b3MgoxqopYYtLPRYpCIYoG6ZLutFX7PE=s800-w800-h600" alt="海雲韓式料理" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🌊</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(2,344則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">海雲韓式料理（新莊店）</div>
+          <div class="card-korean">해운 한식 · 新北新莊</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–14:00 / 17:00–21:00</span>
+          <span class="price-pill">💰 兩人 900–1,300元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0229973131" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2997-3131</a>
+        </div>
+        <div class="card-feature">
+          🔴 新莊區口碑韓式烤肉，使用特色<strong>銅圓盤烤肉方式</strong>，導熱均勻，肉質香嫩。提供2人、3人、4人套餐，每套內含多種烤肉、石鍋拌飯、海鮮煎餅、炒年糕，加上5種小菜，豐盛飽足。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'hc1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'hc2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'hc3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="hc1">
+            <div class="menu-grid">
+              <div class="menu-item">👫 2人套餐 <span class="price">含3種肉+石鍋拌飯等</span></div>
+              <div class="menu-item">🔥 銅圓盤烤牛肉 <span class="price">~$480</span></div>
+              <div class="menu-item">🐷 烤豬五花 <span class="price">~$420</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$320</span></div>
+              <div class="menu-item">🍡 炒年糕 <span class="price">~$200</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="hc2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Very pleasant Korean BBQ. Food was tasty. Quite interesting way to cook meat on the copper center disc. We will come back!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              牛肉有先醃漬，非常入味！小菜一共5種，服務非常好，也有自助沙拉吧，非常滿意！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The best Korean fried chicken we have ever had in Taipei so far! 目前吃過台北最好的韓式炸雞！
+            </div>
+          </div>
+          <div class="inner-panel" id="hc3">
+            <a class="map-link" href="https://maps.google.com/?q=海雲韓式料理+新北市新莊區中港路276號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市新莊區中港路276號（近捷運新莊站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--  💜 TIER 4: 中高級                 -->
+<!-- ══════════════════════════════════ -->
+<div class="section tier-premium" id="section-premium">
+  <div class="section-header">
+    <span class="section-badge">💜 中高級</span>
+    <span class="section-title">兩人預算 1,200–2,200元，品味與享受！</span>
+  </div>
+
+  <!-- 1. 梨谷ATT -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqFbcc6t-FxqAlM2UAZo9WZzB912QP6SXdG9-lqkvw7hITzI7tcufQZzjyvvSiCTZf5zMjNJhqzbkwrBpfpQArnCxf6djiI6z-M=s800-w800-h600" alt="梨谷" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥂</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.9 <small>(3,937則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">梨谷 韓式鐵板炭火烤肉（信義ATT店）</div>
+          <div class="card-korean">이곡 BBQ 신이 · 台北信義區 ATT 4 Fun</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–22:00</span>
+          <span class="price-pill">💰 兩人 1,200–2,000元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/IgokBBQ/" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="https://inline.app/booking/igok" target="_blank" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none">🌐 線上訂位</a>
+          <a class="chip chip-book" href="tel:0277352311" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 02-7735-2311</a>
+        </div>
+        <div class="card-feature">
+          ✨ <strong>全台首創鐵板＋炭烤雙工法</strong>韓式烤肉，菜單含「韓綜連線料理」，100%還原韓劇同款料理（如梨泰院Class海陸嫩豆腐鍋！）。信義ATT高樓層，時尚精緻，有兩間8人包廂。4道小菜無限續、生菜無限加，服務員代烤輕鬆享受。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'lg1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'lg2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'lg3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="lg1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 韓式烤牛小排 <span class="price">~$580</span></div>
+              <div class="menu-item">🐷 啤酒豬五花（韓綜款）<span class="price">~$480</span></div>
+              <div class="menu-item">🫕 海陸嫩豆腐鍋（梨泰院款）<span class="price">~$380</span></div>
+              <div class="menu-item">🍗 韓式炸雞 <span class="price">~$360</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$280</span></div>
+              <div class="menu-item">🥗 4種小菜 <span class="price">無限續</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 包廂低消：平日$4,000 / 假日$5,000；線上訂位：inline.app/booking/igok</p>
+          </div>
+          <div class="inner-panel" id="lg2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">兔兒毛毛姊妹花</span><span class="review-stars">★★★★★</span><span class="review-date">2025年3月</span></div>
+              菜單圖文並茂非常精美！石鍋拌飯、雜醬麵、海鮮煎餅通通都有，隨便點都好吃。建議先訂位！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">貓大爺</span><span class="review-stars">★★★★★</span><span class="review-date">2025年7月</span></div>
+              ATT店空間舒適，位子好坐，小菜4道無限供應超大方。韓綜連線料理的概念很有創意，邊吃邊感受韓劇情境！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Just incredible, the bibimbap was better then in Korea! This place is definitely a must.
+            </div>
+          </div>
+          <div class="inner-panel" id="lg3">
+            <a class="map-link" href="https://maps.google.com/?cid=6796919423213203622" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市信義區松壽路12號5樓（ATT 4 Fun內，近捷運市政府站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. BORNGA -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZOsALPoyh3ODEx9nqCgccmhloLhi7ReNW0BvM5SLwVzXoFuk019kbT04pHOeLcgPKeohRKwBbvpbdSOTpkv64EDmQ8_d6LUHPdWBXBQ5WS0DXSDFAEmhZNGhfMUVG1n3jFkYfT2_aLuu1mb3Q=s800-w800-h600" alt="BORNGA" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">👨‍🍳</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(5,259則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">本家 BORNGA 韓式燒肉（敦南店）</div>
+          <div class="card-korean">본가 · 台北大安區市民大道</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 12:00–16:00 / 17:00–22:30</span>
+          <span class="price-pill">💰 兩人 1,200–1,800元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/profile.php?id=100086873505560" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0227755686" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2775-5686（相鄰）</a>
+        </div>
+        <div class="card-feature">
+          🏅 <strong>韓國知名主廚白鍾元</strong>（韓國頂級飲食節目評審）旗下連鎖品牌，以相對親民的價格呈現米其林等級的概念。食材新鮮，生菜供應充足豐盛，烤肉醃料講究，肉質細緻。空間設計時尚，有卡座包廂感，私密度良好。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'bg1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'bg2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'bg3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="bg1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 韓式烤牛小排 <span class="price">~$680</span></div>
+              <div class="menu-item">🐷 醃烤五花肉 <span class="price">~$480</span></div>
+              <div class="menu-item">🥗 生菜包肉（無限供應）<span class="price">套餐附</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$280</span></div>
+              <div class="menu-item">🧆 多款套餐 <span class="price">2人~$1,500起</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="bg2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The food was so good! Produce (lettuce wraps) are fresh and plentiful, meats are well marinaded and flavourful!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              肉質比預期好很多！套餐份量也很充足，生菜幾乎無限供應，服務態度也不錯，很值得！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              Because of Baek Jong-won, came here with high expectations. The meat was quite tasty. Ambiance was nice and service decent.
+            </div>
+          </div>
+          <div class="inner-panel" id="bg3">
+            <a class="map-link" href="https://maps.google.com/?cid=6362023006808862243" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區市民大道四段102號（近捷運忠孝敦化站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ABV板橋 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZOMh2NOzx4KmUjIKYqrqJLvhFzL8sgYkyQ3FcfQ4gyH_O3sKIz5Y4vjUGdmTnMyMQjBAuRvq08onbq9nJ1Xr4KLEwap2eQOmYz-F4aHfMX4mIKn7zKo36GAPmY_9joicuOFbxnkAs7Evi_Pwh0zMA3t3A=s800-w800-h600" alt="ABV板橋" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🍻</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(909則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">ABV Bar & Kitchen（板橋文化店）</div>
+          <div class="card-korean">ABV 한식 · 新北板橋</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 12:00–01:00 全天</span>
+          <span class="price-pill">💰 兩人 1,200–1,800元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0222726089" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2272-6089</a>
+        </div>
+        <div class="card-feature">
+          🍺 韓式烤肉結合<strong>精選韓國調酒餐酒館</strong>風格，可選擇讓服務員代烤或自行DIY。辣炒魷魚、韓式炒年糕口味道地，氣氛活潑熱鬧，週日全天營業超彈性，是板橋區頗具特色的韓食選擇。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'ab1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'ab2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'ab3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="ab1">
+            <div class="menu-grid">
+              <div class="menu-item">🔥 烤豬五花 <span class="price">~$480</span></div>
+              <div class="menu-item">🐙 辣炒魷魚 <span class="price">~$320</span></div>
+              <div class="menu-item">🍡 辣炒年糕 <span class="price">~$250</span></div>
+              <div class="menu-item">🍶 韓式精選調酒 <span class="price">~$280–380</span></div>
+              <div class="menu-item">🥩 韓式涮牛肉鍋 <span class="price">~$580</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="ab2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The stir-fried squid with onions and spicy rice cake was fire! Staff helped grill pork belly and beef just right.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              氣氛很好，調酒選擇豐富，烤肉品質不錯，非常適合悠閒的午後用餐！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Great atmosphere, great home cooking, beer is very nice. Staff is also very friendly as well.
+            </div>
+          </div>
+          <div class="inner-panel" id="ab3">
+            <a class="map-link" href="https://maps.google.com/?q=ABV+Bar+Kitchen+板橋+新北市板橋區文化路一段217號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 新北市板橋區文化路一段217號（近捷運板橋站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 採源 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZNp0pPZWoJIgfZXpuqHWWP9R5OTvhvWWh9l3QSPU8iN5tNPJYkL71cr-jhCEOuZl7ctPbuY8Wh23qDs3b1SniDsvmf_HLQnyjxfEceor6F_7ME4gRKBQT9ll32DcTgCENe7u-3T0RNbqH-SEA=s800-w800-h600" alt="採源" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🌸</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(54則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">採源（四維路韓式料理）</div>
+          <div class="card-korean">채원 · 台北大安區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 12:00–14:00 / 18:00–21:00</span>
+          <span class="price-pill">💰 兩人 1,500–2,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0227080082" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2708-0082</a>
+        </div>
+        <div class="card-feature">
+          🎵 大安區精緻韓式家常料理，空間設計高雅，<strong>播放古典優雅音樂</strong>，宛如私人餐廳般的靜謐感受。非套餐菜單，可自由點餐，小菜可無限續，評論稱讚氛圍獨特、服務親切，非常適合想要不被打擾的靜謐用餐體驗。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'cy1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'cy2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'cy3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="cy1">
+            <div class="menu-grid">
+              <div class="menu-item">🦐 醬汁鮮蝦 <span class="price">招牌必點</span></div>
+              <div class="menu-item">🥩 韓式烤牛肉 <span class="price">~$580</span></div>
+              <div class="menu-item">🐷 韓式烤豬肉 <span class="price">~$480</span></div>
+              <div class="menu-item">🥗 小菜 <span class="price">無限續</span></div>
+              <div class="menu-item">🍞 杜拜巧克力甜點 <span class="price">季節限定</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 非套餐制，可自由搭配點餐；價格為參考值</p>
+          </div>
+          <div class="inner-panel" id="cy2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              One of a kind. Truly sophisticated ambiance and deeply soulful flavors. Perfect venue for exclusively private dining experience.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              One of the best Korean food in Taipei. 台北吃過最好的韓式料理之一，氣氛非常特別！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              高雅的環境配上優美音樂，食物精緻可口，醬汁鮮蝦是亮點。適合想要安靜享受美食的場合。
+            </div>
+          </div>
+          <div class="inner-panel" id="cy3">
+            <a class="map-link" href="https://maps.google.com/?q=採源+台北市大安區四維路66巷2號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區四維路66巷2號（近捷運科技大樓站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 宮廷聚 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPr5kGBNy8lNeOLzp3hlBpTXexny0TgkeB9RXXyA9T0C-0K90HTlgnFW8TS-wgUHNJR_1GM96lnZYf7Na0pm1044otup-B1PK99ncEr5bsk-oEfewUicLUstVfo2kNs9zgZh9SDf8L4T9t817zMzqIt2A=s800-w800-h600" alt="宮廷聚" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">👘</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.7 <small>(276則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">宮廷聚韓式創意料理（中山）</div>
+          <div class="card-korean">한복 체험 · 台北中山區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 12:00–14:30 / 17:30–21:00</span>
+          <span class="price-pill">💰 兩人 1,000–1,500元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0225000883" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2500-0883</a>
+        </div>
+        <div class="card-feature">
+          👘 獨特的<strong>韓服體驗＋韓式料理</strong>結合，可在用餐前穿上韓服拍照留念，增添儀式感！小菜幾乎無限續，整體用餐環境有韓國異國風情，私房包廂適合小型聚會。招牌辣牛肉湯鮮美，海鮮煎餅超酥脆。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'gt1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'gt2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'gt3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="gt1">
+            <div class="menu-grid">
+              <div class="menu-item">🌶 辣牛肉湯 <span class="price">招牌必點</span></div>
+              <div class="menu-item">🥞 海鮮煎餅 <span class="price">~$320</span></div>
+              <div class="menu-item">🍗 韓式炸雞 <span class="price">~$360</span></div>
+              <div class="menu-item">🥗 小菜 <span class="price">幾乎無限續</span></div>
+              <div class="menu-item">👘 韓服體驗 <span class="price">可預約加購</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="gt2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              辣牛肉湯真的很棒！小菜也非常好吃，韓服拍照更是超有趣，讓整個用餐體驗非常特別！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              The spicy beef soup is really spicy but very good! Side dishes can be added almost infinitely. The owner taught us how to wear the hanbok!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              穿著韓服用餐的感覺超特別，食物也很正宗好吃，是台北少見的韓式體驗型餐廳！
+            </div>
+          </div>
+          <div class="inner-panel" id="gt3">
+            <a class="map-link" href="https://maps.google.com/?q=宮廷聚韓式創意料理+台北市中山區錦州街426巷1-2號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市中山區錦州街426巷1-2號（近捷運行天宮站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--  ❤️ TIER 5: 高級                   -->
+<!-- ══════════════════════════════════ -->
+<div class="section tier-premium" id="section-luxury">
+  <div class="section-header">
+    <span class="section-badge" style="background:linear-gradient(135deg,#FF3B47,#7B2FBE)">❤️ 高級精緻</span>
+    <span class="section-title">兩人預算 2,000元以上，頂級韓食體驗！</span>
+  </div>
+
+  <!-- 1. boon -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPlJ-VoFsNnTzIh5FKgEzGO04FQcv_PyKZBpHj-OLtP5hO2-JgQc2qUh8OJkagbKlaUXRe30yn-WA4baoqCIw-EBk4HDp0KK2CIAWoNDvdhJtYtcEQH5iSfffHLghbjgC-38PAeXMtqLOuLmXyPD5kFWQ=s800-w800-h600" alt="boon" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🌆</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.5 <small>(82則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">boon 現代韓式餐酒館</div>
+          <div class="card-korean">台北信義區微風南山 48F ｜ 🌆 俯瞰台北城</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–02:30</span>
+          <span class="price-pill">💰 兩人 1,500–2,500元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0909956000" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none">📞 訂位：0909-956-000</a>
+        </div>
+        <div class="card-feature">
+          🌆 位於<strong>微風南山48樓</strong>，擁有台北最壯觀的都市天際線景觀，可直眺台北101！主打現代創意韓式料理，炸雞被評論稱讚「不可思議地不油膩」，韓式烤肉與調酒完美搭配，是台北最具浪漫氣氛的韓食選擇。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'bn1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'bn2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'bn3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="bn1">
+            <div class="menu-grid">
+              <div class="menu-item">🍗 現代韓式炸雞 <span class="price">~$480</span></div>
+              <div class="menu-item">🥩 韓式燒烤 <span class="price">~$580</span></div>
+              <div class="menu-item">🍱 韓式刺身飯 <span class="price">~$420</span></div>
+              <div class="menu-item">🍹 韓式創意調酒 <span class="price">~$350–450</span></div>
+              <div class="menu-item">🥗 韓式小菜拼盤 <span class="price">~$280</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 48樓景觀位置，建議提前電話預約窗邊座位；價格為參考值</p>
+          </div>
+          <div class="inner-panel" id="bn2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Incredible dining experience! The food is both creative and delicious. Great vibe. Perfect for a special night out.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Delicious fried chicken: crispy, juicy, and unforgettable. Enjoy it with a stunning city skyline view. Cathy's warm service makes it even better!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              48樓的台北夜景太美了！邊享用創意韓食邊欣賞城市景色，這個體驗值得！炸雞真的不油，超神奇！
+            </div>
+          </div>
+          <div class="inner-panel" id="bn3">
+            <a class="map-link" href="https://maps.google.com/?cid=4247616964153744740" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市信義區松智路17號微風南山48樓（近捷運台北101/世貿站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 漢陽包廂升級 已於上方，這裡放 Broccolibeer -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZP1MvtonMNgoXlN1mp81ZRconHucSYEGe0g0ytBU2TxJGJ6BsxycweQBB34TGoL6Oa9qklgP8ZFJf5vMFaKg8sNTawufrO_LIhuAOap0x05eIgsBA5-dgFUYbMEylHsN_qSbdIduj1-gJ-MdJtSRt7e=s800-w800-h600" alt="Broccolibeer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥦</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.4 <small>(4,499則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">Broccolibeer 韓式餐酒館</div>
+          <div class="card-korean">브로콜리비어 · 台北中山區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–15:00 / 17:00–23:30</span>
+          <span class="price-pill">💰 兩人 1,200–1,800元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0225236878" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2523-6878</a>
+        </div>
+        <div class="card-feature">
+          🎵 韓式餐酒館風格，以<strong>霓虹燈裝飾＋韓流音樂</strong>打造活潑氛圍。招牌「海鮮煎餅披薩」是創意融合必點，啤酒冰涼爽口，音樂不過吵鬧依然適合聊天。評論數近5,000則，是中山區相當受歡迎的韓食聚餐地點。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'bc1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'bc2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'bc3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="bc1">
+            <div class="menu-grid">
+              <div class="menu-item">🍕 海鮮煎餅披薩 <span class="price">招牌必點</span></div>
+              <div class="menu-item">🍗 韓式炸雞 <span class="price">~$380</span></div>
+              <div class="menu-item">🥘 石鍋拌飯 <span class="price">~$280</span></div>
+              <div class="menu-item">🍺 韓式生啤酒 <span class="price">~$200</span></div>
+              <div class="menu-item">🌶 辣炒年糕 <span class="price">~$250</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 有商業午餐套餐，價格較優惠；以現場為準</p>
+          </div>
+          <div class="inner-panel" id="bc2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Their seafood pancake pizza was really good! The music is not too loud so people can still have a nice conversation.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              Loved the vibe of the place! Lots of young decor and neon lights. Great for groups and catching up with friends.
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              韓式餐酒館裡少見的好口味，炸雞酥脆多汁，啤酒冰涼配上現場韓流音樂，氣氛超棒！
+            </div>
+          </div>
+          <div class="inner-panel" id="bc3">
+            <a class="map-link" href="https://maps.google.com/?q=Broccolibeer+台北市中山區松江路40號" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市中山區松江路40號1樓（近捷運松江南京站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 梨谷ATT（高級版）- 再次列出作為高級選項之一 -->
+  <div class="restaurant-card" style="background:linear-gradient(135deg,#fff9f0,#fff0f8)">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/places/ANXAkqFOKdwXp1y1DQwvFvIOmWlen2UztD6uxyDRjuWGVrRU770MQ2lp8glaybgOCHHjhoasXRTLTwwSaRjyg91vpR1xO2nFtsbv15g=s800-w800-h600" alt="梨谷ATT高級" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🥂</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.9 <small>(3,937則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">梨谷 ATT 包廂高級體驗</div>
+          <div class="card-korean">이곡 프리미엄 · 台北信義區 ｜ 💎 包廂升級</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:00–22:00</span>
+          <span class="price-pill">💰 包廂：假日低消 $5,000</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="https://inline.app/booking/igok" target="_blank" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none">🌐 線上訂位</a>
+          <a class="chip chip-book" href="tel:0277352311" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 包廂電話：02-7735-2311</a>
+        </div>
+        <div class="card-feature">
+          💎 梨谷ATT的<strong>8人包廂</strong>（可兩間合併最多16人），完全獨立私密空間，完全不被外人打擾！假日低消5,000元，適合想要升級體驗的用餐安排。韓綜連線特色菜單、服務員全程代烤，讓你安心享受用餐時光。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'lp1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'lp2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'lp3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="lp1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 和牛烤肉 <span class="price">~$880</span></div>
+              <div class="menu-item">🫕 海陸嫩豆腐鍋 <span class="price">~$580</span></div>
+              <div class="menu-item">🍗 韓式炸雞全餐 <span class="price">~$680</span></div>
+              <div class="menu-item">🥗 4種小菜 <span class="price">無限續</span></div>
+              <div class="menu-item">🍹 韓式飲料特調 <span class="price">~$250–380</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 包廂需電話預約（02-7735-2311）；線上訂位無包廂</p>
+          </div>
+          <div class="inner-panel" id="lp2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">周花花，甲飽沒</span><span class="review-stars">★★★★★</span><span class="review-date">2024年6月</span></div>
+              包廂超私密，有兩間8人包廂，聚餐需求大推！ATT店空間寬敞，菜色選擇多元，水準穩定高。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">貓大爺</span><span class="review-stars">★★★★★</span><span class="review-date">2025年7月</span></div>
+              總之菜色非常多，而且口味都有一定水平，ATT店地點好、用餐空間舒適，非常適合聚餐。
+            </div>
+          </div>
+          <div class="inner-panel" id="lp3">
+            <a class="map-link" href="https://maps.google.com/?cid=6796919423213203622" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市信義區松壽路12號5樓（ATT 4 Fun，近捷運市政府站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 漢陽包廂私房菜升級 -->
+  <div class="restaurant-card" style="background:linear-gradient(135deg,#f0fff9,#f0f4ff)">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPbMhumJVcYn3rUdeXCaoPFgZVs_y9lY77jucbuIWg42MP335pRrG3sPzkTkopLwTS4PQlujbrA57M6DnSsvTvn60imnSCGL6da0YnC36VyIHdxTUtdlUCoPLz0c90QrHfHrtQuGBvDZs9ssR81iY9N=s800-w800-h600" alt="漢陽包廂" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🏮</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.9 <small>(354則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">漢陽韓式陶盤 包廂私房菜完整體驗</div>
+          <div class="card-korean">한양 프리미엄 룸 · 台北大安區 ｜ 💎 頂級包廂</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–14:00 / 17:30–21:00</span>
+          <span class="price-pill">💰 兩人（含私房菜）約 1,500–2,200元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-web" href="https://www.facebook.com/Hanyang1996" target="_blank">🌐 Facebook 粉絲頁</a>
+          <a class="chip chip-book" href="tel:0227711220" style="background:linear-gradient(135deg,#FF3B47,#FF6B2B);color:white;border:none">📞 包廂訂位：02-2771-1220</a>
+        </div>
+        <div class="card-feature">
+          🏮 漢陽提供<strong>6至20人包廂</strong>並可加點主廚限定私房菜（辣炒雞湯、牛肉蘿蔔湯、人蔘雞湯），食材使用美國Prime等級牛肉與西班牙頂級伊比利豬，加上桌邊代烤、GD氣泡酒、餐後紅蔘茶，打造完整高端韓式體驗，是台北最接近正宗首爾高端韓食的選擇。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'hylx1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'hylx2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'hylx3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="hylx1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 美國Prime牛肉套餐 <span class="price">~$550/人</span></div>
+              <div class="menu-item">🐷 伊比利豬套餐 <span class="price">~$500/人</span></div>
+              <div class="menu-item">🍲 辣炒雞湯（私房）<span class="price">~$350（包廂限定）</span></div>
+              <div class="menu-item">🥣 牛肉蘿蔔湯（私房）<span class="price">~$300（包廂限定）</span></div>
+              <div class="menu-item">🍜 人蔘雞湯（私房）<span class="price">~$400（包廂限定）</span></div>
+              <div class="menu-item">🥂 GD氣泡酒 <span class="price">~$280</span></div>
+              <div class="menu-item">☕ 紅蔘茶/咖啡 <span class="price">套餐附贈</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 包廂採預約制，建議提前1週訂位；加收10%服務費；資料來源：2025年部落客食記</p>
+          </div>
+          <div class="inner-panel" id="hylx2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">艾斯的美食視界</span><span class="review-stars">★★★★★</span><span class="review-date">2025年7月</span></div>
+              包廂預訂時可加點主廚限定私房菜，辣雞湯真的一秒回韓國，非常道地！GD氣泡酒讓用餐氣氛更加愉悅。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Trip.com 旅客評論</span><span class="review-stars">★★★★★</span><span class="review-date">2025年9月</span></div>
+              包廂私房菜是一大亮點，辣炒雞湯和蘿蔔排骨湯，再加泡麵燉煮，真的超滿足！非常推薦！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">愛食記</span><span class="review-stars">★★★★★</span><span class="review-date">2025年11月</span></div>
+              來自韓國30年家傳口味，道地韓味，專人桌邊烤肉服務，餐後飲料機的紅蔘茶喝起來也很有特色！
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Alina 愛琳娜</span><span class="review-stars">★★★★★</span><span class="review-date">2025年8月</span></div>
+              陶盤烤肉不會產生油煙，吃完身上完全沒有油煙味！高品質肉品搭配水梨高湯，真的超讚。
+            </div>
+          </div>
+          <div class="inner-panel" id="hylx3">
+            <a class="map-link" href="https://maps.google.com/?cid=6314684348301935288" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市大安區仁愛路四段345巷4弄23號（近捷運忠孝敦化站，步行約8分鐘）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ANJU (晚餐) 改為 本家選手村 -->
+  <div class="restaurant-card">
+    <div class="card-top">
+      <div class="card-img-wrap">
+        <img class="card-img" src="https://lh3.googleusercontent.com/place-photos/AJRVUZPwpxtMCdsZdrV5vSkerl5S7uFsNgwvvdnfimC22Dynku1FXroJFYgxQC-eeT0BrHz_S14jnGmLvd0z6chDsQwj7I4fyZ6HtntBNAbaHw-8EuVOfjSbToGflTzuQa5rVWOw0XXzQ9EMpWiUTg=s800-w800-h600" alt="本家選手村" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-placeholder" style="display:none">🎵</div>
+        <div class="card-img-overlay">
+          <span class="rating-badge">⭐ 4.6 <small>(2,975則)</small></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-name">本家選手村</div>
+          <div class="card-korean">본가 선수촌 · 台北松山區</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="hours-pill">⏰ 週日 11:30–16:00 / 17:30–22:30</span>
+          <span class="price-pill">💰 兩人 1,500–2,500元</span>
+        </div>
+        <div class="card-links">
+          <a class="chip chip-book" href="tel:0228747087" style="background:linear-gradient(135deg,#4361EE,#7B2FBE);color:white;border:none">📞 訂位：02-2874-7087</a>
+        </div>
+        <div class="card-feature">
+          🇰🇷 韓國首爾連鎖品牌在台分店，以<strong>最接近首爾街頭氣氛</strong>聞名，KPop音樂、裝潢佈置完整重現韓國用餐體驗。週日有開午餐，肉質評價好，生菜新鮮充足，是台北最有韓國味道的高級選擇之一。
+        </div>
+        <div>
+          <div class="inner-tabs">
+            <button class="inner-tab active" onclick="switchInner(this,'bj1')">🍽 菜單</button>
+            <button class="inner-tab" onclick="switchInner(this,'bj2')">💬 評論</button>
+            <button class="inner-tab" onclick="switchInner(this,'bj3')">📍 地圖</button>
+          </div>
+          <div class="inner-panel active" id="bj1">
+            <div class="menu-grid">
+              <div class="menu-item">🥩 精選烤牛肉 <span class="price">~$680–880</span></div>
+              <div class="menu-item">🧈 奶油烤豬五花 <span class="price">~$580</span></div>
+              <div class="menu-item">🥗 生菜包肉 <span class="price">無限供應</span></div>
+              <div class="menu-item">🍻 韓國生啤酒 <span class="price">~$250</span></div>
+              <div class="menu-item">🌶 辣炒年糕 <span class="price">~$280</span></div>
+            </div>
+            <p style="font-size:12px;color:#aaa;margin-top:10px">※ 價格為參考值，以現場為準</p>
+          </div>
+          <div class="inner-panel" id="bj2">
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              If you ever want to experience what it is like in Seoul, just come here! Great food, great staff, great vibe and extremely reasonable price!
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★☆</span><span class="review-date">近期</span></div>
+              肉質很好，生菜新鮮，服務周到，音樂讓整個氣氛非常韓式！很喜歡這個整體感受。
+            </div>
+            <div class="review-item">
+              <div class="review-meta"><span class="review-author">Google 用戶</span><span class="review-stars">★★★★★</span><span class="review-date">近期</span></div>
+              Pork was really good and kpop songs created a really nice ambience. Would come again for sure!
+            </div>
+          </div>
+          <div class="inner-panel" id="bj3">
+            <a class="map-link" href="https://maps.google.com/?q=本家選手村+台北市松山區慶城街1號2樓" target="_blank">📍 在 Google Maps 查看</a>
+            <div class="address-text">📌 台北市松山區慶城街1號2樓（近捷運南京三民站）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>🍖 台北韓式料理精選指南</strong><br>
+  資料來源：Google Maps、各餐廳官方粉絲頁、部落客食記（2024–2025）<br>
+  ⚠️ 菜單價格及營業時間可能隨時更動，建議出發前電話確認。<br>
+  <span style="font-size:12px;margin-top:8px;display:block">Made with ❤️ · 資料更新至 2025年</span>
+</footer>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('section-' + id).classList.add('active');
+  window.scrollTo({ top: document.querySelector('.tabs-wrap').offsetTop - 10, behavior: 'smooth' });
+}
+
+function switchInner(el, panelId) {
+  const card = el.closest('.restaurant-card');
+  card.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// Lazy load images with fallback
+document.querySelectorAll('.card-img').forEach(img => {
+  img.addEventListener('error', function() {
+    this.style.display = 'none';
+    const ph = this.nextElementSibling;
+    if (ph && ph.classList.contains('img-placeholder')) {
+      ph.style.display = 'flex';
+    }
+  });
+});
+</script>
+</body>
+</html>
