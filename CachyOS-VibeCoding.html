@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本地 AI 開發環境安裝指南 — Qwen 3.5 + OpenClaw + HiClaw</title>
+<style>
+  :root{
+    --bg:#0e0c0d; --bg2:#15171a; --panel:#1a1d22; --panel2:#1e2229;
+    --accent:#FF5A36; --accent2:#FF8A6B; --accentdim:#3a201a;
+    --text:#e9e7e4; --muted:#9aa0a8; --border:#2a2e36;
+    --code:#0b0d10; --green:#3fb950; --greenbg:#15301c;
+    --blue:#4aa3ff; --bluebg:#142436; --amber:#e3a008; --amberbg:#332608;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+    line-height:1.75;font-size:16px;
+  }
+  code,pre,.mono{font-family:"JetBrains Mono","Cascadia Code","Consolas",ui-monospace,monospace}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* layout */
+  .wrap{display:flex;max-width:1400px;margin:0 auto}
+  .sidebar{
+    width:266px;flex-shrink:0;position:sticky;top:0;height:100vh;
+    overflow-y:auto;padding:24px 14px;border-right:1px solid var(--border);
+    background:var(--bg2);
+  }
+  .main{flex:1;min-width:0;padding:0 clamp(18px,4vw,56px) 120px}
+
+  /* top progress */
+  .topbar{
+    position:sticky;top:0;z-index:50;background:rgba(14,12,13,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--border);
+    padding:12px clamp(18px,4vw,56px);
+  }
+  .topbar .row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topbar h2{font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .pbar{flex:1;min-width:140px;height:9px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .pfill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease}
+  .ptext{font-size:13px;color:var(--accent2);font-weight:700;white-space:nowrap}
+  .resetbtn{background:none;border:1px solid var(--border);color:var(--muted);
+    font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer}
+  .resetbtn:hover{border-color:var(--accent);color:var(--accent2)}
+
+  /* sidebar nav */
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;margin-bottom:4px;padding:0 8px}
+  .brand .lob{font-size:22px}
+  .brandsub{font-size:11.5px;color:var(--muted);padding:0 8px;margin-bottom:18px}
+  .nav a{
+    display:block;padding:8px 12px;border-radius:8px;color:var(--muted);
+    font-size:14px;margin-bottom:2px;border-left:2px solid transparent;
+  }
+  .nav a:hover{background:var(--panel);color:var(--text);text-decoration:none}
+  .nav a.active{background:var(--accentdim);color:var(--accent2);border-left-color:var(--accent);font-weight:600}
+  .nav .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    color:#5a606a;margin:16px 8px 6px;font-weight:700}
+
+  /* hero */
+  .hero{padding:54px 0 30px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .hero h1{font-size:clamp(26px,4vw,40px);line-height:1.25;font-weight:800;letter-spacing:-.01em}
+  .hero h1 .hl{color:var(--accent)}
+  .hero .lead{color:var(--muted);font-size:17px;margin-top:14px;max-width:680px}
+
+  /* spec card */
+  .speccard{
+    background:linear-gradient(135deg,var(--panel),var(--panel2));
+    border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin:26px 0;
+  }
+  .speccard h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent2);margin-bottom:14px}
+  .specgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .specitem .k{font-size:12px;color:var(--muted)}
+  .specitem .v{font-size:15px;font-weight:700;margin-top:2px}
+  .specitem .v.good{color:var(--green)}
+
+  /* roadmap */
+  .roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:24px 0}
+  .rmcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+  .rmcard .num{font-size:42px;font-weight:800;color:var(--accentdim);position:absolute;top:6px;right:14px;line-height:1}
+  .rmcard .stage{font-size:12px;color:var(--accent2);font-weight:700;letter-spacing:.04em}
+  .rmcard h4{font-size:16px;margin:6px 0 6px}
+  .rmcard p{font-size:13.5px;color:var(--muted)}
+
+  /* sections */
+  section{padding:42px 0 10px;border-bottom:1px solid var(--border)}
+  section:last-of-type{border-bottom:none}
+  .sectag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.05em;
+    color:var(--accent2);background:var(--accentdim);padding:3px 11px;border-radius:20px;margin-bottom:12px}
+  h2.sec{font-size:clamp(21px,3vw,29px);font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  h3.sub{font-size:18px;font-weight:700;margin:30px 0 10px;display:flex;align-items:center;gap:9px}
+  h3.sub .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;flex-shrink:0}
+  p{margin:10px 0}
+  .muted{color:var(--muted)}
+  ul.clean{margin:10px 0 10px 4px;list-style:none}
+  ul.clean li{padding:4px 0 4px 22px;position:relative}
+  ul.clean li::before{content:"▸";color:var(--accent);position:absolute;left:0}
+
+  /* step card */
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    margin:16px 0;overflow:hidden;transition:border-color .25s}
+  .step.done{border-color:var(--green)}
+  .stephead{display:flex;align-items:flex-start;gap:13px;padding:15px 18px;cursor:pointer;user-select:none}
+  .stephead:hover{background:var(--panel2)}
+  .chk{appearance:none;width:22px;height:22px;border:2px solid var(--border);border-radius:6px;
+    flex-shrink:0;cursor:pointer;margin-top:2px;position:relative;transition:.2s}
+  .chk:checked{background:var(--green);border-color:var(--green)}
+  .chk:checked::after{content:"✓";position:absolute;color:#fff;font-size:14px;font-weight:900;
+    left:3px;top:-2px}
+  .stepnum{font-size:12px;color:var(--accent2);font-weight:700}
+  .steptitle{font-size:16px;font-weight:700;margin-top:1px}
+  .stepbody{padding:2px 18px 18px 53px}
+  @media(max-width:560px){.stepbody{padding:2px 16px 16px 16px}}
+
+  /* command block */
+  .cb{position:relative;margin:12px 0}
+  .cb pre{background:var(--code);border:1px solid var(--border);border-radius:9px;
+    padding:13px 50px 13px 15px;overflow-x:auto;font-size:13.5px;line-height:1.65}
+  .cb pre code{color:#d6e7c8}
+  .cb .cmt{color:#6b7280}
+  .copy{position:absolute;top:8px;right:8px;background:var(--panel2);border:1px solid var(--border);
+    color:var(--muted);font-size:11.5px;padding:4px 9px;border-radius:6px;cursor:pointer;font-family:inherit}
+  .copy:hover{border-color:var(--accent);color:var(--accent2)}
+  .copy.ok{border-color:var(--green);color:var(--green)}
+  .inlinecode{background:var(--code);border:1px solid var(--border);border-radius:5px;
+    padding:1px 6px;font-size:13px;color:var(--accent2)}
+
+  /* callouts */
+  .box{border-radius:10px;padding:13px 16px;margin:14px 0;font-size:14.5px;border:1px solid}
+  .box .bt{font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:7px}
+  .box.info{background:var(--bluebg);border-color:#21527e}
+  .box.info .bt{color:var(--blue)}
+  .box.warn{background:var(--amberbg);border-color:#6b5212}
+  .box.warn .bt{color:var(--amber)}
+  .box.tip{background:var(--greenbg);border-color:#23502f}
+  .box.tip .bt{color:var(--green)}
+  .box.danger{background:var(--accentdim);border-color:#6b3320}
+  .box.danger .bt{color:var(--accent2)}
+
+  /* why-details */
+  details.why{background:var(--panel2);border:1px dashed var(--border);border-radius:9px;
+    margin:12px 0;padding:0}
+  details.why summary{cursor:pointer;padding:11px 15px;font-size:14px;color:var(--accent2);
+    font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+  details.why summary::-webkit-details-marker{display:none}
+  details.why summary::before{content:"💡";font-size:15px}
+  details.why summary::after{content:"展開說明 ▾";margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
+  details.why[open] summary::after{content:"收合 ▴"}
+  details.why .wbody{padding:2px 15px 14px;font-size:14px;color:#c8ccd2;border-top:1px solid var(--border);margin-top:0;padding-top:12px}
+
+  /* verify checklist */
+  .verify{background:var(--greenbg);border:1px solid #23502f;border-radius:10px;padding:13px 17px;margin:14px 0}
+  .verify .vt{color:var(--green);font-weight:700;margin-bottom:6px;font-size:14px}
+  .verify ul{list-style:none;font-size:14px}
+  .verify li{padding:3px 0 3px 24px;position:relative}
+  .verify li::before{content:"☑";color:var(--green);position:absolute;left:0}
+
+  /* tables */
+  .tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  .tbl th,.tbl td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+  .tbl th{background:var(--panel2);color:var(--accent2);font-size:13px}
+  .tbl tr:nth-child(even) td{background:var(--bg2)}
+
+  /* trouble */
+  details.tr{background:var(--panel);border:1px solid var(--border);border-radius:10px;margin:10px 0}
+  details.tr summary{cursor:pointer;padding:13px 16px;font-weight:600;font-size:15px;list-style:none;
+    display:flex;align-items:center;gap:9px}
+  details.tr summary::-webkit-details-marker{display:none}
+  details.tr summary::before{content:"⚠";color:var(--amber)}
+  details.tr summary::after{content:"▾";margin-left:auto;color:var(--muted)}
+  details.tr[open] summary::after{content:"▴"}
+  details.tr[open] summary{border-bottom:1px solid var(--border)}
+  details.tr .trbody{padding:13px 16px}
+
+  /* phase banner */
+  .phasebanner{display:flex;align-items:center;gap:16px;background:linear-gradient(120deg,var(--accentdim),transparent);
+    border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:16px 20px;margin:8px 0 8px}
+  .phasebanner .pn{font-size:34px;font-weight:800;color:var(--accent)}
+  .phasebanner .pd .t{font-weight:800;font-size:18px}
+  .phasebanner .pd .s{color:var(--muted);font-size:13.5px}
+
+  .footer{padding:34px 0 10px;color:var(--muted);font-size:13px}
+  .kbd{background:var(--panel2);border:1px solid var(--border);border-bottom-width:2px;
+    border-radius:5px;padding:1px 7px;font-size:12.5px;font-family:inherit}
+
+  .menubtn{display:none}
+  @media(max-width:900px){
+    .sidebar{position:fixed;left:-280px;z-index:60;transition:left .25s;box-shadow:0 0 40px #000}
+    .sidebar.open{left:0}
+    .menubtn{display:inline-block;background:var(--panel2);border:1px solid var(--border);
+      color:var(--text);border-radius:7px;padding:5px 11px;cursor:pointer;font-size:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <button class="menubtn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <h2>安裝進度</h2>
+    <div class="pbar"><div class="pfill" id="pfill"></div></div>
+    <span class="ptext" id="ptext">0 / 0</span>
+    <button class="resetbtn" onclick="resetProgress()">重設</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="brand"><span class="lob">🦞</span> 本地 AI 開發環境</div>
+    <div class="brandsub">Qwen 3.5 · OpenClaw · HiClaw 完整安裝指南</div>
+    <nav class="nav" id="nav">
+      <a href="#home">總覽與學習路線</a>
+      <a href="#concepts">先搞懂：四個工具的關係</a>
+      <a href="#prep">開始之前：系統準備</a>
+      <div class="grp">階段一</div>
+      <a href="#phase1">Ollama + Qwen 3.5</a>
+      <div class="grp">階段二</div>
+      <a href="#phase2">Cline — Vibe Coding</a>
+      <div class="grp">階段三</div>
+      <a href="#phase3">OpenClaw — 第一個代理</a>
+      <div class="grp">階段四</div>
+      <a href="#phase4">HiClaw — 軟體開發團隊</a>
+      <div class="grp">補充</div>
+      <a href="#tuning">設定調校 & 資源分配</a>
+      <a href="#trouble">疑難排解</a>
+      <a href="#links">參考連結</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+  <!-- ===================== HOME ===================== -->
+  <section id="home" style="border-bottom:none">
+    <div class="hero">
+      <h1>把你的筆電變成<br><span class="hl">本地 AI 開發工作站</span></h1>
+      <p class="lead">這份指南會帶你一步步在 CachyOS 上，讓 Qwen 3.5 模型在地端跑起來、用它做 Vibe Coding，最後打造一支自動協作的軟體開發 AI 代理團隊。每個指令都附上「在做什麼」的說明，新手也能跟著走完。</p>
+    </div>
+
+    <div class="speccard">
+      <h3>📋 這份指南是針對你的這台機器量身設計</h3>
+      <div class="specgrid">
+        <div class="specitem"><div class="k">機型</div><div class="v">Dell Precision 5570</div></div>
+        <div class="specitem"><div class="k">處理器</div><div class="v">Intel 12 代行動工作站</div></div>
+        <div class="specitem"><div class="k">顯示卡</div><div class="v good">RTX A2000 · 8GB</div></div>
+        <div class="specitem"><div class="k">記憶體</div><div class="v">32 GB RAM</div></div>
+        <div class="specitem"><div class="k">作業系統</div><div class="v">CachyOS（Arch 系）</div></div>
+        <div class="specitem"><div class="k">日常工具</div><div class="v">VS Code</div></div>
+      </div>
+    </div>
+
+    <div class="box tip">
+      <div class="bt">✅ 結論先講：你的配備跑得動</div>
+      8GB 的 A2000 剛好能把 Qwen 3.5 的中型模型整顆放進顯示卡，速度順暢；32GB 記憶體足以同時撐起一支小型 AI 代理團隊。這份指南會幫你把資源分配得剛剛好。
+    </div>
+
+    <h3 class="sub"><span class="dot"></span>四個階段的學習路線</h3>
+    <p class="muted">建議照順序做。每一階段都是下一階段的基礎，由淺入深，你會邊做邊建立信心。</p>
+    <div class="roadmap">
+      <div class="rmcard">
+        <div class="num">1</div>
+        <div class="stage">階段一 · 基礎</div>
+        <h4>Ollama + Qwen 3.5</h4>
+        <p>裝好「AI 引擎」，讓 Qwen 3.5 模型在你的顯示卡上跑起來。這是後面一切的地基。</p>
+      </div>
+      <div class="rmcard">
+        <div class="num">2</div>
+        <div class="stage">階段二 · 上手</div>
+        <h4>Cline Vibe Coding</h4>
+        <p>在你熟悉的 VS Code 裡接上本地模型，第一次體驗「用嘴巴寫程式」。</p>
+      </div>
+      <div class="rmcard">
+        <div class="num">3</div>
+        <div class="stage">階段三 · 進階</div>
+        <h4>OpenClaw 單一代理</h4>
+        <p>裝一個會自己動手、會記憶、會排程的個人 AI 代理，理解「代理」是什麼。</p>
+      </div>
+      <div class="rmcard">
+        <div class="num">4</div>
+        <div class="stage">階段四 · 目標</div>
+        <h4>HiClaw 開發團隊</h4>
+        <p>打造 Manager 帶 Worker 的多代理團隊，前端、後端、測試各司其職。</p>
+      </div>
+    </div>
+
+    <div class="box info">
+      <div class="bt">ℹ️ 關於指令的兩個小提醒</div>
+      指南裡的指令多半要在「終端機」執行（CachyOS 開始選單搜尋 <span class="inlinecode">Terminal</span> 或按 <span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">T</span>）。每個指令框右上角都有「複製」鈕。指令前若有 <span class="inlinecode">sudo</span> 代表需要系統管理權限，執行後會要你輸入登入密碼（畫面不會顯示字元，正常現象，打完按 Enter 即可）。
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPTS ===================== -->
+  <section id="concepts">
+    <span class="sectag">觀念篇</span>
+    <h2 class="sec">先搞懂：這四個工具各自負責什麼</h2>
+    <p class="muted">名字很像、很容易混淆。花兩分鐘看懂它們的關係，後面安裝就不會迷路。</p>
+
+    <table class="tbl">
+      <tr><th>工具</th><th>角色比喻</th><th>它負責的事</th></tr>
+      <tr><td><b>Ollama</b></td><td>發電廠</td><td>在你的電腦上「執行」AI 模型的軟體。負責把模型載入顯示卡、提供一個本機網址讓其他程式呼叫。</td></tr>
+      <tr><td><b>Qwen 3.5</b></td><td>電力本身</td><td>真正的 AI 模型（阿里巴巴出品）。由 Ollama 來執行它。有大有小，挑適合 8GB 顯示卡的尺寸。</td></tr>
+      <tr><td><b>Cline</b></td><td>桌上的助理</td><td>VS Code 的擴充套件。把 Qwen 3.5 接進編輯器，讓 AI 直接幫你讀檔、寫檔、執行指令 —— 這就是「Vibe Coding」。</td></tr>
+      <tr><td><b>OpenClaw</b></td><td>一位全能員工</td><td>一個會「主動行動」的 AI 代理：會自己排程、有長期記憶、能操作你的檔案與工具。一個人、一個代理。</td></tr>
+      <tr><td><b>HiClaw</b></td><td>一整間公司</td><td>OpenClaw 的「團隊版」。一個 Manager 代理指揮多個 Worker 代理協作，所有對話都在聊天室裡，你隨時能介入。</td></tr>
+    </table>
+
+    <div class="box info">
+      <div class="bt">ℹ️ 它們是怎麼串起來的</div>
+      <b>Ollama 跑 Qwen 3.5</b> → 提供一個本機 AI 服務 → <b>Cline / OpenClaw / HiClaw</b> 都來呼叫這個服務當大腦。<br>
+      換句話說：階段一裝好的這顆「本地大腦」，階段二、三、四全部共用它。而 <b>HiClaw 內部其實就是用 OpenClaw 當每個代理的執行核心</b> —— 所以階段三先單獨玩 OpenClaw，是為了理解原理；階段四的 HiClaw 則把它變成一支隊伍。
+    </div>
+
+    <div class="box warn">
+      <div class="bt">⚠️ 關於模型大小與你的 8GB 顯示卡</div>
+      顯示卡記憶體（VRAM）只有 8GB，模型必須塞得進去才會快。本指南主力推薦 <b>Qwen 3.5 9B</b>（約 6GB，整顆進得了 GPU）。它對「寫程式聊天」很夠用，但對「完全自主、多步驟的代理任務」算是偏小的模型 —— 這點我們會在每個階段誠實提醒你，並給出對策。
+    </div>
+  </section>
+
+  <!-- ===================== PREP ===================== -->
+  <section id="prep">
+    <span class="sectag">前置作業</span>
+    <h2 class="sec">開始之前：系統準備</h2>
+    <p class="muted">確認驅動程式就緒、系統更新到最新。大約 5～10 分鐘。</p>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 0-1</div><div class="steptitle">更新整個系統</div></div>
+      </label>
+      <div class="stepbody">
+        <p>CachyOS 是「滾動更新」的系統，安裝新軟體前先把所有套件更新到最新，可以避免很多相容性問題。</p>
+        <div class="cb"><pre><code>sudo pacman -Syu</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <details class="why"><summary>這行指令在做什麼？</summary>
+          <div class="wbody"><span class="inlinecode">pacman</span> 是 CachyOS（Arch 系）的「軟體管理員」，負責安裝/移除/更新軟體。<span class="inlinecode">-S</span> 是同步、<span class="inlinecode">-y</span> 是刷新軟體清單、<span class="inlinecode">-u</span> 是升級已安裝的套件。看到問你 <span class="inlinecode">[Y/n]</span> 時按 Enter 即可。若清單很長、跑幾分鐘都正常。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 0-2</div><div class="steptitle">確認 NVIDIA 顯示卡驅動正常</div></div>
+      </label>
+      <div class="stepbody">
+        <p>Qwen 3.5 要靠顯示卡加速，所以驅動一定要先就緒。執行這行：</p>
+        <div class="cb"><pre><code>nvidia-smi</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>如果出現一張表格，裡面看得到 <b>NVIDIA RTX A2000</b> 字樣 —— 太好了，驅動正常，<b>跳過下一個步驟</b>。</p>
+        <p>如果出現「command not found」或錯誤訊息，代表驅動還沒裝好，繼續看步驟 0-3。</p>
+        <details class="why"><summary>nvidia-smi 是什麼？</summary>
+          <div class="wbody">它是 NVIDIA 內附的監控工具，會顯示顯示卡型號、溫度、VRAM 使用量、正在用 GPU 的程式。之後想知道「模型有沒有真的在用顯示卡」也是靠它。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 0-3</div><div class="steptitle">（只在驅動沒裝好時才做）安裝 NVIDIA 驅動</div></div>
+      </label>
+      <div class="stepbody">
+        <p>CachyOS 安裝時通常會自動裝好顯示卡驅動，所以多數情況你不需要這步。若上一步失敗才執行：</p>
+        <div class="cb"><pre><code>sudo pacman -S nvidia-open-dkms nvidia-utils</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>裝完後<b>重新開機</b>，再執行一次 <span class="inlinecode">nvidia-smi</span> 確認。</p>
+        <div class="box info"><div class="bt">ℹ️ 為什麼用 nvidia-open</div>
+          RTX A2000 是 Ampere 架構，NVIDIA 的「開源核心模組」驅動（nvidia-open）完整支援，且和 CachyOS 的滾動更新搭配較穩定。</div>
+        <p class="muted" style="font-size:13.5px">替代做法：CachyOS 內建硬體偵測工具，也可執行 <span class="inlinecode">sudo chwd -a</span> 讓系統自動挑驅動安裝。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 0-4</div><div class="steptitle">安裝基本開發工具</div></div>
+      </label>
+      <div class="stepbody">
+        <p>後面會用到 git 與編譯工具，先一次裝齊。<span class="inlinecode">--needed</span> 代表已經有的就略過。</p>
+        <div class="cb"><pre><code>sudo pacman -S --needed base-devel git curl</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <div class="verify"><div class="vt">✅ 完成這一段後，你應該能：</div>
+          <ul><li>執行 <span class="inlinecode">nvidia-smi</span> 看到 RTX A2000</li><li>系統已更新到最新</li><li>git 已安裝（<span class="inlinecode">git --version</span> 有回應）</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHASE 1 ===================== -->
+  <section id="phase1">
+    <span class="sectag">階段一</span>
+    <h2 class="sec">Ollama + Qwen 3.5：讓本地 AI 跑起來</h2>
+    <div class="phasebanner">
+      <div class="pn">1</div>
+      <div class="pd"><div class="t">這一階段的目標</div>
+      <div class="s">裝好 Ollama，下載 Qwen 3.5 模型，確認它跑在顯示卡上，並調好效能設定。約 20～30 分鐘（多數時間在下載模型）。</div></div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-1</div><div class="steptitle">安裝 Ollama（CUDA / 顯示卡加速版）</div></div>
+      </label>
+      <div class="stepbody">
+        <div class="box danger"><div class="bt">🚨 最關鍵的一步，別裝錯套件</div>
+          一定要裝 <b>ollama-cuda</b>，不是普通的 <span class="inlinecode">ollama</span>。普通版只會用 CPU 跑，慢上好幾倍。<b>ollama-cuda</b> 才會用到你的 RTX A2000。</div>
+        <div class="cb"><pre><code>sudo pacman -S ollama-cuda</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <details class="why"><summary>CUDA 是什麼？</summary>
+          <div class="wbody">CUDA 是 NVIDIA 顯示卡的運算平台。AI 模型的計算量極大，靠顯示卡上千個核心平行處理會比 CPU 快非常多。<span class="inlinecode">ollama-cuda</span> 就是「會使用 CUDA 的 Ollama 版本」。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-2</div><div class="steptitle">啟動 Ollama 背景服務</div></div>
+      </label>
+      <div class="stepbody">
+        <p>讓 Ollama 變成開機自動啟動的背景服務，這樣它會一直待命等你呼叫。</p>
+        <div class="cb"><pre><code>sudo systemctl enable --now ollama</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>確認版本，有版本號就代表裝好了：</p>
+        <div class="cb"><pre><code>ollama --version</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <details class="why"><summary>systemctl enable --now 是什麼意思？</summary>
+          <div class="wbody"><span class="inlinecode">systemctl</span> 管理系統的背景服務。<span class="inlinecode">enable</span> 設定為「開機自動啟動」，<span class="inlinecode">--now</span> 代表「順便現在就立刻啟動」。所以這一行同時做了兩件事。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-3</div><div class="steptitle">下載 Qwen 3.5 模型</div></div>
+      </label>
+      <div class="stepbody">
+        <p>下載主力模型 <b>Qwen 3.5 9B</b>（約 6GB，會邊下載邊顯示進度）：</p>
+        <div class="cb"><pre><code>ollama pull qwen3.5:9b</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>再下載一顆輕量模型 <b>Qwen 3.5 4B</b>，需要快速回應時用：</p>
+        <div class="cb"><pre><code>ollama pull qwen3.5:4b</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+
+        <table class="tbl">
+          <tr><th>模型</th><th>下載大小</th><th>放哪</th><th>適合做什麼</th></tr>
+          <tr><td><b>qwen3.5:9b</b></td><td>約 6 GB</td><td>整顆進 GPU ✅</td><td><b>主力</b>。Vibe coding、代理日常任務</td></tr>
+          <tr><td>qwen3.5:4b</td><td>約 2.5 GB</td><td>整顆進 GPU ✅</td><td>快速問答、簡單任務</td></tr>
+          <tr><td>qwen3.5:27b</td><td>約 15 GB</td><td>部分溢出到 RAM ⚠️</td><td>較複雜的推理，但會變慢</td></tr>
+          <tr><td>qwen3.5:35b-a3b</td><td>約 20 GB</td><td>部分溢出到 RAM ⚠️</td><td>MoE 架構，溢出也還能接受的較強模型</td></tr>
+        </table>
+        <div class="box tip"><div class="bt">💡 建議</div>
+          先用 9B 走完整份指南。等熟悉之後想要更強的推理品質，再試 <span class="inlinecode">qwen3.5:35b-a3b</span> —— 它是 MoE（混合專家）架構，雖然 8GB 裝不下、要溢出一部分到 RAM，但每次只啟用一小部分參數，所以速度比同級的 27B 一般模型好。</div>
+        <details class="why"><summary>「pull」是什麼？下載到哪裡？</summary>
+          <div class="wbody"><span class="inlinecode">pull</span>（拉取）會從 Ollama 官方模型庫把模型檔下載到你電腦（預設在 <span class="inlinecode">/usr/share/ollama</span>）。下載一次就好，之後都從本機讀取。若中途斷線，重跑同一行指令會「續傳」，不會從頭來。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-4</div><div class="steptitle">實際對話測試</div></div>
+      </label>
+      <div class="stepbody">
+        <p>啟動 9B 模型，進入對話模式：</p>
+        <div class="cb"><pre><code>ollama run qwen3.5:9b</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>看到 <span class="inlinecode">&gt;&gt;&gt;</span> 提示符後，隨便打個問題試試，例如「用 Python 寫一個費氏數列函式」。要離開對話，輸入 <span class="inlinecode">/bye</span> 再按 Enter。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-5</div><div class="steptitle">確認模型真的跑在顯示卡上</div></div>
+      </label>
+      <div class="stepbody">
+        <p>這步很重要 —— 要確認模型用的是 GPU 而不是 CPU。模型載入狀態下，開「另一個終端機視窗」執行：</p>
+        <div class="cb"><pre><code>ollama ps</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>看 <b>PROCESSOR</b> 那一欄。顯示 <span class="inlinecode">100% GPU</span> 就完美。若顯示 CPU 或部分 CPU，請看下方「疑難排解」。</p>
+        <p>也可以用 <span class="inlinecode">nvidia-smi</span> 看：模型載入時，VRAM 用量應該會跳到約 6GB 左右。</p>
+        <div class="verify"><div class="vt">✅ 階段一驗收</div>
+          <ul><li><span class="inlinecode">ollama --version</span> 有版本號</li><li>能和 qwen3.5:9b 對話</li><li><span class="inlinecode">ollama ps</span> 顯示 100% GPU</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 1-6</div><div class="steptitle">效能調校（針對 8GB 顯示卡最佳化）</div></div>
+      </label>
+      <div class="stepbody">
+        <p>幫 Ollama 加上幾個環境設定，讓 8GB VRAM 用得更有效率，也順便為後面的 HiClaw 預作準備。執行：</p>
+        <div class="cb"><pre><code>sudo systemctl edit ollama</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>會打開一個文字編輯畫面。在指定的空白區域（通常標示著「### 在此行與結尾之間加入你的設定」）貼上以下內容：</p>
+        <div class="cb"><pre><code>[Service]
+Environment="OLLAMA_FLASH_ATTENTION=1"
+Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
+Environment="OLLAMA_NUM_PARALLEL=2"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_KEEP_ALIVE=10m"
+Environment="OLLAMA_CONTEXT_LENGTH=32768"
+Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>存檔離開（編輯器若是 nano：<span class="kbd">Ctrl</span>+<span class="kbd">O</span> 存檔、<span class="kbd">Enter</span> 確認、<span class="kbd">Ctrl</span>+<span class="kbd">X</span> 離開）。然後重啟服務讓設定生效：</p>
+        <div class="cb"><pre><code>sudo systemctl restart ollama</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+
+        <table class="tbl">
+          <tr><th>設定</th><th>作用</th></tr>
+          <tr><td>FLASH_ATTENTION=1</td><td>開啟更省記憶體的注意力演算法，讓 VRAM 撐得住更長的上下文。</td></tr>
+          <tr><td>KV_CACHE_TYPE=q8_0</td><td>把「對話快取」壓縮成 8-bit，省下大量 VRAM，品質幾乎無損。</td></tr>
+          <tr><td>NUM_PARALLEL=2</td><td>同時最多處理 2 個請求。多代理時有用，但別設太大以免吃爆 VRAM。</td></tr>
+          <tr><td>MAX_LOADED_MODELS=1</td><td>同時只保留 1 個模型在 VRAM。8GB 放不下兩顆，這樣最穩。</td></tr>
+          <tr><td>KEEP_ALIVE=10m</td><td>模型用完後在記憶體裡待命 10 分鐘，免得每次都重新載入。</td></tr>
+          <tr><td>CONTEXT_LENGTH=32768</td><td>預設上下文長度 32K，對寫程式夠用。設太大會吃爆 VRAM。</td></tr>
+          <tr><td>HOST=0.0.0.0:11434</td><td>讓 Ollama 接受來自其他程式（含階段四的 Docker 容器）的連線。<b>HiClaw 會用到。</b></td></tr>
+        </table>
+        <div class="box warn"><div class="bt">⚠️ 安全小提醒</div>
+          <span class="inlinecode">OLLAMA_HOST=0.0.0.0</span> 會讓同一個區域網路內的裝置都能連到你的 Ollama。在家用網路沒問題；如果在公司或公共網路、且有疑慮，可改成只開放給 Docker：<span class="inlinecode">OLLAMA_HOST=172.17.0.1:11434</span>。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHASE 2 ===================== -->
+  <section id="phase2">
+    <span class="sectag">階段二</span>
+    <h2 class="sec">Cline：在 VS Code 裡開始 Vibe Coding</h2>
+    <div class="phasebanner">
+      <div class="pn">2</div>
+      <div class="pd"><div class="t">這一階段的目標</div>
+      <div class="s">在你天天用的 VS Code 裡裝上 Cline，接上本地 Qwen 3.5，第一次體驗 AI 幫你寫整個專案。約 15 分鐘。</div></div>
+    </div>
+
+    <div class="box info">
+      <div class="bt">ℹ️ 為什麼推薦 Cline（這是你問我要的推薦）</div>
+      你做 vibe coding 的選擇主要有三個：<b>Cline</b>、Continue.dev、Aider。我推薦 <b>Cline</b>，因為：<br>
+      ① 它是「agentic（代理式）」工具 —— 會自己讀檔、改檔、執行終端機指令、看結果再修正，最貼近「用嘴巴寫程式」的 vibe coding 體驗。<br>
+      ② 它是 VS Code 擴充，完全在你已經熟悉的環境裡，零學習成本。<br>
+      ③ 它的運作模式（規劃 → 執行 → 驗證）正好是階段三、四 AI 代理的縮影，先用 Cline 培養手感，後面接觸 OpenClaw/HiClaw 會非常順。<br>
+      Continue.dev 比較像「程式碼補全＋側邊對話」，較輕量；Aider 是純終端機工具。若之後覺得 9B 模型帶 Cline 有點吃力，Continue.dev 是很好的備援。
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 2-1</div><div class="steptitle">安裝 Cline 擴充套件</div></div>
+      </label>
+      <div class="stepbody">
+        <p>打開 VS Code，按 <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">X</span> 開啟擴充套件面板，在搜尋框輸入 <b>Cline</b>，找到後點「Install / 安裝」。</p>
+        <p>安裝完，VS Code 左側活動列會出現一個 Cline 圖示（機器人圖案），點它就會開啟 Cline 面板。</p>
+        <details class="why"><summary>找不到 Cline？</summary>
+          <div class="wbody">如果你的 VS Code 是 CachyOS 套件庫安裝的開源版「Code - OSS」，它用的是 Open VSX 套件市集 —— Cline 在上面也有，照樣搜得到。若真的搜不到，可改裝微軟官方版 VS Code（AUR 套件 <span class="inlinecode">visual-studio-code-bin</span>）。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 2-2</div><div class="steptitle">把 Cline 接上本地 Qwen 3.5</div></div>
+      </label>
+      <div class="stepbody">
+        <p>點開 Cline 面板，進入設定（齒輪圖示），照下表填寫：</p>
+        <table class="tbl">
+          <tr><th>設定項目</th><th>填入的值</th></tr>
+          <tr><td>API Provider</td><td>選擇 <b>Ollama</b></td></tr>
+          <tr><td>Base URL</td><td><span class="inlinecode">http://localhost:11434</span></td></tr>
+          <tr><td>Model</td><td><span class="inlinecode">qwen3.5:9b</span></td></tr>
+        </table>
+        <p>儲存後，Cline 應該就能列出你下載過的模型。挑 <span class="inlinecode">qwen3.5:9b</span> 即可。</p>
+        <div class="box tip"><div class="bt">💡 小技巧</div>
+          Cline 設定裡如果有「Context Window / 上下文長度」欄位，填 <span class="inlinecode">32768</span>，和我們在階段一設的一致。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 2-3</div><div class="steptitle">你的第一次 Vibe Coding</div></div>
+      </label>
+      <div class="stepbody">
+        <p>建一個空資料夾，用 VS Code 開啟它（檔案 → 開啟資料夾）。打開 Cline 面板，在輸入框試著下這個任務：</p>
+        <div class="cb"><pre><code><span class="cmt"># 把這段話貼到 Cline 對話框</span>
+請幫我做一個單一 HTML 檔的待辦事項小工具，
+用 HTML + CSS + JavaScript 寫在同一個檔案，
+可以新增、勾選完成、刪除項目，介面要簡潔好看。</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>送出後觀察 Cline 怎麼運作：它會先「規劃（Plan）」要做什麼，列出步驟，然後一步步「執行（Act）」—— 建立檔案、寫入程式碼。每個動作它都會問你核准，你按核准它才會動手。完成後直接在瀏覽器打開那個 HTML 檔看成果。</p>
+        <details class="why"><summary>Plan 模式 vs Act 模式</summary>
+          <div class="wbody">Cline 有兩種模式。<b>Plan（規劃）</b>：只討論、列計畫，不動你的檔案 —— 適合先把需求講清楚。<b>Act（執行）</b>：實際讀寫檔案、跑指令。建議養成習慣：先在 Plan 模式把需求聊到位，再切到 Act 讓它動手。對 9B 這種中小型模型，這個習慣特別能提升成功率。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 2-4</div><div class="steptitle">和小模型相處的訣竅</div></div>
+      </label>
+      <div class="stepbody">
+        <p>9B 是顆好用但「中小型」的模型。誠實說，它不會像雲端大模型那樣每次都完美。掌握這些技巧，體驗會好很多：</p>
+        <ul class="clean">
+          <li><b>任務切小</b>：與其「做一個完整的電商網站」，不如拆成「先做商品列表頁」「再做購物車」。</li>
+          <li><b>講清楚、給脈絡</b>：明確說用什麼語言、框架、檔名。模型猜得越少，做得越準。</li>
+          <li><b>善用 Plan 模式</b>：先讓它規劃，你檢查計畫沒問題再執行。</li>
+          <li><b>一次一個檔案的修改</b>：大範圍跨檔重構對小模型較吃力。</li>
+          <li><b>它卡住時</b>：把錯誤訊息貼回去給它，或換 <span class="inlinecode">qwen3.5:35b-a3b</span> 試試。</li>
+        </ul>
+        <div class="box tip"><div class="bt">💡 進階選項</div>
+          如果你發現某些複雜任務本地模型實在吃力，Cline 也支援雲端 API。可以「日常用本地 9B、難題切雲端」混搭 —— 兼顧隱私、成本與能力。</div>
+        <div class="verify"><div class="vt">✅ 階段二驗收</div>
+          <ul><li>Cline 已安裝並接上 qwen3.5:9b</li><li>成功讓 Cline 生成一個可運作的小程式</li><li>理解 Plan / Act 兩種模式的差別</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHASE 3 ===================== -->
+  <section id="phase3">
+    <span class="sectag">階段三</span>
+    <h2 class="sec">OpenClaw：你的第一個 AI 代理</h2>
+    <div class="phasebanner">
+      <div class="pn">3</div>
+      <div class="pd"><div class="t">這一階段的目標</div>
+      <div class="s">裝一個會主動行動、有記憶的個人 AI 代理，理解「代理（Agent）」和「聊天機器人」的差別。這是通往 HiClaw 團隊的橋樑。約 15～20 分鐘。</div></div>
+    </div>
+
+    <div class="box info"><div class="bt">ℹ️ Cline 和 OpenClaw 差在哪？</div>
+      Cline 活在 VS Code 裡、由你一句句驅動，專注寫程式。<b>OpenClaw</b> 則是獨立執行的代理：它有長期記憶、能排程（例如每天早上自動做某事）、能連接你的檔案、行事曆、瀏覽器等。把 Cline 想成「結對程式設計夥伴」，OpenClaw 想成「全職員工」。</div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 3-1</div><div class="steptitle">安裝 Node.js</div></div>
+      </label>
+      <div class="stepbody">
+        <p>OpenClaw 用 Node.js 撰寫，需要 Node 22.16 以上（建議 24）。Arch 系套件庫的版本夠新：</p>
+        <div class="cb"><pre><code>sudo pacman -S nodejs npm</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>確認版本（應顯示 v22 或更高）：</p>
+        <div class="cb"><pre><code>node --version</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <details class="why"><summary>Node.js 和 npm 是什麼？</summary>
+          <div class="wbody"><b>Node.js</b> 讓 JavaScript 程式能在電腦上（而非瀏覽器裡）執行。<b>npm</b> 是它的套件管理員，用來下載安裝像 OpenClaw 這類用 JavaScript 寫的工具。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 3-2</div><div class="steptitle">安裝 OpenClaw</div></div>
+      </label>
+      <div class="stepbody">
+        <p>用 npm 全域安裝 OpenClaw：</p>
+        <div class="cb"><pre><code>npm install -g openclaw@latest</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <div class="box warn"><div class="bt">⚠️ 如果出現權限錯誤（EACCES）</div>
+          代表 npm 全域目錄需要權限。最簡單的替代方案是改用 OpenClaw 官方安裝腳本，它會自動處理 Node 與路徑設定：
+          <div class="cb" style="margin-top:8px"><pre><code>curl -fsSL https://openclaw.ai/install.sh | bash</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        </div>
+        <details class="why"><summary>「-g」是什麼意思？這樣安全嗎？</summary>
+          <div class="wbody"><span class="inlinecode">-g</span>（global）代表裝成「全系統都能用的指令」，這樣你在任何資料夾都能輸入 <span class="inlinecode">openclaw</span>。<br>至於上面那行 <span class="inlinecode">curl ... | bash</span>：它是從 OpenClaw 官方網域下載安裝腳本來執行，這是該專案官方文件正式建議的安裝方式。執行任何 <span class="inlinecode">curl | bash</span> 前都該確認來源是官方網域 —— 這裡的 openclaw.ai 即是。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 3-3</div><div class="steptitle">執行引導設定（接上本地 Ollama）</div></div>
+      </label>
+      <div class="stepbody">
+        <p>OpenClaw 有一個互動式引導程式，會帶你設定。執行：</p>
+        <div class="cb"><pre><code>openclaw onboard --install-daemon</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>過程中當它問到「模型供應商（Provider）」時，這樣選：</p>
+        <table class="tbl">
+          <tr><th>問題</th><th>選擇 / 填入</th></tr>
+          <tr><td>選擇 Provider</td><td>從清單中選 <b>Ollama</b></td></tr>
+          <tr><td>選擇模式</td><td>選 <b>Local only</b>（純本地）</td></tr>
+          <tr><td>Ollama base URL</td><td><span class="inlinecode">http://localhost:11434</span></td></tr>
+          <tr><td>選擇模型</td><td>從偵測到的清單選 <span class="inlinecode">qwen3.5:9b</span></td></tr>
+        </table>
+        <div class="box danger"><div class="bt">🚨 重要：網址結尾「不要」加 /v1</div>
+          OpenClaw 連本地 Ollama 時，網址要用 <span class="inlinecode">http://localhost:11434</span>，<b>千萬不要</b>寫成 <span class="inlinecode">.../v1</span>。加了 <span class="inlinecode">/v1</span> 會走 OpenAI 相容模式，導致「工具呼叫」失效 —— 代理就不會動手做事了。這是官方文件特別強調的雷點。</div>
+        <details class="why"><summary>--install-daemon 是什麼？</summary>
+          <div class="wbody">daemon（守護程序）是常駐背景的服務。這個參數會把 OpenClaw 的 Gateway 設成 systemd 背景服務，讓它持續執行、能排程任務 —— 這正是「代理」會主動行動的關鍵。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 3-4</div><div class="steptitle">設定預設模型並驗證</div></div>
+      </label>
+      <div class="stepbody">
+        <p>明確指定 OpenClaw 用 Qwen 3.5 9B 當大腦：</p>
+        <div class="cb"><pre><code>openclaw models set ollama/qwen3.5:9b</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>跑幾個檢查指令確認一切就緒：</p>
+        <div class="cb"><pre><code>openclaw --version
+openclaw doctor
+openclaw gateway status
+openclaw models list --provider ollama</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p><span class="inlinecode">openclaw doctor</span> 會體檢設定有沒有問題；<span class="inlinecode">gateway status</span> 確認背景服務在跑；<span class="inlinecode">models list</span> 應該列得出你的 Qwen 模型。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 3-5</div><div class="steptitle">交代第一個任務</div></div>
+      </label>
+      <div class="stepbody">
+        <p>現在和你的代理對話、給它一個小任務，感受它「自己動手」的過程。例如請它在某個資料夾裡整理檔案、或寫一個小腳本。觀察它如何規劃、執行、回報。</p>
+        <div class="box tip"><div class="bt">💡 心態建議</div>
+          這個階段重點不是「做出多厲害的東西」，而是<b>建立對「代理」的直覺</b>：它會自己拆解任務、呼叫工具、看結果再決定下一步。理解了這個迴圈，階段四的 HiClaw 團隊你就會秒懂 —— 因為那只是「很多個這樣的代理一起合作」。</div>
+        <div class="verify"><div class="vt">✅ 階段三驗收</div>
+          <ul><li><span class="inlinecode">openclaw doctor</span> 沒有報重大錯誤</li><li>OpenClaw 使用本地 qwen3.5:9b</li><li>成功讓代理完成一個簡單任務</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PHASE 4 ===================== -->
+  <section id="phase4">
+    <span class="sectag">階段四 · 最終目標</span>
+    <h2 class="sec">HiClaw：打造軟體開發 AI 團隊</h2>
+    <div class="phasebanner">
+      <div class="pn">4</div>
+      <div class="pd"><div class="t">這一階段的目標</div>
+      <div class="s">用 HiClaw 架起一個 Manager 帶 Worker 的多代理團隊，建立前端、後端、測試等角色，指派一個真實的開發任務讓它們協作。約 30～40 分鐘。</div></div>
+    </div>
+
+    <h3 class="sub"><span class="dot"></span>先理解 HiClaw 的運作方式</h3>
+    <p>HiClaw 是「協作式多代理作業系統」。核心概念：</p>
+    <ul class="clean">
+      <li><b>Manager（管理者）</b>：你的 AI 幕僚長。你跟它說需求，它負責建立 Worker、拆解任務、分派、追蹤進度、回報。</li>
+      <li><b>Worker（工作者）</b>：實際幹活的代理，例如「前端工程師 alice」「後端工程師 bob」。</li>
+      <li><b>聊天室介面（Matrix / Element）</b>：所有對話都在聊天室裡進行，<b>你全程看得到、隨時能插話介入</b> —— 沒有黑箱。</li>
+      <li><b>Higress 閘道</b>：集中保管 API 金鑰、GitHub Token。Worker 只拿到臨時憑證，碰不到真正的金鑰，比較安全。</li>
+    </ul>
+    <div class="box info"><div class="bt">ℹ️ HiClaw 和階段三的 OpenClaw 是什麼關係？</div>
+      HiClaw 內部其實是用 OpenClaw（或更輕量的 CoPaw）當每個代理的執行核心，並用 Docker 容器把它們包起來、加上聊天室、檔案共享與安全閘道。所以階段三玩過的 OpenClaw 不是白費 —— 它正是 HiClaw 裡每個 Worker 的「本體」。</div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-1</div><div class="steptitle">安裝 Docker</div></div>
+      </label>
+      <div class="stepbody">
+        <p>HiClaw 用 Docker 容器來執行各個元件。安裝並啟動 Docker：</p>
+        <div class="cb"><pre><code>sudo pacman -S docker docker-compose
+sudo systemctl enable --now docker</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>把你的使用者加入 docker 群組，這樣不用每次都打 sudo：</p>
+        <div class="cb"><pre><code>sudo usermod -aG docker $USER</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <div class="box warn"><div class="bt">⚠️ 這一步做完一定要重新登入</div>
+          群組變更要重新登入（或重開機）才生效。快速生效可執行 <span class="inlinecode">newgrp docker</span>，或乾脆登出再登入一次。</div>
+        <p>驗證 Docker 正常：</p>
+        <div class="cb"><pre><code>docker run --rm hello-world</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <details class="why"><summary>Docker 是什麼？</summary>
+          <div class="wbody">Docker 把軟體連同它需要的環境打包成「容器」，像獨立的小盒子。HiClaw 有 Higress、Matrix 伺服器、檔案儲存、各個代理等很多元件，用容器隔開可以乾淨地一起執行、不互相干擾。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-2</div><div class="steptitle">決定 HiClaw 團隊用哪顆大腦</div></div>
+      </label>
+      <div class="stepbody">
+        <p>安裝 HiClaw 前先做個重要決定：團隊的代理要用「本地 Qwen 3.5」還是「雲端 Qwen API」？兩條路都可以，誠實的比較如下：</p>
+        <table class="tbl">
+          <tr><th></th><th>路線 A：雲端 Qwen API（推薦）</th><th>路線 B：本地 Ollama（全免費）</th></tr>
+          <tr><td>設定難度</td><td>簡單，貼上金鑰即可</td><td>較繁瑣（要處理 Docker 網路）</td></tr>
+          <tr><td>推理品質</td><td>較強，適合 Manager 拆解複雜任務</td><td>受限於 9B 模型</td></tr>
+          <tr><td>多代理速度</td><td>各代理並行不卡</td><td>共用一張顯示卡，請求會排隊</td></tr>
+          <tr><td>費用 / 隱私</td><td>依用量計費；資料送雲端</td><td>完全免費；資料不出門</td></tr>
+        </table>
+        <div class="box tip"><div class="bt">💡 我的建議</div>
+          多代理協作對「大腦」要求較高，而你只有單張 8GB 顯示卡要同時餵好幾個代理會排隊。<b>建議第一次先用路線 A（雲端 Qwen API）</b> 把 HiClaw 跑順、把流程學會；之後若想挑戰全本地，再回來試路線 B。<br>折衷做法：Manager 用雲端（負責動腦拆解），Worker 用本地（負責執行）—— 兼顧品質與成本。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-3</div><div class="steptitle">執行 HiClaw 一鍵安裝腳本</div></div>
+      </label>
+      <div class="stepbody">
+        <p>執行官方安裝腳本，它會用互動問答帶你完成設定：</p>
+        <div class="cb"><pre><code>bash &lt;(curl -sSL https://higress.ai/hiclaw/install.sh)</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>安裝過程會問你幾件事：</p>
+        <ul class="clean">
+          <li><b>LLM 供應商與 API 金鑰</b>：見下方依路線填寫。</li>
+          <li><b>管理員帳號與密碼</b>：自己設定，這是你登入聊天室的帳密。</li>
+          <li><b>網路模式</b>：選「local-only（僅本機）」即可。</li>
+          <li><b>網域名稱</b>：直接按 Enter 用預設值。</li>
+          <li><b>GitHub PAT（選填）</b>：若要讓代理直接操作 GitHub，可填入；不確定就先跳過，之後能再加。</li>
+        </ul>
+
+        <h3 class="sub" style="font-size:15px"><span class="dot"></span>路線 A：填雲端 Qwen API</h3>
+        <p>到阿里雲百煉（DashScope）等服務開通 Qwen 模型、取得 API 金鑰，安裝時填：</p>
+        <table class="tbl">
+          <tr><th>欄位</th><th>填入</th></tr>
+          <tr><td>API Base URL</td><td><span class="inlinecode">https://dashscope.aliyuncs.com/compatible-mode/v1</span></td></tr>
+          <tr><td>API Key</td><td>你的 DashScope 金鑰（sk-...）</td></tr>
+          <tr><td>Model</td><td>你開通的 Qwen 模型名稱</td></tr>
+        </table>
+
+        <h3 class="sub" style="font-size:15px"><span class="dot"></span>路線 B：指向本地 Ollama</h3>
+        <p>因為 HiClaw 跑在 Docker 容器裡，容器內的 <span class="inlinecode">localhost</span> 指的是容器自己、不是你的電腦。要讓容器連到主機上的 Ollama，得用 Docker 橋接位址。先確認橋接 IP（通常是 172.17.0.1）：</p>
+        <div class="cb"><pre><code>ip -4 addr show docker0</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>然後安裝時填：</p>
+        <table class="tbl">
+          <tr><th>欄位</th><th>填入</th></tr>
+          <tr><td>API Base URL</td><td><span class="inlinecode">http://172.17.0.1:11434/v1</span></td></tr>
+          <tr><td>API Key</td><td>隨便填，例如 <span class="inlinecode">ollama</span>（本地不驗證金鑰）</td></tr>
+          <tr><td>Model</td><td><span class="inlinecode">qwen3.5:9b</span></td></tr>
+        </table>
+        <div class="box warn"><div class="bt">⚠️ 路線 B 的前提</div>
+          必須已完成階段一步驟 1-6 的 <span class="inlinecode">OLLAMA_HOST=0.0.0.0:11434</span> 設定，Ollama 才會接受來自 Docker 容器的連線。HiClaw 連不到模型，九成是這個原因。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-4</div><div class="steptitle">登入聊天室，見你的 Manager</div></div>
+      </label>
+      <div class="stepbody">
+        <p>安裝完成後，打開瀏覽器前往：</p>
+        <div class="cb"><pre><code>http://127.0.0.1:18088</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>這是 Element Web（聊天室介面）。用你剛才設定的管理員帳密登入。登入後，Manager 代理會主動跟你打招呼、說明怎麼建立第一個 Worker。</p>
+        <table class="tbl">
+          <tr><th>網址</th><th>用途</th></tr>
+          <tr><td><span class="inlinecode">http://127.0.0.1:18088</span></td><td>Element Web — 你和代理團隊對話的主要地方</td></tr>
+          <tr><td><span class="inlinecode">http://localhost:18001</span></td><td>Higress 主控台 — 看金鑰與流量管理</td></tr>
+          <tr><td><span class="inlinecode">http://localhost:9001</span></td><td>MinIO 主控台 — 看代理之間共享的檔案</td></tr>
+        </table>
+        <p>確認 Manager 容器在跑：</p>
+        <div class="cb"><pre><code>docker ps | grep hiclaw-manager</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-5</div><div class="steptitle">建立第一個 Worker（前端工程師 Alice）</div></div>
+      </label>
+      <div class="stepbody">
+        <p>在 Element Web 裡，跟 <span class="inlinecode">manager</span> 開一個私訊對話，傳送：</p>
+        <div class="cb"><pre><code>請建立一個名為 alice 的 Worker，負責前端開發工作，
+並給她 GitHub MCP 的存取權限。</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>Manager 會自動：幫 alice 註冊聊天室帳號 → 在 Higress 建立她的憑證 → 建立一個三方聊天室（你、Manager、Alice）→ 啟動 Alice 的容器。完成後你會在左側看到 Alice 的房間。</p>
+        <details class="why"><summary>什麼是 MCP？</summary>
+          <div class="wbody">MCP（Model Context Protocol）是讓 AI 代理連接外部工具的標準介面。「GitHub MCP」就是讓代理能讀寫 GitHub 儲存庫、開分支、發 PR 的工具。金鑰由 Higress 閘道集中保管，Worker 只透過 MCP 呼叫、碰不到真金鑰。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-6</div><div class="steptitle">組起完整的軟體開發團隊</div></div>
+      </label>
+      <div class="stepbody">
+        <p>用同樣的方式請 Manager 再建立幾個角色，組成一支麻雀雖小、五臟俱全的開發隊：</p>
+        <table class="tbl">
+          <tr><th>Worker</th><th>角色</th><th>建立指令（傳給 Manager）</th></tr>
+          <tr><td>alice</td><td>前端開發</td><td>已於上一步建立</td></tr>
+          <tr><td>bob</td><td>後端開發</td><td>「建立名為 bob 的 Worker，負責後端開發，給他 GitHub MCP 存取權。」</td></tr>
+          <tr><td>carol</td><td>測試 / QA</td><td>「建立名為 carol 的 Worker，負責撰寫測試與品質檢查。」</td></tr>
+        </table>
+        <div class="box tip"><div class="bt">💡 省記憶體訣竅：用 CoPaw 執行 Worker</div>
+          HiClaw 的 Worker 可以用較輕量的「CoPaw」執行核心，記憶體用量約 150MB，遠低於標準 OpenClaw 的約 500MB。建立 Worker 時可以加一句「請用 CoPaw runtime 建立」。對你 32GB 的機器，這能讓你多養好幾個代理。</div>
+        <div class="box warn"><div class="bt">⚠️ 循序漸進</div>
+          先從 2～3 個 Worker 開始，觀察記憶體與速度再決定要不要加人。單張顯示卡＋本地模型時，代理越多、請求排隊越明顯。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 4-7</div><div class="steptitle">指派一個真實的協作開發任務</div></div>
+      </label>
+      <div class="stepbody">
+        <p>現在來真的。在和 Manager 的對話裡，下一個需要多人協作的任務：</p>
+        <div class="cb"><pre><code>我要 alice、bob、carol 一起開發一個簡單的記帳網頁應用：
+
+- alice：用 React 做前端介面（新增支出、列表、月度總計）
+- bob：用 Node.js + Express 做後端 API 與資料儲存
+- carol：為後端 API 撰寫測試
+
+請大家透過 MinIO 共享檔案協調介面規格（API 格式），
+有重要決策時在房間裡回報，完成後通知我。</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        <p>接著就觀察魔法發生：Manager 會拆解任務、分派給三位 Worker，它們在各自房間裡工作、把進度貼出來。你全程看得到，隨時能在任一房間補充指示 —— 例如「alice，按鈕改用圓角」「bob，密碼至少 8 碼」。</p>
+        <div class="verify"><div class="vt">✅ 階段四驗收 — 你成功了！</div>
+          <ul><li>能在 Element Web 登入並和 Manager 對話</li><li>成功建立多個 Worker，各自有房間</li><li>指派協作任務，看到 Worker 們分工完成</li><li>能中途介入、補充指示並被採納</li></ul>
+        </div>
+        <div class="box tip"><div class="bt">🎉 恭喜</div>
+          走到這裡，你已經有了：在地端執行的 AI 模型、AI 輔助的寫程式環境、以及一支會協作的軟體開發 AI 團隊 —— 全部跑在你自己的筆電上。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TUNING ===================== -->
+  <section id="tuning">
+    <span class="sectag">補充</span>
+    <h2 class="sec">設定調校 &amp; 32GB 資源怎麼分配</h2>
+
+    <h3 class="sub"><span class="dot"></span>你的 32GB RAM 大概會這樣用</h3>
+    <table class="tbl">
+      <tr><th>項目</th><th>記憶體用量（估計）</th><th>備註</th></tr>
+      <tr><td>CachyOS 系統 + 桌面</td><td>約 2～3 GB</td><td>基本開銷</td></tr>
+      <tr><td>Ollama（9B 跑在 GPU）</td><td>約 1～2 GB RAM<br>約 6 GB VRAM</td><td>模型主要佔顯示卡記憶體，系統 RAM 佔得少</td></tr>
+      <tr><td>HiClaw 基礎設施</td><td>約 3～4 GB</td><td>Higress + Matrix 伺服器 + MinIO + Element</td></tr>
+      <tr><td>Manager + 每個 Worker</td><td>每個約 0.15～0.5 GB</td><td>用 CoPaw 約 150MB，標準 OpenClaw 約 500MB</td></tr>
+      <tr><td>VS Code + Cline</td><td>約 1～2 GB</td><td>同時開發時</td></tr>
+      <tr><td>瀏覽器</td><td>約 1～3 GB</td><td>Element Web 等分頁</td></tr>
+    </table>
+    <div class="box tip"><div class="bt">💡 結論</div>
+      只要模型 9B 完整跑在顯示卡上，32GB RAM 撐起「Ollama + HiClaw + 3～4 個 CoPaw Worker + VS Code + 瀏覽器」很從容。真正的瓶頸不是 RAM，而是<b>單張 8GB 顯示卡</b> —— 多個代理共用它，請求會排隊。這對「團隊照著任務清單逐步完成工作」完全沒問題，只是別期待所有代理同時即時回應。</div>
+
+    <h3 class="sub"><span class="dot"></span>什麼時候該考慮雲端 API</h3>
+    <p>全本地很棒，但在這些情況混搭雲端會明顯更順：Manager 要拆解複雜大型任務時、多個 Worker 需要同時高速運作時、或本地 9B 在某類任務上品質不夠時。建議的心法是「<b>日常本地、難題雲端</b>」—— 隱私、成本、能力三者取得平衡。</p>
+
+    <h3 class="sub"><span class="dot"></span>日常維護指令</h3>
+    <table class="tbl">
+      <tr><th>想做的事</th><th>指令</th></tr>
+      <tr><td>更新 Qwen 模型</td><td><span class="inlinecode">ollama pull qwen3.5:9b</span></td></tr>
+      <tr><td>看目前載入的模型</td><td><span class="inlinecode">ollama ps</span></td></tr>
+      <tr><td>更新 OpenClaw</td><td><span class="inlinecode">npm update -g openclaw</span></td></tr>
+      <tr><td>升級 HiClaw</td><td>重新執行那行 HiClaw 安裝腳本（會保留資料）</td></tr>
+      <tr><td>看 HiClaw 容器狀態</td><td><span class="inlinecode">docker ps</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== TROUBLE ===================== -->
+  <section id="trouble">
+    <span class="sectag">補充</span>
+    <h2 class="sec">疑難排解</h2>
+    <p class="muted">點開對應的問題看解法。</p>
+
+    <details class="tr"><summary>nvidia-smi 找不到指令，或沒有輸出</summary>
+      <div class="trbody">驅動沒裝好。回到「系統準備」步驟 0-3 安裝 <span class="inlinecode">nvidia-open-dkms nvidia-utils</span>，然後<b>務必重新開機</b>。重開後再試一次。</div>
+    </details>
+
+    <details class="tr"><summary>ollama ps 顯示 CPU 而不是 100% GPU</summary>
+      <div class="trbody">最常見原因是裝成了普通 <span class="inlinecode">ollama</span> 而非 <span class="inlinecode">ollama-cuda</span>。先移除再裝對的：
+        <div class="cb"><pre><code>sudo pacman -R ollama
+sudo pacman -S ollama-cuda
+sudo systemctl restart ollama</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        若仍不行，確認 <span class="inlinecode">nvidia-smi</span> 正常，並重啟 Ollama 服務。</div>
+    </details>
+
+    <details class="tr"><summary>ollama pull 下載很慢或中途斷掉</summary>
+      <div class="trbody">這是網路問題。好消息是 Ollama 支援「續傳」—— 直接重跑同一行 <span class="inlinecode">ollama pull</span> 指令，它會接著沒下載完的部分繼續，不會從頭來。</div>
+    </details>
+
+    <details class="tr"><summary>Cline 回應很慢、或結果品質不理想</summary>
+      <div class="trbody">9B 是中小型模型，這在預期之內。對策：把任務切得更小更具體、先用 Plan 模式把需求講清楚、把錯誤訊息貼回去讓它修正。需要更強時改用 <span class="inlinecode">qwen3.5:35b-a3b</span>，或在 Cline 裡切換到雲端 API。</div>
+    </details>
+
+    <details class="tr"><summary>Cline 連不到 Ollama / 找不到模型</summary>
+      <div class="trbody">確認 Ollama 服務在跑（<span class="inlinecode">systemctl status ollama</span>），且 Cline 的 Base URL 是 <span class="inlinecode">http://localhost:11434</span>。可用這行測試 API 是否通：
+        <div class="cb"><pre><code>curl http://localhost:11434/api/tags</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        有回傳一串 JSON 就代表 Ollama 正常。</div>
+    </details>
+
+    <details class="tr"><summary>輸入 openclaw 出現 command not found</summary>
+      <div class="trbody">npm 全域安裝的路徑沒被加進系統 PATH。先看路徑：
+        <div class="cb"><pre><code>npm prefix -g</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        把它的 <span class="inlinecode">/bin</span> 子目錄加進 PATH。執行這行（會寫進你的 shell 設定檔）：
+        <div class="cb"><pre><code>echo 'export PATH="$(npm prefix -g)/bin:$PATH"' &gt;&gt; ~/.bashrc</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        然後關掉重開終端機。（若你用 zsh，把 <span class="inlinecode">.bashrc</span> 改成 <span class="inlinecode">.zshrc</span>。）</div>
+    </details>
+
+    <details class="tr"><summary>docker 指令出現 permission denied</summary>
+      <div class="trbody">你還沒被加進 docker 群組，或加了但沒重新登入。執行 <span class="inlinecode">sudo usermod -aG docker $USER</span> 後，<b>登出再登入</b>（或重開機）。臨時生效可用 <span class="inlinecode">newgrp docker</span>。</div>
+    </details>
+
+    <details class="tr"><summary>HiClaw 連不到本地 Ollama 模型</summary>
+      <div class="trbody">這幾乎都是 Docker 網路問題。檢查三件事：① 階段一步驟 1-6 是否已設 <span class="inlinecode">OLLAMA_HOST=0.0.0.0:11434</span> 並重啟 Ollama；② HiClaw 的 Base URL 是否用了 <span class="inlinecode">http://172.17.0.1:11434/v1</span>（容器內不能用 localhost）；③ 用 <span class="inlinecode">ip -4 addr show docker0</span> 確認橋接 IP 確實是 172.17.0.1。若仍卡關，最省事的方式是改用雲端 Qwen API（路線 A）。</div>
+    </details>
+
+    <details class="tr"><summary>顯示記憶體不足（out of memory / VRAM）</summary>
+      <div class="trbody">8GB VRAM 被塞爆了。對策：降低 <span class="inlinecode">OLLAMA_CONTEXT_LENGTH</span>（例如改成 16384）、確認 <span class="inlinecode">OLLAMA_KV_CACHE_TYPE=q8_0</span> 有開、確認 <span class="inlinecode">OLLAMA_MAX_LOADED_MODELS=1</span>、或改用更小的 <span class="inlinecode">qwen3.5:4b</span>。</div>
+    </details>
+
+    <details class="tr"><summary>想看 HiClaw 的詳細記錄檔（log）</summary>
+      <div class="trbody">查 Manager 代理的日誌：
+        <div class="cb"><pre><code>docker exec -it hiclaw-manager cat /var/log/hiclaw/manager-agent.log</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+        看單一容器即時日誌可用 <span class="inlinecode">docker logs -f &lt;容器名稱&gt;</span>。</div>
+    </details>
+
+    <details class="tr"><summary>網頁打不開（連接埠 18088 等）</summary>
+      <div class="trbody">先確認容器都起來了：<span class="inlinecode">docker ps</span>。若連接埠被其他程式占用，安裝腳本通常會提示；可關掉占用的程式後重跑安裝腳本。剛安裝完也可能需要等一兩分鐘讓所有服務啟動完成。</div>
+    </details>
+  </section>
+
+  <!-- ===================== LINKS ===================== -->
+  <section id="links" style="border-bottom:none">
+    <span class="sectag">補充</span>
+    <h2 class="sec">參考連結</h2>
+    <ul class="clean">
+      <li>Qwen 3.5 模型庫（看所有尺寸與標籤）：<a href="https://ollama.com/library/qwen3.5" target="_blank">ollama.com/library/qwen3.5</a></li>
+      <li>OpenClaw 安裝文件：<a href="https://docs.openclaw.ai/install" target="_blank">docs.openclaw.ai/install</a></li>
+      <li>OpenClaw 接 Ollama 設定文件：<a href="https://docs.openclaw.ai/providers/ollama" target="_blank">docs.openclaw.ai/providers/ollama</a></li>
+      <li>HiClaw 專案首頁：<a href="https://github.com/agentscope-ai/HiClaw" target="_blank">github.com/agentscope-ai/HiClaw</a></li>
+      <li>HiClaw 快速上手教學：<a href="https://github.com/agentscope-ai/HiClaw/blob/main/docs/quickstart.md" target="_blank">HiClaw quickstart.md</a></li>
+      <li>Ollama 官方網站：<a href="https://ollama.com" target="_blank">ollama.com</a></li>
+    </ul>
+
+    <div class="footer">
+      <p>本指南依你的硬體配置（Dell Precision 5570 / RTX A2000 8GB / 32GB RAM / CachyOS）量身編寫。</p>
+      <p>軟體版本與安裝步驟會隨專案更新而變動，遇到與指南不符之處，請以上方官方連結的最新文件為準。</p>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+  /* ---- copy to clipboard ---- */
+  function cp(btn){
+    var pre = btn.parentElement.querySelector('code');
+    var text = pre.innerText;
+    function done(){
+      var old = btn.textContent;
+      btn.textContent = '已複製 ✓'; btn.classList.add('ok');
+      setTimeout(function(){ btn.textContent = old; btn.classList.remove('ok'); }, 1600);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(text,done); });
+    } else { fallback(text,done); }
+  }
+  function fallback(text,done){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  /* ---- progress tracking (in-memory) ---- */
+  var checks = Array.prototype.slice.call(document.querySelectorAll('.chk'));
+  function updateProgress(){
+    var done = checks.filter(function(c){return c.checked;}).length;
+    var total = checks.length;
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('pfill').style.width = pct + '%';
+    document.getElementById('ptext').textContent = done + ' / ' + total;
+  }
+  checks.forEach(function(c){
+    c.addEventListener('change', function(){
+      var step = c.closest('.step');
+      if(step) step.classList.toggle('done', c.checked);
+      updateProgress();
+    });
+  });
+  function resetProgress(){
+    checks.forEach(function(c){
+      c.checked = false;
+      var step = c.closest('.step'); if(step) step.classList.remove('done');
+    });
+    updateProgress();
+  }
+  updateProgress();
+
+  /* ---- scroll-spy nav ---- */
+  var navlinks = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var sections = navlinks.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function spy(){
+    var pos = window.scrollY + 140;
+    var idx = 0;
+    for(var i=0;i<sections.length;i++){
+      if(sections[i] && sections[i].offsetTop <= pos) idx = i;
+    }
+    navlinks.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll', spy);
+  spy();
+
+  /* ---- close mobile sidebar on nav click ---- */
+  navlinks.forEach(function(a){
+    a.addEventListener('click', function(){
+      document.querySelector('.sidebar').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
