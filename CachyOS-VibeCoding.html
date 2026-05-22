@@ -213,12 +213,12 @@
     <div class="brandsub">Qwen 3.5 · OpenClaw · HiClaw 完整安裝指南</div>
     <nav class="nav" id="nav">
       <a href="#home">總覽與學習路線</a>
-      <a href="#concepts">先搞懂：四個工具的關係</a>
+      <a href="#concepts">先搞懂：工具的關係</a>
       <a href="#prep">開始之前：系統準備</a>
       <div class="grp">階段一</div>
       <a href="#phase1">Ollama + Qwen 3.5</a>
       <div class="grp">階段二</div>
-      <a href="#phase2">Cline — Vibe Coding</a>
+      <a href="#phase2">VS Code + Cline</a>
       <div class="grp">階段三</div>
       <a href="#phase3">OpenClaw — 第一個代理</a>
       <div class="grp">階段四</div>
@@ -268,7 +268,7 @@
       <div class="rmcard">
         <div class="num">2</div>
         <div class="stage">階段二 · 上手</div>
-        <h4>Cline Vibe Coding</h4>
+        <h4>VS Code + Cline</h4>
         <p>在你熟悉的 VS Code 裡接上本地模型，第一次體驗「用嘴巴寫程式」。</p>
       </div>
       <div class="rmcard">
@@ -508,11 +508,11 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
   <!-- ===================== PHASE 2 ===================== -->
   <section id="phase2">
     <span class="sectag">階段二</span>
-    <h2 class="sec">Cline：在 VS Code 裡開始 Vibe Coding</h2>
+    <h2 class="sec">VS Code + Cline：開始 Vibe Coding</h2>
     <div class="phasebanner">
       <div class="pn">2</div>
       <div class="pd"><div class="t">這一階段的目標</div>
-      <div class="s">在你天天用的 VS Code 裡裝上 Cline，接上本地 Qwen 3.5，第一次體驗 AI 幫你寫整個專案。約 15 分鐘。</div></div>
+      <div class="s">準備好 VS Code，裝上 Cline，接上本地 Qwen 3.5，第一次體驗 AI 幫你寫整個專案。約 15～20 分鐘。</div></div>
     </div>
 
     <div class="box info">
@@ -526,7 +526,33 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
 
     <div class="step">
       <label class="stephead"><input type="checkbox" class="chk">
-        <div><div class="stepnum">步驟 2-1</div><div class="steptitle">安裝 Cline 擴充套件</div></div>
+        <div><div class="stepnum">步驟 2-1</div><div class="steptitle">安裝 VS Code（已安裝可直接跳過）</div></div>
+      </label>
+      <div class="stepbody">
+        <p>你提過平常就用 VS Code，所以這步多半可以直接勾選跳過。以下安裝方式附給你日後重灌或換機時參考。CachyOS 上有兩種選擇，挑一種即可：</p>
+
+        <h3 class="sub" style="font-size:15px"><span class="dot"></span>選擇一：Code - OSS（最簡單，官方套件庫）</h3>
+        <p>直接用 pacman 安裝，不需要任何額外工具：</p>
+        <div class="cb"><pre><code>sudo pacman -S code</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+
+        <h3 class="sub" style="font-size:15px"><span class="dot"></span>選擇二：微軟官方版 VS Code（從 AUR）</h3>
+        <p>若想要和 Windows 上一模一樣的微軟官方版，從 AUR 安裝（CachyOS 預設內建 <span class="inlinecode">paru</span> 這個 AUR 工具）：</p>
+        <div class="cb"><pre><code>paru -S visual-studio-code-bin</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
+
+        <p>裝好後，可在開始選單找到 VS Code，或在終端機輸入 <span class="inlinecode">code</span> 啟動。</p>
+
+        <details class="why"><summary>Code - OSS 和微軟官方版差在哪？該選哪個？</summary>
+          <div class="wbody"><b>Code - OSS</b> 是 VS Code 的純開源建置版，由 Arch 官方套件庫提供，安裝最省事，用的擴充市集是 Open VSX。<b>微軟官方版</b> 多了一些微軟自家功能與遙測，用的是微軟官方擴充市集。<br>對這份指南來說<b>兩個都可以</b> —— 我們要用的 Cline 在兩個市集都找得到。新手想最省事就選「選擇一」；想和原本習慣完全一致就選「選擇二」。</div>
+        </details>
+
+        <div class="box info"><div class="bt">ℹ️ AUR 是什麼</div>
+          AUR（Arch User Repository）是 Arch 系社群維護的軟體庫，許多官方庫沒有的軟體都在這裡。<span class="inlinecode">paru</span> 會自動幫你從 AUR 下載、建置、安裝，過程中可能問你幾個 [Y/n]，按 Enter 即可。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <label class="stephead"><input type="checkbox" class="chk">
+        <div><div class="stepnum">步驟 2-2</div><div class="steptitle">安裝 Cline 擴充套件</div></div>
       </label>
       <div class="stepbody">
         <p>打開 VS Code，按 <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">X</span> 開啟擴充套件面板，在搜尋框輸入 <b>Cline</b>，找到後點「Install / 安裝」。</p>
@@ -539,7 +565,7 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
 
     <div class="step">
       <label class="stephead"><input type="checkbox" class="chk">
-        <div><div class="stepnum">步驟 2-2</div><div class="steptitle">把 Cline 接上本地 Qwen 3.5</div></div>
+        <div><div class="stepnum">步驟 2-3</div><div class="steptitle">把 Cline 接上本地 Qwen 3.5</div></div>
       </label>
       <div class="stepbody">
         <p>點開 Cline 面板，進入設定（齒輪圖示），照下表填寫：</p>
@@ -557,7 +583,7 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
 
     <div class="step">
       <label class="stephead"><input type="checkbox" class="chk">
-        <div><div class="stepnum">步驟 2-3</div><div class="steptitle">你的第一次 Vibe Coding</div></div>
+        <div><div class="stepnum">步驟 2-4</div><div class="steptitle">你的第一次 Vibe Coding</div></div>
       </label>
       <div class="stepbody">
         <p>建一個空資料夾，用 VS Code 開啟它（檔案 → 開啟資料夾）。打開 Cline 面板，在輸入框試著下這個任務：</p>
@@ -574,7 +600,7 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
 
     <div class="step">
       <label class="stephead"><input type="checkbox" class="chk">
-        <div><div class="stepnum">步驟 2-4</div><div class="steptitle">和小模型相處的訣竅</div></div>
+        <div><div class="stepnum">步驟 2-5</div><div class="steptitle">和小模型相處的訣竅</div></div>
       </label>
       <div class="stepbody">
         <p>9B 是顆好用但「中小型」的模型。誠實說，它不會像雲端大模型那樣每次都完美。掌握這些技巧，體驗會好很多：</p>
@@ -588,7 +614,7 @@ Environment="OLLAMA_HOST=0.0.0.0:11434"</code></pre><button class="copy" onclick
         <div class="box tip"><div class="bt">💡 進階選項</div>
           如果你發現某些複雜任務本地模型實在吃力，Cline 也支援雲端 API。可以「日常用本地 9B、難題切雲端」混搭 —— 兼顧隱私、成本與能力。</div>
         <div class="verify"><div class="vt">✅ 階段二驗收</div>
-          <ul><li>Cline 已安裝並接上 qwen3.5:9b</li><li>成功讓 Cline 生成一個可運作的小程式</li><li>理解 Plan / Act 兩種模式的差別</li></ul>
+          <ul><li>VS Code 就緒、Cline 已安裝並接上 qwen3.5:9b</li><li>成功讓 Cline 生成一個可運作的小程式</li><li>理解 Plan / Act 兩種模式的差別</li></ul>
         </div>
       </div>
     </div>
@@ -725,7 +751,7 @@ sudo systemctl enable --now docker</code></pre><button class="copy" onclick="cp(
         <p>把你的使用者加入 docker 群組，這樣不用每次都打 sudo：</p>
         <div class="cb"><pre><code>sudo usermod -aG docker $USER</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
         <div class="box warn"><div class="bt">⚠️ 這一步做完一定要重新登入</div>
-          群組變更要重新登入（或重開機）才生效。快速生效可執行 <span class="inlinecode">newgrp docker</span>，或乾脆登出再登入一次。</div>
+          群組變更要重新登入(或重開機)才生效。快速生效可執行 <span class="inlinecode">newgrp docker</span>，或乾脆登出再登入一次。</div>
         <p>驗證 Docker 正常：</p>
         <div class="cb"><pre><code>docker run --rm hello-world</code></pre><button class="copy" onclick="cp(this)">複製</button></div>
         <details class="why"><summary>Docker 是什麼？</summary>
@@ -989,8 +1015,8 @@ sudo systemctl restart ollama</code></pre><button class="copy" onclick="cp(this)
 <script>
   /* ---- copy to clipboard ---- */
   function cp(btn){
-    var pre = btn.parentElement.querySelector('code');
-    var text = pre.innerText;
+    var codeEl = btn.parentElement.querySelector('code');
+    var text = codeEl.innerText;
     function done(){
       var old = btn.textContent;
       btn.textContent = '已複製 ✓'; btn.classList.add('ok');
