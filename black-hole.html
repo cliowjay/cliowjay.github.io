@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>黑洞模擬 — Schwarzschild Black Hole</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#000;font:13px/1.5 system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;color:#c9d2e0;}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;}
+  #c.drag{cursor:grabbing;}
+  #panel{position:fixed;top:14px;left:14px;width:236px;background:rgba(10,13,20,.66);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 14px;user-select:none;}
+  #panel h1{font-size:14px;font-weight:600;margin:0;color:#e8edf6;letter-spacing:.02em;}
+  #panel .sub{font-size:11px;color:#7d8797;margin:2px 0 8px;}
+  .row{display:flex;align-items:center;gap:8px;margin:7px 0;}
+  .row label{flex:0 0 74px;color:#9aa5b5;}
+  .row output{flex:0 0 30px;text-align:right;color:#dfe6f0;font-variant-numeric:tabular-nums;}
+  input[type=range]{flex:1;accent-color:#e8a34a;height:14px;min-width:0;}
+  select,button{background:rgba(255,255,255,.07);color:#dfe6f0;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:4px 8px;font:inherit;cursor:pointer;}
+  select:hover,button:hover{background:rgba(255,255,255,.13);}
+  .btns{display:flex;gap:8px;margin-top:9px;}
+  .btns button{flex:1;}
+  .chk{display:flex;align-items:center;gap:6px;margin:7px 0 0;color:#9aa5b5;cursor:pointer;}
+  .chk input{accent-color:#e8a34a;}
+  #hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(10,13,20,.55);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:6px 16px;font-size:12px;color:#aab4c4;transition:opacity 1.2s;pointer-events:none;white-space:nowrap;}
+  #err{display:none;position:fixed;inset:0;align-items:center;justify-content:center;text-align:center;color:#c9d2e0;font-size:15px;padding:0 2rem;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="err">此瀏覽器不支援 WebGL2，無法顯示黑洞模擬。請改用最新版 Chrome、Edge、Firefox 或 Safari。</div>
+<div id="panel">
+  <h1>黑洞模擬</h1>
+  <div class="sub">Schwarzschild 測地線光線追蹤 · <span id="fps">-- fps</span></div>
+  <div class="row"><label for="quality">品質</label><select id="quality"><option value="low">低</option><option value="med" selected>中</option><option value="high">高</option></select></div>
+  <div class="row"><label for="gain">吸積盤亮度</label><input id="gain" type="range" min="0.2" max="3" step="0.05" value="1"><output id="gainOut">1.0</output></div>
+  <div class="row"><label for="expo">曝光</label><input id="expo" type="range" min="0.4" max="2.4" step="0.05" value="1.1"><output id="expoOut">1.1</output></div>
+  <div class="row"><label for="speed">時間流速</label><input id="speed" type="range" min="0" max="3" step="0.1" value="1"><output id="speedOut">1.0</output></div>
+  <label class="chk"><input id="auto" type="checkbox" checked> 鏡頭自動環繞</label>
+  <div class="btns"><button id="pause">暫停</button><button id="reset">重設視角</button></div>
+</div>
+<div id="hint">拖曳旋轉視角 · 滾輪／雙指縮放 · 空白鍵暫停</div>
+<script>
+"use strict";
+const VERT = `#version 300 es
+layout(location=0) in vec2 aPos;
+void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`;
+const FRAG = `#version 300 es
+precision highp float;
+
+out vec4 fragColor;
+
+uniform vec2  uRes;
+uniform float uTime;
+uniform float uCamDist;
+uniform float uYaw;
+uniform float uPitch;
+uniform int   uSteps;
+uniform float uDiskGain;
+uniform float uExposure;
+
+const float PI     = 3.14159265359;
+const float R_IN   = 3.0;
+const float R_OUT  = 12.0;
+const float R_ESC  = 30.0;
+
+float hash21(vec2 p){ p = fract(p*vec2(234.34, 435.345)); p += dot(p, p+34.23); return fract(p.x*p.y); }
+vec2  hash22(vec2 p){ float n = hash21(p); return vec2(n, hash21(p+n+17.71)); }
+float hash13(vec3 p){ p = fract(p*vec3(443.897, 441.423, 437.195)); p += dot(p, p.yzx+19.19); return fract((p.x+p.y)*p.z); }
+
+float vnoise(vec3 p){
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  f = f*f*(3.0-2.0*f);
+  float n000 = hash13(i);
+  float n100 = hash13(i+vec3(1.0,0.0,0.0));
+  float n010 = hash13(i+vec3(0.0,1.0,0.0));
+  float n110 = hash13(i+vec3(1.0,1.0,0.0));
+  float n001 = hash13(i+vec3(0.0,0.0,1.0));
+  float n101 = hash13(i+vec3(1.0,0.0,1.0));
+  float n011 = hash13(i+vec3(0.0,1.0,1.0));
+  float n111 = hash13(i+vec3(1.0,1.0,1.0));
+  float nx00 = mix(n000, n100, f.x);
+  float nx10 = mix(n010, n110, f.x);
+  float nx01 = mix(n001, n101, f.x);
+  float nx11 = mix(n011, n111, f.x);
+  float ny0 = mix(nx00, nx10, f.y);
+  float ny1 = mix(nx01, nx11, f.y);
+  return mix(ny0, ny1, f.z);
+}
+
+float fbm(vec3 p){
+  float a = 0.5;
+  float s = 0.0;
+  for(int i=0;i<4;i++){ s += a*vnoise(p); p *= 2.02; a *= 0.5; }
+  return s;
+}
+
+vec3 blackbody(float T){
+  float t = clamp(T, 1000.0, 40000.0)/100.0;
+  float r = t<=66.0 ? 255.0 : 329.698727446*pow(t-60.0, -0.1332047592);
+  float g = t<=66.0 ? 99.4708025861*log(t)-161.1195681661 : 288.1221695283*pow(t-60.0, -0.0755148492);
+  float b = t>=66.0 ? 255.0 : (t<=19.0 ? 0.0 : 138.5177312231*log(t-10.0)-305.0447927307);
+  return clamp(vec3(r,g,b)/255.0, 0.0, 1.0);
+}
+
+vec2 dirToOct(vec3 n){
+  n /= (abs(n.x)+abs(n.y)+abs(n.z));
+  vec2 xy = n.z >= 0.0 ? n.xy : (1.0-abs(n.yx))*sign(n.xy);
+  return xy*0.5+0.5;
+}
+
+vec3 starLayer(vec2 uv, float n, float seed){
+  uv *= n;
+  vec2 id = floor(uv);
+  vec2 f = fract(uv);
+  vec2 h = hash22(id+seed);
+  vec2 pos = 0.25 + 0.5*h;
+  float d = length(f-pos);
+  float br = pow(hash21(id+seed+7.31), 18.0)*2.0;
+  float star = br*smoothstep(0.10, 0.0, d);
+  float tw = 0.78 + 0.22*sin(uTime*2.0 + h.x*40.0);
+  vec3 tint = mix(vec3(0.72,0.84,1.0), vec3(1.0,0.86,0.70), hash21(id+seed+3.7));
+  return tint*star*tw;
+}
+
+vec3 background(vec3 d){
+  vec3 col = vec3(0.0);
+  float n1 = fbm(d*3.1 + vec3(3.7,1.1,2.4));
+  float n2 = fbm(d*6.3 + vec3(1.3,5.2,0.7));
+  col += vec3(0.10,0.06,0.18)*n1*n1*1.2;
+  col += vec3(0.03,0.06,0.12)*n2*n2;
+  vec3 m = normalize(vec3(0.40,0.80,0.35));
+  float band = exp(-pow(dot(d,m)*3.2, 2.0));
+  col += band*vec3(0.30,0.26,0.24)*(0.35+0.65*fbm(d*7.0+9.3))*0.35;
+  vec2 uv = dirToOct(d);
+  col += starLayer(uv, 340.0, 0.0);
+  col += starLayer(uv, 180.0, 7.0)*1.3;
+  col += band*starLayer(uv, 520.0, 13.0)*1.6;
+  return col;
+}
+
+vec4 diskColor(vec3 hit, vec3 rd){
+  float r = length(hit.xz);
+  float beta = clamp(sqrt(0.5/(max(r,1.5)-1.0)), 0.0, 0.85);
+  vec3 vdir = normalize(vec3(-hit.z, 0.0, hit.x));
+  vec3 toCam = -rd;
+  float f = sqrt(max(1.0-1.5/r, 0.02)) / (1.0 - beta*dot(vdir, toCam));
+  float ang = atan(hit.z, hit.x);
+  float a2 = ang + uTime*0.55*pow(r/3.0, -1.5);
+  float n = fbm(vec3(cos(a2)*2.0, sin(a2)*2.0, r*3.0));
+  float inner = smoothstep(R_IN, R_IN+0.6, r);
+  float outer = 1.0 - smoothstep(R_OUT-3.5, R_OUT, r);
+  float dens = inner*outer*(0.35+0.65*smoothstep(0.25, 0.75, n));
+  float alpha = clamp(dens*1.5, 0.0, 1.0);
+  float T = 7500.0*pow(3.0/r, 0.75);
+  vec3 c = blackbody(T*f);
+  float I = uDiskGain*pow(f, 3.0)*(0.35+1.3*n)*pow(3.0/r, 1.6)*2.4;
+  return vec4(c*I, alpha);
+}
+
+vec3 trace(vec3 ro, vec3 rdir){
+  vec3 p = ro;
+  vec3 v = rdir;
+  vec3 hv = cross(p, v);
+  float h2 = dot(hv, hv);
+  vec3 col = vec3(0.0);
+  float trans = 1.0;
+  float glow = 0.0;
+  bool escaped = false;
+  for(int i=0;i<uSteps;i++){
+    float r2 = dot(p, p);
+    float r = sqrt(r2);
+    if(r < 1.0){ break; }
+    if(r > R_ESC && dot(p, v) > 0.0){ escaped = true; break; }
+    float dt = clamp(0.08*r, 0.03, 0.5);
+    vec3 a = -1.5*h2*p/(r2*r2*r);
+    v += a*dt;
+    vec3 pn = p + v*dt;
+    glow += dt/(0.7 + pow(abs(r-1.5)*1.7, 4.0));
+    if(p.y*pn.y < 0.0){
+      float t = p.y/(p.y-pn.y);
+      vec3 hit = mix(p, pn, t);
+      float hr = length(hit.xz);
+      if(hr > R_IN*0.98 && hr < R_OUT){
+        vec4 dc = diskColor(hit, normalize(v));
+        col += trans*dc.rgb*dc.a;
+        trans *= (1.0-dc.a);
+        if(trans < 0.02){ break; }
+      }
+    }
+    p = pn;
+  }
+  if(escaped){ col += trans*background(normalize(v)); }
+  col += vec3(1.0,0.55,0.28)*glow*0.010*(0.4+0.6*trans);
+  return col;
+}
+
+vec3 aces(vec3 x){
+  return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14), 0.0, 1.0);
+}
+
+void main(){
+  vec2 uv = (2.0*gl_FragCoord.xy - uRes)/uRes.y;
+  float cy = cos(uYaw), sy = sin(uYaw);
+  float cp = cos(uPitch), sp = sin(uPitch);
+  vec3 ro = uCamDist*vec3(cy*cp, sp, sy*cp);
+  vec3 fwd = normalize(-ro);
+  vec3 right = normalize(cross(fwd, vec3(0.0,1.0,0.0)));
+  vec3 up = cross(right, fwd);
+  vec3 rd = normalize(fwd*1.6 + uv.x*right + uv.y*up);
+  vec3 col = trace(ro, rd);
+  col *= uExposure;
+  col = aces(col);
+  col = pow(col, vec3(1.0/2.2));
+  col *= 1.0 - 0.22*dot(uv*0.55, uv*0.55);
+  col += (hash21(gl_FragCoord.xy + fract(uTime)*7.0)-0.5)/255.0;
+  fragColor = vec4(col, 1.0);
+}`;
+(function(){
+  const canvas = document.getElementById('c');
+  const errEl = document.getElementById('err');
+  const panel = document.getElementById('panel');
+  const hint = document.getElementById('hint');
+  const gl = canvas.getContext('webgl2', {antialias:false, alpha:false});
+  if(!gl){
+    errEl.style.display = 'flex';
+    panel.style.display = 'none';
+    hint.style.display = 'none';
+    return;
+  }
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      const log = gl.getShaderInfoLog(s);
+      errEl.textContent = 'Shader 編譯失敗：' + log;
+      errEl.style.display = 'flex';
+      throw new Error(log);
+    }
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    errEl.textContent = 'Program 連結失敗：' + gl.getProgramInfoLog(prog);
+    errEl.style.display = 'flex';
+    return;
+  }
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  const U = {};
+  for(const n of ['uRes','uTime','uCamDist','uYaw','uPitch','uSteps','uDiskGain','uExposure']){
+    U[n] = gl.getUniformLocation(prog, n);
+  }
+  const DEFAULTS = {yaw:-0.6, pitch:0.12, dist:16};
+  const QUAL = {low:[0.5,150], med:[0.7,220], high:[1.0,320]};
+  const st = {yaw:DEFAULTS.yaw, pitch:DEFAULTS.pitch, dist:DEFAULTS.dist,
+              gain:1, expo:1.1, speed:1, paused:false, auto:true, quality:'med'};
+  function resize(){
+    const s = QUAL[st.quality][0]*Math.min(window.devicePixelRatio||1, 1.75);
+    canvas.width  = Math.max(2, Math.round(window.innerWidth*s));
+    canvas.height = Math.max(2, Math.round(window.innerHeight*s));
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  const $ = id => document.getElementById(id);
+  $('quality').addEventListener('change', e => { st.quality = e.target.value; resize(); });
+  function bindRange(id, key, out){
+    $(id).addEventListener('input', e => {
+      st[key] = parseFloat(e.target.value);
+      $(out).textContent = st[key].toFixed(1);
+    });
+  }
+  bindRange('gain','gain','gainOut');
+  bindRange('expo','expo','expoOut');
+  bindRange('speed','speed','speedOut');
+  const autoChk = $('auto');
+  autoChk.addEventListener('change', e => { st.auto = e.target.checked; });
+  const pauseBtn = $('pause');
+  function setPaused(p){ st.paused = p; pauseBtn.textContent = p ? '繼續' : '暫停'; }
+  pauseBtn.addEventListener('click', () => setPaused(!st.paused));
+  $('reset').addEventListener('click', () => {
+    st.yaw = DEFAULTS.yaw; st.pitch = DEFAULTS.pitch; st.dist = DEFAULTS.dist;
+  });
+  window.addEventListener('keydown', e => {
+    if(e.code === 'Space' && !e.repeat && e.target.tagName !== 'BUTTON'){
+      e.preventDefault(); setPaused(!st.paused);
+    }
+  });
+  const pointers = new Map();
+  let pinchD = 0;
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    canvas.classList.add('drag');
+    if(pointers.size === 2){
+      const p = [...pointers.values()];
+      pinchD = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+    }
+  });
+  canvas.addEventListener('pointermove', e => {
+    if(!pointers.has(e.pointerId)) return;
+    const prev = pointers.get(e.pointerId);
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size === 1){
+      st.yaw   += (e.clientX-prev.x)*0.005;
+      st.pitch += (e.clientY-prev.y)*0.005;
+      st.pitch = Math.min(1.25, Math.max(-1.25, st.pitch));
+      st.auto = false; autoChk.checked = false;
+    } else if(pointers.size === 2){
+      const p = [...pointers.values()];
+      const d = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+      if(pinchD > 0){ st.dist = Math.min(34, Math.max(2.6, st.dist*pinchD/d)); }
+      pinchD = d;
+    }
+  });
+  function endPointer(e){
+    pointers.delete(e.pointerId);
+    if(pointers.size === 0) canvas.classList.remove('drag');
+  }
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    st.dist = Math.min(34, Math.max(2.6, st.dist*Math.exp(e.deltaY*0.0012)));
+  }, {passive:false});
+  setTimeout(() => { hint.style.opacity = '0'; }, 6000);
+  const fpsEl = $('fps');
+  let simT = 0, last = performance.now(), frames = 0, fpsLast = last;
+  function frame(now){
+    const dt = Math.min(0.1, (now-last)/1000);
+    last = now;
+    if(!st.paused) simT += dt*st.speed;
+    if(st.auto) st.yaw += dt*0.05;
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uTime, simT);
+    gl.uniform1f(U.uCamDist, st.dist);
+    gl.uniform1f(U.uYaw, st.yaw);
+    gl.uniform1f(U.uPitch, st.pitch);
+    gl.uniform1i(U.uSteps, QUAL[st.quality][1]);
+    gl.uniform1f(U.uDiskGain, st.gain);
+    gl.uniform1f(U.uExposure, st.expo);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    frames++;
+    if(now-fpsLast > 500){
+      fpsEl.textContent = Math.round(frames*1000/(now-fpsLast)) + ' fps';
+      frames = 0; fpsLast = now;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
